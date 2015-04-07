@@ -1,0 +1,27 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a checkbox field that shows the value of the "commentOnSuccess" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+  <f:entry title="Comment on Success" field="commentOnSuccess"
+           description="Post a differential comment on successful builds">
+    <f:checkbox />
+  </f:entry>
+  <f:entry title="Uberalls Cobertura XML" field="coberturaReportFile">
+    <f:textbox default="coverage.xml" />
+  </f:entry>
+  <f:entry title="Enable Uberalls" field="uberallsEnabled"
+           description="Enable code coverage reporting">
+    <f:checkbox default="true" />
+  </f:entry>
+  <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
+           description="Post a differential comment on failed builds with a link to the raw Console Output">
+    <f:checkbox default="false" />
+  </f:entry>
+</j:jelly>

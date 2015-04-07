@@ -1,0 +1,6 @@
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  This plugin integrates Phabricator and Harbormaster with Jenkins and Uberalls.
+</div>
