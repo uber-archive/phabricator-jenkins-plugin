@@ -1,0 +1,12 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <j:if test="${it.iconPath != null}">
+    <t:summary icon="${it.iconPath}">
+      ${it.text}
+    </t:summary>
+  </j:if>
+  <j:if test="${it.iconPath == null}">
+    <div>
+      ${it.text}
+    </div>
+  </j:if>
+</j:jelly>

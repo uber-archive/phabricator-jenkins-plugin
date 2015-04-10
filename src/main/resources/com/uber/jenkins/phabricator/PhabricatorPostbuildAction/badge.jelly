@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <j:if test="${it.iconPath != null &amp;&amp; it.link == null}">
+        <img src="${rootURL}${it.iconPath}" width="16" height="16" alt="${it.text}" title="${it.text}" onclick="javascript:alert('${it.text}')" />
+    </j:if>
+    <j:if test="${it.iconPath != null &amp;&amp; it.link != null}">
+        <a href="${it.link}"><img src="${rootURL}${it.iconPath}" width="16" height="16" alt="${it.text}" title="${it.text}" /></a>
+    </j:if>
+    <j:if test="${it.iconPath == null}">
+        <span style="padding:1px;border:${it.border} solid ${it.borderColor};margin:0px;background:${it.background};color:${it.color}">${it.text}</span>
+    </j:if>
+</j:jelly>
