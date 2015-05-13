@@ -35,35 +35,14 @@ public class PhabricatorPostbuildAction implements BuildBadgeAction {
     private String borderColor = "transparent";
     private String link;
 
-    private PhabricatorPostbuildAction(String iconPath, String text) {
+    private PhabricatorPostbuildAction(String iconPath, String text, String link) {
         this.iconPath = iconPath;
         this.text = text;
+        this.link = link;
     }
 
-    public static PhabricatorPostbuildAction createBadge(String icon, String text) {
-        return new PhabricatorPostbuildAction(PhabricatorPlugin.getIconPath(icon), text);
-    }
-
-    public static PhabricatorPostbuildAction createBadge(String icon, String text, String link) {
-        PhabricatorPostbuildAction action = new PhabricatorPostbuildAction(PhabricatorPlugin.getIconPath(icon), text);
-        action.link = link;
-        return action;
-    }
-
-    public static PhabricatorPostbuildAction createShortText(String text) {
-        return new PhabricatorPostbuildAction(null, text);
-    }
-
-    public static PhabricatorPostbuildAction createInfoBadge(String text) {
-        return new PhabricatorPostbuildAction(PhabricatorPlugin.getIconPath("info.gif"), text);
-    }
-
-    public static PhabricatorPostbuildAction createWarningBadge(String text) {
-        return new PhabricatorPostbuildAction(PhabricatorPlugin.getIconPath("warning.gif"), text);
-    }
-
-    public static PhabricatorPostbuildAction createErrorBadge(String text) {
-        return new PhabricatorPostbuildAction(PhabricatorPlugin.getIconPath("error.gif"), text);
+    public static PhabricatorPostbuildAction createShortText(String text, String link) {
+        return new PhabricatorPostbuildAction(null, text, link);
     }
 
     /* Action methods */

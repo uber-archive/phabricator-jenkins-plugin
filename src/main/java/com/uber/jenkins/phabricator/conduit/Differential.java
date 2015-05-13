@@ -123,14 +123,22 @@ public class Differential {
      * @return
      */
     public String getSummaryMessage(String phabricatorURL) {
+        return String.format("This was a build of <a href=\"%s\">%s</a> by %s &lt;%s&gt;",
+                this.getPhabricatorLink(phabricatorURL),
+                this.getRevisionID(true),
+                this.rawJSON.get("authorName"), this.rawJSON.get("authorEmail"));
+    }
+
+    public String getPhabricatorLink(String phabricatorURL) {
         String revisionID = this.getRevisionID(true);
-        return String.format("This was a build of <a href=\"%s%s\">%s</a> by %s &lt;%s&gt;",
-                phabricatorURL, revisionID, revisionID, this.rawJSON.get("authorName"), this.rawJSON.get("authorEmail"));
+        return String.format("%s%s", phabricatorURL, revisionID);
     }
 
     public void decorate(AbstractBuild build, String phabricatorURL) {
         // Add a badge next to the build
-        build.getActions().add(PhabricatorPostbuildAction.createShortText(this.getRevisionID(true)));
+        build.getActions().add(PhabricatorPostbuildAction.createShortText(
+                this.getRevisionID(true),
+                this.getPhabricatorLink(phabricatorURL)));
         // Add some long-form text
         this.createSummary(build, "phabricator.png").appendText(this.getSummaryMessage(phabricatorURL), false);
     }

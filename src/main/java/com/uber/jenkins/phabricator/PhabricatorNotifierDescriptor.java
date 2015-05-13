@@ -69,7 +69,7 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         // set that to properties and call save().
         req.bindJSON(this, formData);
         save();
-        return super.configure(req,formData);
+        return super.configure(req, formData);
     }
 
     public String getConduitURL() {

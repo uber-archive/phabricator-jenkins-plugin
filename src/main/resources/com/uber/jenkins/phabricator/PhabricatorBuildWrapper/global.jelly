@@ -11,9 +11,9 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-  <f:section title="Uberalls">
-    <f:entry title="Uberalls URL" field="uberallsURL"
-      description="Location of the Uberalls instance">
+  <f:section title="Phabricator">
+    <f:entry title="Phabricator URL" field="conduitURL"
+      description="Location of the Phabricator instance">
       <f:textbox />
     </f:entry>
   </f:section>
