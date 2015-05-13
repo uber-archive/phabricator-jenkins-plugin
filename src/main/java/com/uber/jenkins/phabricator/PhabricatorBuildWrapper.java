@@ -133,7 +133,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     }
 
     private void addShortText(final AbstractBuild build, final String text) {
-        build.getActions().add(PhabricatorPostbuildAction.createShortText(text));
+        build.getActions().add(PhabricatorPostbuildAction.createShortText(text, null));
     }
 
     private Environment ignoreBuild(PrintStream logger, String message) {

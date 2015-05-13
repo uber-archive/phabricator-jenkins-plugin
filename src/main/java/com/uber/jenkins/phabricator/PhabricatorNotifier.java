@@ -90,7 +90,7 @@ public class PhabricatorNotifier extends Notifier {
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
             if (needsDecoration) {
-                build.getActions().add(PhabricatorPostbuildAction.createShortText("master"));
+                build.getActions().add(PhabricatorPostbuildAction.createShortText("master", null));
             }
             if (uberallsEnabled && coverage != null) {
                 String currentSHA = environment.get("GIT_COMMIT");
