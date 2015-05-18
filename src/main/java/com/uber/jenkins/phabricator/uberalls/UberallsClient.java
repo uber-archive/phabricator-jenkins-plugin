@@ -45,7 +45,7 @@ public class UberallsClient {
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
 
     private final EnvVars environment;
-    private String uberallsURL;
+    private String baseURL;
 
     public boolean recordCoverage(String currentSHA, String branch, CodeCoverageMetrics codeCoverageMetrics) {
         if (codeCoverageMetrics.isValid()) {
@@ -80,8 +80,12 @@ public class UberallsClient {
     }
 
     public UberallsClient(String baseURL, EnvVars environment) {
-        uberallsURL = baseURL;
+        this.baseURL = baseURL;
         this.environment = environment;
+    }
+
+    public String getBaseURL() {
+        return this.baseURL;
     }
 
     public CodeCoverageMetrics getParentCoverage(Differential differential) {
@@ -135,6 +139,6 @@ public class UberallsClient {
     }
 
     private URIBuilder getBuilder() throws URISyntaxException {
-        return new URIBuilder(uberallsURL);
+        return new URIBuilder(baseURL);
     }
 }

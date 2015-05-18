@@ -93,15 +93,19 @@ public class PhabricatorNotifier extends Notifier {
                 build.getActions().add(PhabricatorPostbuildAction.createShortText("master", null));
             }
             if (uberallsEnabled && coverage != null) {
-                String currentSHA = environment.get("GIT_COMMIT");
-                CodeCoverageMetrics codeCoverageMetrics = new CodeCoverageMetrics(coverage);
-
-                if (!CommonUtils.isBlank(currentSHA) && codeCoverageMetrics.isValid()) {
-                    logger.println("[uberalls] sending coverage report for " + currentSHA + " as " +
-                            codeCoverageMetrics.toString());
-                    uberalls.recordCoverage(currentSHA, environment.get("GIT_BRANCH"), codeCoverageMetrics);
+                if (CommonUtils.isBlank(uberalls.getBaseURL())) {
+                    logger.println("[uberalls] enabled but no server configured. skipping.");
                 } else {
-                    logger.println("[uberalls] no line coverage available for " + currentSHA);
+                    String currentSHA = environment.get("GIT_COMMIT");
+                    CodeCoverageMetrics codeCoverageMetrics = new CodeCoverageMetrics(coverage);
+
+                    if (!CommonUtils.isBlank(currentSHA) && codeCoverageMetrics.isValid()) {
+                        logger.println("[uberalls] sending coverage report for " + currentSHA + " as " +
+                                codeCoverageMetrics.toString());
+                        uberalls.recordCoverage(currentSHA, environment.get("GIT_BRANCH"), codeCoverageMetrics);
+                    } else {
+                        logger.println("[uberalls] no line coverage available for " + currentSHA);
+                    }
                 }
             }
             return this.ignoreBuild(logger, "No differential ID found.");
