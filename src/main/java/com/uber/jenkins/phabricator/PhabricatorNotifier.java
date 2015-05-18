@@ -93,7 +93,7 @@ public class PhabricatorNotifier extends Notifier {
                 build.getActions().add(PhabricatorPostbuildAction.createShortText("master", null));
             }
             if (uberallsEnabled && coverage != null) {
-                if (CommonUtils.isBlank(uberalls.getUberallsURL())) {
+                if (CommonUtils.isBlank(uberalls.getBaseURL())) {
                     logger.println("[uberalls] enabled but no server configured. skipping.");
                 } else {
                     String currentSHA = environment.get("GIT_COMMIT");
