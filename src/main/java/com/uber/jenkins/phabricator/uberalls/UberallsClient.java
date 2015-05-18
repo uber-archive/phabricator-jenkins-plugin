@@ -84,6 +84,10 @@ public class UberallsClient {
         this.environment = environment;
     }
 
+    public String getUberallsURL() {
+        return this.uberallsURL;
+    }
+
     public CodeCoverageMetrics getParentCoverage(Differential differential) {
         try {
             String sha = differential.getBaseCommit();
