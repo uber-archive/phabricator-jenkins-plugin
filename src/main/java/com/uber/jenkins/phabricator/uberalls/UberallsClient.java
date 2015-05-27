@@ -129,7 +129,9 @@ public class UberallsClient {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (HttpResponseException e) {
-            // e.g. 404, pass
+            if (e.getStatusCode() != 404) {
+                e.printStackTrace();
+            }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
