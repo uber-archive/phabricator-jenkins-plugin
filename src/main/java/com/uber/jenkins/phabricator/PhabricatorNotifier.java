@@ -87,13 +87,15 @@ public class PhabricatorNotifier extends Notifier {
         UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment);
         boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
 
+        boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
+
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
             if (needsDecoration) {
                 build.getActions().add(PhabricatorPostbuildAction.createShortText("master", null));
             }
             if (uberallsEnabled && coverage != null) {
-                if (CommonUtils.isBlank(uberalls.getBaseURL())) {
+                if (!uberallsConfigured) {
                     logger.println("[uberalls] enabled but no server configured. skipping.");
                 } else {
                     String currentSHA = environment.get("GIT_COMMIT");
@@ -136,7 +138,11 @@ public class PhabricatorNotifier extends Notifier {
             if (lineCoverage == null) {
                 logger.println("[uberalls] no line coverage found, skipping...");
             } else {
-                comment = getCoverageComment(lineCoverage, uberalls, diff, logger, environment.get("BUILD_URL"));
+                if (uberallsConfigured) {
+                    comment = getCoverageComment(lineCoverage, uberalls, diff, logger, environment.get("BUILD_URL"));
+                } else {
+                    logger.println("[uberalls] no backend configured, skipping...");
+                }
             }
         }
 
