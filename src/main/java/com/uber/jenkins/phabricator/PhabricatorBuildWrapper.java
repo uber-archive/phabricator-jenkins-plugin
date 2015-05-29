@@ -105,6 +105,12 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                     .cmds(Arrays.asList("git", "clean", "-fd", "-f"))
                     .join();
 
+            // Update submodules recursively.
+            starter.launch()
+                    .stdout(logger)
+                    .cmds(Arrays.asList("git", "submodule", "update", "--init", "--recursive"))
+                    .join();
+
             List<String> patchCommand = new ArrayList<String>(Arrays.asList("arc", "patch", "--nobranch", "--diff", diffID));
             if (!createCommit) {
                 patchCommand.add("--nocommit");
