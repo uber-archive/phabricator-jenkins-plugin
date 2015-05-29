@@ -49,6 +49,7 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
 
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
+        load();
     }
 
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -67,7 +68,7 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
         // set that to properties and call save().
-        req.bindJSON(this, formData);
+        req.bindJSON(this, formData.getJSONObject("uberalls"));
         save();
         return super.configure(req, formData);
     }

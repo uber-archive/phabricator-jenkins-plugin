@@ -87,13 +87,15 @@ public class PhabricatorNotifier extends Notifier {
         UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment);
         boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
 
+        boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
+
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
             if (needsDecoration) {
                 build.getActions().add(PhabricatorPostbuildAction.createShortText("master", null));
             }
             if (uberallsEnabled && coverage != null) {
-                if (CommonUtils.isBlank(uberalls.getBaseURL())) {
+                if (!uberallsConfigured) {
                     logger.println("[uberalls] enabled but no server configured. skipping.");
                 } else {
                     String currentSHA = environment.get("GIT_COMMIT");
@@ -136,7 +138,11 @@ public class PhabricatorNotifier extends Notifier {
             if (lineCoverage == null) {
                 logger.println("[uberalls] no line coverage found, skipping...");
             } else {
-                comment = getCoverageComment(lineCoverage, uberalls, diff, logger, environment.get("BUILD_URL"));
+                if (uberallsConfigured) {
+                    comment = getCoverageComment(lineCoverage, uberalls, diff, logger, environment.get("BUILD_URL"));
+                } else {
+                    logger.println("[uberalls] no backend configured, skipping...");
+                }
             }
         }
 
@@ -199,9 +205,10 @@ public class PhabricatorNotifier extends Notifier {
                                       PrintStream logger, String buildUrl) {
         Float lineCoveragePercent = lineCoverage.getPercentageFloat();
         logger.println("[uberalls] line coverage: " + lineCoveragePercent);
+        logger.println("[uberalls] fetching coverage from " + uberalls.getBaseURL());
         CodeCoverageMetrics parentCoverage = uberalls.getParentCoverage(diff);
         if (parentCoverage == null) {
-            logger.println("[uberalls] unable to find coverage for parent commit!");
+            logger.println("[uberalls] unable to find coverage for parent commit (" + diff.getBaseCommit() + ")");
             return null;
         } else {
             logger.println("[uberalls] found parent coverage as " + parentCoverage.getLineCoveragePercent());
