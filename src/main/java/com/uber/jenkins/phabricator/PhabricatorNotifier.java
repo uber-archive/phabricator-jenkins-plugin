@@ -208,7 +208,7 @@ public class PhabricatorNotifier extends Notifier {
         logger.println("[uberalls] fetching coverage from " + uberalls.getBaseURL());
         CodeCoverageMetrics parentCoverage = uberalls.getParentCoverage(diff);
         if (parentCoverage == null) {
-            logger.println("[uberalls] unable to find coverage for parent commit!");
+            logger.println("[uberalls] unable to find coverage for parent commit (" + diff.getBaseCommit() + ")");
             return null;
         } else {
             logger.println("[uberalls] found parent coverage as " + parentCoverage.getLineCoveragePercent());
