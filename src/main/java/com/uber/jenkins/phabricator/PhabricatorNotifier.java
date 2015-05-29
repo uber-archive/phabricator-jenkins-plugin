@@ -205,6 +205,7 @@ public class PhabricatorNotifier extends Notifier {
                                       PrintStream logger, String buildUrl) {
         Float lineCoveragePercent = lineCoverage.getPercentageFloat();
         logger.println("[uberalls] line coverage: " + lineCoveragePercent);
+        logger.println("[uberalls] fetching coverage from " + uberalls.getBaseURL());
         CodeCoverageMetrics parentCoverage = uberalls.getParentCoverage(diff);
         if (parentCoverage == null) {
             logger.println("[uberalls] unable to find coverage for parent commit!");

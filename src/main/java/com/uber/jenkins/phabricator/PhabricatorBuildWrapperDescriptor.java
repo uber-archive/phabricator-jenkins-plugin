@@ -34,6 +34,7 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
 
     public PhabricatorBuildWrapperDescriptor() {
         super(PhabricatorBuildWrapper.class);
+        load();
     }
 
     @Override
@@ -52,7 +53,7 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
         // set that to properties and call save().
-        req.bindJSON(this, formData);
+        req.bindJSON(this, formData.getJSONObject("phabricator"));
         save();
         return super.configure(req,formData);
     }
