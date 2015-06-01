@@ -43,10 +43,9 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
+
+import static java.lang.Integer.parseInt;
 
 public class PhabricatorNotifier extends Notifier {
 
@@ -56,15 +55,17 @@ public class PhabricatorNotifier extends Notifier {
     private final String coberturaReportFile;
     private final boolean commentWithConsoleLinkOnFailure;
     private final String commentFile;
+    private final String commentSize;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, String coberturaReportFile, boolean uberallsEnabled,
-                               String commentFile, boolean commentWithConsoleLinkOnFailure) {
+                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure) {
         this.commentOnSuccess = commentOnSuccess;
         this.coberturaReportFile = coberturaReportFile;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
+        this.commentSize = commentSize;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
     }
 
@@ -180,21 +181,21 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         diff.setBuildFinished(build.getResult());
-        String customComment = null;
+        String customComment;
         try {
-            customComment = getRemoteComment(build, logger, this.commentFile);
+            customComment = getRemoteComment(build, logger, this.commentFile, this.commentSize);
+
+            if (!CommonUtils.isBlank(customComment)) {
+                if (comment == null) {
+                    comment = String.format("```\n%s\n```\n\n", customComment);
+                } else {
+                    comment = String.format("%s\n\n```\n%s\n```\n", comment, customComment);
+                }
+            }
         } catch(InterruptedException e) {
             e.printStackTrace(logger);
         } catch (IOException e) {
             Util.displayIOException(e, listener);
-
-        }
-        if (customComment != null) {
-            if (comment == null) {
-                comment = String.format("%s\n\n", customComment);
-            } else {
-                comment = String.format("%s\n\n%s\n\n", comment, customComment);
-            }
         }
 
         if (comment != null) {
@@ -255,11 +256,13 @@ public class PhabricatorNotifier extends Notifier {
      * @return the contents of the string
      * @throws InterruptedException
      */
-    private String getRemoteComment(AbstractBuild<?, ?> build, PrintStream logger, String commentFile) throws InterruptedException, IOException {
+    private String getRemoteComment(AbstractBuild<?, ?> build, PrintStream logger, String commentFile, String maxSize) throws InterruptedException, IOException {
         if (CommonUtils.isBlank(commentFile)) {
             logger.println("[comment-file] no comment file configured");
             return null;
         }
+
+
 
         FilePath workspace = build.getWorkspace();
         FilePath[] src = workspace.list(commentFile);
@@ -270,7 +273,16 @@ public class PhabricatorNotifier extends Notifier {
         if (src.length > 1) {
             logger.println("[comment-file] Found multiple matches. Reading first only.");
         }
-        return src[0].readToString();
+
+        FilePath source = src[0];
+
+        int maxLength = parseInt(maxSize, 10);
+        if (source.length() < maxLength) {
+            maxLength = (int)source.length();
+        }
+        byte[] buffer = new byte[maxLength];
+        source.read().read(buffer, 0, maxLength);
+        return new String(buffer);
     }
 
     private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) throws InterruptedException {
@@ -369,7 +381,6 @@ public class PhabricatorNotifier extends Notifier {
     public String getCommentFile() {
         return commentFile;
     }
-
 
     // Overridden for better type safety.
     @Override

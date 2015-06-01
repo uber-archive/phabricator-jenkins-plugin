@@ -48,6 +48,16 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
     private String uberallsURL;
     private String commentFile;
 
+    public String getCommentSize() {
+        return commentSize;
+    }
+
+    public void setCommentSize(String commentSize) {
+        this.commentSize = commentSize;
+    }
+
+    private String commentSize;
+
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
         load();
