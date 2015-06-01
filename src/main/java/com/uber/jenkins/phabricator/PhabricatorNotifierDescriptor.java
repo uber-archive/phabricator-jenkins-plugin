@@ -46,6 +46,17 @@ import java.io.IOException;
 public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Publisher> {
     private String conduitURL;
     private String uberallsURL;
+    private String commentFile;
+
+    public String getCommentSize() {
+        return commentSize;
+    }
+
+    public void setCommentSize(String commentSize) {
+        this.commentSize = commentSize;
+    }
+
+    private String commentSize;
 
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
@@ -88,4 +99,12 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         return null;
     }
     public void setUberallsURL(String value) { uberallsURL = value; }
+
+    public void setCommentFile(String commentFile) {
+        this.commentFile = commentFile;
+    }
+
+    public String getCommentFile() {
+        return commentFile;
+    }
 }

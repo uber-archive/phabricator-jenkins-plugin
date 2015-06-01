@@ -36,16 +36,17 @@ import java.util.Map;
 
 public class ArcanistClient {
     private String methodName;
-    private Map params;
+    private Map<String, String> params;
 
-    public ArcanistClient(String methodName, Map params) {
+    public ArcanistClient(String methodName, Map<String, String> params) {
         this.methodName = methodName;
         this.params = params;
     }
 
     public JSONObject callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
-        JsonBuilder jsonBuilder = new JsonBuilder(this.params);
-        List<String> command = new ArrayList<String>(Arrays.asList("sh", "-c", "echo '" + jsonBuilder.toString() + "' | arc call-conduit " + this.methodName));
+        JSONObject obj = new JSONObject();
+        obj.putAll(this.params);
+        List<String> command = new ArrayList<String>(Arrays.asList("sh", "-c", "echo '" + obj.toString() + "' | arc call-conduit " + this.methodName));
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
         // TODO handle bad return code

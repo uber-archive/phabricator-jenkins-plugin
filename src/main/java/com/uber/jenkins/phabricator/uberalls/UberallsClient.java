@@ -34,6 +34,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 public class UberallsClient {
@@ -46,6 +47,7 @@ public class UberallsClient {
 
     private final EnvVars environment;
     private String baseURL;
+    private final PrintStream logger;
 
     public boolean recordCoverage(String currentSHA, String branch, CodeCoverageMetrics codeCoverageMetrics) {
         if (codeCoverageMetrics.isValid()) {
@@ -79,9 +81,10 @@ public class UberallsClient {
         return false;
     }
 
-    public UberallsClient(String baseURL, EnvVars environment) {
+    public UberallsClient(String baseURL, EnvVars environment, PrintStream logger) {
         this.baseURL = baseURL;
         this.environment = environment;
+        this.logger = logger;
     }
 
     public String getBaseURL() {
@@ -111,7 +114,7 @@ public class UberallsClient {
                     ((Double) coverage.getDouble(LINE_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue());
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(logger);
         }
 
         return null;
@@ -127,15 +130,15 @@ public class UberallsClient {
             return Request.Get(builder.build())
                     .execute().returnContent().asString();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger);
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != 404) {
-                e.printStackTrace();
+                e.printStackTrace(logger);
             }
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger);
         }
         return null;
     }
