@@ -28,6 +28,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -105,7 +106,7 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("revision_id", this.getRevisionID(false));
         params.put("action", action);
-        params.put("message", message);
+        params.put("message", StringEscapeUtils.escapeJavaScript(message));
         params.put("silent", silent);
 
         ArcanistClient arc = new ArcanistClient("differential.createcomment", params);

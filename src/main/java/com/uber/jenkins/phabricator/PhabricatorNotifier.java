@@ -55,14 +55,16 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean uberallsEnabled;
     private final String coberturaReportFile;
     private final boolean commentWithConsoleLinkOnFailure;
+    private final String commentFile;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, String coberturaReportFile, boolean uberallsEnabled,
-                               boolean commentWithConsoleLinkOnFailure) {
+                               String commentFile, boolean commentWithConsoleLinkOnFailure) {
         this.commentOnSuccess = commentOnSuccess;
         this.coberturaReportFile = coberturaReportFile;
         this.uberallsEnabled = uberallsEnabled;
+        this.commentFile = commentFile;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
     }
 
@@ -84,7 +86,7 @@ public class PhabricatorNotifier extends Notifier {
             coverage.setOwner(build);
         }
 
-        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment);
+        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment, logger);
         boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
 
         boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
@@ -178,23 +180,37 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         diff.setBuildFinished(build.getResult());
+        String customComment = null;
+        try {
+            customComment = getRemoteComment(build, logger, this.commentFile);
+        } catch(InterruptedException e) {
+            e.printStackTrace(logger);
+        } catch (IOException e) {
+            Util.displayIOException(e, listener);
+
+        }
+        if (customComment != null) {
+            if (comment == null) {
+                comment = String.format("%s\n\n", customComment);
+            } else {
+                comment = String.format("%s\n\n%s\n\n", comment, customComment);
+            }
+        }
 
         if (comment != null) {
             boolean silent = false;
-
-            String formattedMessage = String.format("%s.", comment);
             if (this.commentWithConsoleLinkOnFailure && build.getResult().isWorseOrEqualTo(Result.UNSTABLE)) {
-                formattedMessage += String.format("\\n\\nLink to build: %s", environment.get("BUILD_URL"));
-                formattedMessage += String.format("\\nSee console output for more information: %sconsole", environment.get("BUILD_URL"));
+                comment += String.format("\n\nLink to build: %s", environment.get("BUILD_URL"));
+                comment += String.format("\nSee console output for more information: %sconsole", environment.get("BUILD_URL"));
             } else {
-                formattedMessage += String.format(" %s for more details.", environment.get("BUILD_URL"));
+                comment += String.format(" %s for more details.", environment.get("BUILD_URL"));
             }
 
-            JSONObject result = diff.postComment(formattedMessage, silent, commentAction);
+            JSONObject result = diff.postComment(comment, silent, commentAction);
             if(!(result.get("errorMessage") instanceof JSONNull)) {
                 logger.println("Get error " + result.get("errorMessage") + " with action " +
                         commentAction +"; trying again with action 'none'");
-                diff.postComment(formattedMessage, silent, "none");
+                diff.postComment(comment, silent, "none");
             }
         }
 
@@ -230,6 +246,31 @@ public class PhabricatorNotifier extends Notifier {
 
             return coverageComment;
         }
+    }
+
+    /**
+     * Attempt to read a remote comment file
+     * @param build the build
+     * @param logger the logger
+     * @return the contents of the string
+     * @throws InterruptedException
+     */
+    private String getRemoteComment(AbstractBuild<?, ?> build, PrintStream logger, String commentFile) throws InterruptedException, IOException {
+        if (CommonUtils.isBlank(commentFile)) {
+            logger.println("[comment-file] no comment file configured");
+            return null;
+        }
+
+        FilePath workspace = build.getWorkspace();
+        FilePath[] src = workspace.list(commentFile);
+        if (src.length == 0) {
+            logger.println("[comment-file] no files found by path: '" + commentFile + "'");
+            return null;
+        }
+        if (src.length > 1) {
+            logger.println("[comment-file] Found multiple matches. Reading first only.");
+        }
+        return src[0].readToString();
     }
 
     private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) throws InterruptedException {
@@ -323,6 +364,12 @@ public class PhabricatorNotifier extends Notifier {
     public boolean isCommentWithConsoleLinkOnFailure() {
         return commentWithConsoleLinkOnFailure;
     }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getCommentFile() {
+        return commentFile;
+    }
+
 
     // Overridden for better type safety.
     @Override
