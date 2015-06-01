@@ -66,6 +66,14 @@ Set the "When Complete" dropdown to "Wait For Message"
 
 [Build Token Root Plugin]: https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin
 
+Additional Comments
+-------------------
+
+To allow projects to post back additional text instead of just pass/fail, the
+plugin supports a build comment file, which defaults to
+`.phabricator-comment`. Put text in here, and Jenkins will add it to the build
+status comment.
+
 Herald
 ------
 
