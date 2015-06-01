@@ -57,6 +57,8 @@ public class PhabricatorNotifier extends Notifier {
     private final String commentFile;
     private final String commentSize;
 
+    private final int DEFAULT_COMMENT_SIZE = 1000;
+
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, String coberturaReportFile, boolean uberallsEnabled,
@@ -262,8 +264,6 @@ public class PhabricatorNotifier extends Notifier {
             return null;
         }
 
-
-
         FilePath workspace = build.getWorkspace();
         FilePath[] src = workspace.list(commentFile);
         if (src.length == 0) {
@@ -276,7 +276,10 @@ public class PhabricatorNotifier extends Notifier {
 
         FilePath source = src[0];
 
-        int maxLength = parseInt(maxSize, 10);
+        int maxLength = DEFAULT_COMMENT_SIZE;
+        if (!CommonUtils.isBlank(maxSize)) {
+            maxLength = parseInt(maxSize, 10);
+        }
         if (source.length() < maxLength) {
             maxLength = (int)source.length();
         }
