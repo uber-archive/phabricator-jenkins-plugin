@@ -105,7 +105,7 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("revision_id", this.getRevisionID(false));
         params.put("action", action);
-        params.put("message", this.escapeNewlines(message));
+        params.put("message", this.escapeSpecialCharacters(message));
         params.put("silent", silent);
 
         ArcanistClient arc = new ArcanistClient("differential.createcomment", params);
@@ -122,8 +122,8 @@ public class Differential {
      * @param input
      * @return
      */
-    private String escapeNewlines(final String input) {
-        return input.replaceAll("\n", "\\\\n");
+    private String escapeSpecialCharacters(final String input) {
+        return input.replaceAll("\n", "\\\\n").replaceAll("\t", "    ");
     }
 
     /**
