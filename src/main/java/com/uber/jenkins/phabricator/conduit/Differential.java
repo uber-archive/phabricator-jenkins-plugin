@@ -113,8 +113,8 @@ public class Differential {
         return arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
     }
 
-    public JSONObject postComment(String message, boolean silent) throws IOException, InterruptedException {
-        return postComment(message, silent, "none");
+    public JSONObject postComment(String message) throws IOException, InterruptedException {
+        return postComment(message, true, "none");
     }
 
     /**
@@ -145,16 +145,16 @@ public class Differential {
 
     public void decorate(AbstractBuild build, String phabricatorURL) {
         // Add a badge next to the build
-        build.getActions().add(PhabricatorPostbuildAction.createShortText(
+        build.addAction(PhabricatorPostbuildAction.createShortText(
                 this.getRevisionID(true),
                 this.getPhabricatorLink(phabricatorURL)));
         // Add some long-form text
-        this.createSummary(build, "phabricator.png").appendText(this.getSummaryMessage(phabricatorURL), false);
+        this.createSummary(build).appendText(this.getSummaryMessage(phabricatorURL));
     }
 
-    private PhabricatorPostbuildSummaryAction createSummary(final AbstractBuild build, final String icon) {
-        PhabricatorPostbuildSummaryAction action = new PhabricatorPostbuildSummaryAction(icon);
-        build.getActions().add(action);
+    private PhabricatorPostbuildSummaryAction createSummary(final AbstractBuild build) {
+        PhabricatorPostbuildSummaryAction action = new PhabricatorPostbuildSummaryAction("phabricator.png");
+        build.addAction(action);
         return action;
     }
 

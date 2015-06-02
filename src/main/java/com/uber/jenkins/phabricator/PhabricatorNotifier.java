@@ -30,8 +30,7 @@ import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
-import hudson.plugins.cobertura.CoberturaCoverageParser;
-import hudson.plugins.cobertura.CoberturaPublisher;
+import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
@@ -52,19 +51,15 @@ public class PhabricatorNotifier extends Notifier {
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
-    private final String coberturaReportFile;
     private final boolean commentWithConsoleLinkOnFailure;
     private final String commentFile;
     private final String commentSize;
 
-    private final int DEFAULT_COMMENT_SIZE = 1000;
-
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PhabricatorNotifier(boolean commentOnSuccess, String coberturaReportFile, boolean uberallsEnabled,
+    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled,
                                String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure) {
         this.commentOnSuccess = commentOnSuccess;
-        this.coberturaReportFile = coberturaReportFile;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
@@ -97,7 +92,7 @@ public class PhabricatorNotifier extends Notifier {
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
             if (needsDecoration) {
-                build.getActions().add(PhabricatorPostbuildAction.createShortText("master", null));
+                build.addAction(PhabricatorPostbuildAction.createShortText("master", null));
             }
             if (uberallsEnabled && coverage != null) {
                 if (!uberallsConfigured) {
@@ -276,6 +271,7 @@ public class PhabricatorNotifier extends Notifier {
 
         FilePath source = src[0];
 
+        int DEFAULT_COMMENT_SIZE = 1000;
         int maxLength = DEFAULT_COMMENT_SIZE;
         if (!CommonUtils.isBlank(maxSize)) {
             maxLength = parseInt(maxSize, 10);
@@ -288,59 +284,18 @@ public class PhabricatorNotifier extends Notifier {
         return new String(buffer);
     }
 
-    private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) throws InterruptedException {
+    private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) {
         if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE) || !uberallsEnabled) {
             return null;
         }
 
         PrintStream logger = listener.getLogger();
-
-        logger.println("[uberalls] looking for coverage report in " + coberturaReportFile);
-
-        final FilePath[] moduleRoots = build.getModuleRoots();
-        final boolean multipleModuleRoots =
-                moduleRoots != null && moduleRoots.length > 1;
-        final FilePath moduleRoot = multipleModuleRoots ? build.getWorkspace() : build.getModuleRoot();
-        final File buildCoberturaDir = build.getRootDir();
-        FilePath buildTarget = new FilePath(buildCoberturaDir);
-
-        FilePath[] reports = new FilePath[0];
-
-        try {
-            reports = moduleRoot.act(new CoberturaPublisher.ParseReportCallable(coberturaReportFile));
-        } catch (IOException e) {
-            Util.displayIOException(e, listener);
-            e.printStackTrace(listener.fatalError("Unable to find coverage results"));
+        CoberturaBuildAction coberturaAction = build.getAction(CoberturaBuildAction.class);
+        if (coberturaAction == null) {
+            logger.println("[uberalls] no cobertura results found");
+            return null;
         }
-
-        if (reports.length == 0) {
-            logger.println("[uberalls] no coverage report found");
-        }
-
-        for (int i = 0; i < reports.length; i++) {
-            final FilePath targetPath = new FilePath(buildTarget, "uberalls" + (i == 0 ? "" : i) + ".xml");
-            try {
-                reports[i].copyTo(targetPath);
-            } catch (IOException e) {
-                Util.displayIOException(e, listener);
-                e.printStackTrace(listener.fatalError("Unable to copy coverage from " + reports[i] + " to " + buildTarget));
-                build.setResult(Result.FAILURE);
-            }
-        }
-
-        CoverageResult result = null;
-        for (File coberturaXmlReport : build.getRootDir().listFiles(new CoberturaReportFilenameFilter())) {
-            try {
-                result = CoberturaCoverageParser.parse(coberturaXmlReport, result);
-            } catch (IOException e) {
-                Util.displayIOException(e, listener);
-                e.printStackTrace(listener.fatalError("Unable to parse " + coberturaXmlReport));
-            }
-        }
-        if (result == null) {
-            logger.println("[uberalls] unable to parse any cobertura results");
-        }
-        return result;
+        return coberturaAction.getResult();
     }
 
     /**
@@ -371,11 +326,6 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public String getCoberturaReportFile () {
-        return coberturaReportFile;
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
     public boolean isCommentWithConsoleLinkOnFailure() {
         return commentWithConsoleLinkOnFailure;
     }
@@ -389,12 +339,5 @@ public class PhabricatorNotifier extends Notifier {
     @Override
     public PhabricatorNotifierDescriptor getDescriptor() {
         return (PhabricatorNotifierDescriptor) super.getDescriptor();
-    }
-
-    private static class CoberturaReportFilenameFilter implements FilenameFilter {
-        public boolean accept(File dir, String name) {
-            // TODO take this out of an anonymous inner class, create a singleton and use a Regex to match the name
-            return name.startsWith("uberalls") && name.endsWith(".xml");
-        }
     }
 }

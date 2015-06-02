@@ -60,7 +60,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (diffID == null || "".equals(diffID)) {
-            this.addShortText(build, "master");
+            this.addShortText(build);
             this.ignoreBuild(logger, "No differential ID found.");
         } else {
             LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
@@ -82,7 +82,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             logger.println("Applying patch for differential");
 
             // Post a silent notification
-            diff.postComment(diff.getBuildStartedMessage(environment), true);
+            diff.postComment(diff.getBuildStartedMessage(environment));
             diff.setBuildURL(environment);
 
             String baseCommit = "origin/master";
@@ -138,8 +138,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         };
     }
 
-    private void addShortText(final AbstractBuild build, final String text) {
-        build.getActions().add(PhabricatorPostbuildAction.createShortText(text, null));
+    private void addShortText(final AbstractBuild build) {
+        build.addAction(PhabricatorPostbuildAction.createShortText("master", null));
     }
 
     private Environment ignoreBuild(PrintStream logger, String message) {

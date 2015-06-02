@@ -27,6 +27,8 @@ import net.sf.json.JSON;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.fluent.Request;
@@ -46,7 +48,7 @@ public class UberallsClient {
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
 
     private final EnvVars environment;
-    private String baseURL;
+    private final String baseURL;
     private final PrintStream logger;
 
     public boolean recordCoverage(String currentSHA, String branch, CodeCoverageMetrics codeCoverageMetrics) {
@@ -96,7 +98,7 @@ public class UberallsClient {
             String sha = differential.getBaseCommit();
             String coverageJSON = null;
             if (sha != null) {
-                coverageJSON = getCoverage("sha", sha);
+                coverageJSON = getCoverage(sha);
             }
             JsonSlurper jsonParser = new JsonSlurper();
             JSON responseJSON = jsonParser.parseText(coverageJSON);
@@ -120,15 +122,15 @@ public class UberallsClient {
         return null;
     }
 
-    public String getCoverage(String param, String value) {
+    public String getCoverage(String value) {
         URIBuilder builder;
         try {
             builder = getBuilder()
                 .setParameter("repository", this.environment.get("GIT_URL"))
-                .setParameter(param, value);
+                .setParameter("sha", value);
 
-            return Request.Get(builder.build())
-                    .execute().returnContent().asString();
+            GetMethod instance = new GetMethod(builder.build().toString());
+            return instance.getResponseBodyAsString();
         } catch (URISyntaxException e) {
             e.printStackTrace(logger);
         } catch (HttpResponseException e) {

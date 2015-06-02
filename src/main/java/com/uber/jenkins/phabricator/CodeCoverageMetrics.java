@@ -80,10 +80,6 @@ public class CodeCoverageMetrics {
         this.conditionalCoveragePercent = conditionalCoveragePercent;
     }
 
-    public CodeCoverageMetrics(float packages, float files, float classes, float method, float line, float conditional) {
-        this(null, packages, files, classes, method, line, conditional);
-    }
-
     public boolean isValid() {
         return lineCoveragePercent != -1;
     }

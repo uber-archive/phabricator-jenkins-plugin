@@ -22,7 +22,7 @@ package com.uber.jenkins.phabricator;
 
 import hudson.Plugin;
 import hudson.PluginWrapper;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 import java.io.File;
 
@@ -38,9 +38,9 @@ public class PhabricatorPlugin extends Plugin {    // Diff ID (not differential 
         if(icon.startsWith("/")) return icon;
 
         // Try plugin images dir, fallback to Hudson images dir
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(PhabricatorPlugin.class);
+        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(PhabricatorPlugin.class);
 
         boolean pluginIconExists = (wrapper != null) && new File(wrapper.baseResourceURL.getPath() + "/images/" + icon).exists();
-        return pluginIconExists ? "/plugin/" + wrapper.getShortName() + "/images/" + icon : Hudson.RESOURCE_PATH + "/images/16x16/" + icon;
+        return pluginIconExists ? "/plugin/" + wrapper.getShortName() + "/images/" + icon : Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
     }
 }
