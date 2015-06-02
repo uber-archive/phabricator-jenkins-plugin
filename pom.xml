@@ -9,7 +9,7 @@
   <artifactId>phabricator-plugin</artifactId>
   <name>Phabricator Plugin</name>
   <description>Integrate Jenkins with Phabricator and Uberalls</description>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>hpi</packaging>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Plugin</url>
 
@@ -72,5 +72,6 @@
     <connection>scm:git:ssh://github.com/jenkinsci/phabricator-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/phabricator-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/phabricator-plugin</url>
+    <tag>phabricator-plugin-1.0</tag>
   </scm>
 </project>
