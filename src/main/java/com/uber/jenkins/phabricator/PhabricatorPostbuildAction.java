@@ -29,20 +29,20 @@ import org.kohsuke.stapler.export.Exported;
 public class PhabricatorPostbuildAction implements BuildBadgeAction {
     private final String iconPath;
     private final String text;
-    private String color = "#1FBAD6";
-    private String background = "transparent";
-    private String border = "0";
-    private String borderColor = "transparent";
-    private String link;
+    private final String color = "#1FBAD6";
+    private final String background = "transparent";
+    private final String border = "0";
+    private final String borderColor = "transparent";
+    private final String link;
 
-    private PhabricatorPostbuildAction(String iconPath, String text, String link) {
-        this.iconPath = iconPath;
+    private PhabricatorPostbuildAction(String text, String link) {
+        this.iconPath = null;
         this.text = text;
         this.link = link;
     }
 
     public static PhabricatorPostbuildAction createShortText(String text, String link) {
-        return new PhabricatorPostbuildAction(null, text, link);
+        return new PhabricatorPostbuildAction(text, link);
     }
 
     /* Action methods */

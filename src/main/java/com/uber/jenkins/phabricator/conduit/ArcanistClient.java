@@ -20,9 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import groovy.json.JsonBuilder;
 import hudson.Launcher;
-import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 
@@ -35,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ArcanistClient {
-    private String methodName;
-    private Map<String, String> params;
+    private final String methodName;
+    private final Map<String, String> params;
 
     public ArcanistClient(String methodName, Map<String, String> params) {
         this.methodName = methodName;

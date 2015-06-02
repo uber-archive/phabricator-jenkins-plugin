@@ -45,8 +45,8 @@ public class PhabricatorPostbuildSummaryAction implements Action {
     @Exported public String getIconPath() { return iconPath; }
     @Exported public String getText() { return textBuilder.toString(); }
 
-    public void appendText(String text, boolean escapeHtml) {
-        if(escapeHtml) {
+    public void appendText(String text) {
+        if(false) {
             text = StringEscapeUtils.escapeHtml(text);
         }
         textBuilder.append(text);
