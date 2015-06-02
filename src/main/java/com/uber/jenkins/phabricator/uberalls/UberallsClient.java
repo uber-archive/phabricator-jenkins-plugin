@@ -28,10 +28,13 @@ import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
@@ -65,10 +68,22 @@ public class UberallsClient {
             params.put("repository", this.environment.get("GIT_URL"));
 
             try {
-                Request.Post(getBuilder().build())
-                        .bodyString(params.toString(), ContentType.APPLICATION_JSON)
-                        .execute().returnContent().asString();
+                HttpClient client = new HttpClient();
+                PostMethod request = new PostMethod(getBuilder().build().toString());
+                request.addRequestHeader("Content-Type", "application/json");
+                StringRequestEntity requestEntity = new StringRequestEntity(
+                        params.toString(),
+                        ContentType.APPLICATION_JSON.toString(),
+                        "UTF-8");
+                request.setRequestEntity(requestEntity);
+                int statusCode = client.executeMethod(request);
+
+                if (statusCode != HttpStatus.SC_OK) {
+                    logger.println("[uberalls] call failed: " + request.getStatusLine());
+                    return false;
+                }
                 return true;
+
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             } catch (HttpResponseException e) {
@@ -129,8 +144,15 @@ public class UberallsClient {
                 .setParameter("repository", this.environment.get("GIT_URL"))
                 .setParameter("sha", value);
 
-            GetMethod instance = new GetMethod(builder.build().toString());
-            return instance.getResponseBodyAsString();
+            HttpClient client = new HttpClient();
+            HttpMethod request = new GetMethod(builder.build().toString());
+            int statusCode = client.executeMethod(request);
+
+            if (statusCode != HttpStatus.SC_OK) {
+                logger.println("[uberalls] call failed: " + request.getStatusLine());
+                return null;
+            }
+            return request.getResponseBodyAsString();
         } catch (URISyntaxException e) {
             e.printStackTrace(logger);
         } catch (HttpResponseException e) {
