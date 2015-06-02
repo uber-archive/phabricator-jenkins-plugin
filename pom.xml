@@ -6,13 +6,6 @@
     <version>1.597</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
   </parent>
 
-  <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/phabricator-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/phabricator-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/phabricator-plugin</url>
-  </scm>
-
-  <groupId>org.jenkins-ci.plugins</groupId>groupId>
   <artifactId>phabricator-plugin</artifactId>
   <name>Phabricator Plugin</name>
   <description>Integrate Jenkins with Phabricator and Uberalls</description>
@@ -41,10 +34,6 @@
       <id>repo.jenkins-ci.org</id>
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
-    <repository>
-      <id>project.local</id>
-      <url>file://${project.basedir}/repo</url>
-    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -67,7 +56,7 @@
     </dependency>
 
     <dependency>
-      <groupId>hudson.plugins</groupId>
+      <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>cobertura</artifactId>
       <version>1.9.6</version>
     </dependency>
@@ -83,4 +72,10 @@
         <version>3.2.2</version>
     </dependency>
   </dependencies>
+
+  <scm>
+    <connection>scm:git:ssh://github.com/jenkinsci/phabricator-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/phabricator-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/phabricator-plugin</url>
+  </scm>
 </project>
