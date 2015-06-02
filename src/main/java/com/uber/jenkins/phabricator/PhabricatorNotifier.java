@@ -177,7 +177,6 @@ public class PhabricatorNotifier extends Notifier {
             }
         }
 
-        diff.setBuildFinished(build.getResult());
         String customComment;
         try {
             customComment = getRemoteComment(build, logger, this.commentFile, this.commentSize);

@@ -83,7 +83,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
             // Post a silent notification
             diff.postComment(diff.getBuildStartedMessage(environment));
-            diff.setBuildURL(environment);
 
             String baseCommit = "origin/master";
             if (!applyToMaster) {

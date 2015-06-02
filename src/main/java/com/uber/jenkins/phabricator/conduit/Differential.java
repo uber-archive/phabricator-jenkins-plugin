@@ -190,24 +190,4 @@ public class Differential {
             return "(unknown)";
         }
     }
-
-    public void setDiffProperty(String name, String value) throws IOException, InterruptedException {
-        Map params = new HashMap<String, String>();
-        params.put("diff_id", this.diffID);
-        params.put("name", name);
-        params.put("data", String.format("\"%s\"", value));
-        ArcanistClient arc = new ArcanistClient("differential.setdiffproperty", params);
-
-        arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
-        return;
-    }
-
-    public void setBuildURL(EnvVars environment) throws IOException, InterruptedException {
-        this.setDiffProperty("uber:build-url", environment.get("BUILD_URL"));
-        this.setDiffProperty("uber:build-status", "PENDING");
-    }
-
-    public void setBuildFinished(Result result) throws IOException, InterruptedException {
-        this.setDiffProperty("uber:build-status", result.toString());
-    }
 }
