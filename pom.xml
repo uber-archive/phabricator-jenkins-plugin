@@ -6,10 +6,19 @@
     <version>1.597</version><!-- which version of Jenkins is this plugin built against? Users must have at least this Jenkins version to use this plugin. -->
   </parent>
 
-  <groupId>com.uber.jenkins</groupId>
+  <scm>
+    <connection>scm:git:ssh://github.com/jenkinsci/phabricator-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/phabricator-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/phabricator-plugin</url>
+  </scm>
+
+  <groupId>org.jenkins-ci.plugins</groupId>groupId>
   <artifactId>phabricator-plugin</artifactId>
+  <name>Phabricator Plugin</name>
+  <description>Integrate Jenkins with Phabricator and Uberalls</description>
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Plugin</url>
 
   <licenses>
     <license>
@@ -17,6 +26,14 @@
       <url>http://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <id>ai</id>
+      <name>Aiden Scandella</name>
+      <email>sc@ndella.com</email>
+    </developer>
+  </developers>
 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
