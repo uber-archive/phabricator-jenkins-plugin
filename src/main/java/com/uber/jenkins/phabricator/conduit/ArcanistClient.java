@@ -57,8 +57,8 @@ public class ArcanistClient {
     public JSONObject callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
         JSONObject obj = new JSONObject();
         obj.putAll(this.params);
-        List<String> command = new ArrayList<String>(
-                Arrays.asList("sh", "-c", "echo '" + obj.toString() + "' | " + this.getConduitCommand(this.methodName)));
+        List<String> command = Arrays.asList(
+                "sh", "-c", "echo '" + obj.toString() + "' | " + this.getConduitCommand(this.methodName));
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
         // TODO handle bad return code
