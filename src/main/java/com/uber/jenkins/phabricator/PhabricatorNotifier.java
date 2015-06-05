@@ -75,9 +75,6 @@ public class PhabricatorNotifier extends Notifier {
                                  final BuildListener listener) throws InterruptedException, IOException {
         EnvVars environment = build.getEnvironment(listener);
         PrintStream logger = listener.getLogger();
-        if (environment == null) {
-            return this.ignoreBuild(logger, "No environment variables found?!");
-        }
 
         CoverageResult coverage = getUberallsCoverage(build, listener);
         if (coverage != null) {
@@ -120,10 +117,6 @@ public class PhabricatorNotifier extends Notifier {
         String revisionID = diff.getRevisionID();
         if (CommonUtils.isBlank(revisionID)) {
             return this.ignoreBuild(logger, "Unable to load revisionID from conduit for diff ID " + diffID);
-        }
-
-        if (needsDecoration) {
-            diff.decorate(build, this.getPhabricatorURL());
         }
 
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
