@@ -86,6 +86,7 @@ public class PhabricatorNotifier extends Notifier {
 
         UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment, logger);
         boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
+        String conduitToken = environment.get(PhabricatorPlugin.CONDUIT_TOKEN, null);
 
         boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
 
@@ -115,7 +116,7 @@ public class PhabricatorNotifier extends Notifier {
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
 
-        Differential diff = Differential.fromDiffID(diffID, starter);
+        Differential diff = Differential.fromDiffID(diffID, starter, conduitToken);
 
         String revisionID = diff.getRevisionID();
         if (CommonUtils.isBlank(revisionID)) {

@@ -31,6 +31,7 @@ import org.kohsuke.stapler.StaplerRequest;
 @Extension // This indicates to Jenkins that this is an implementation of an extension point.
 public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescriptor {
     private String conduitURL;
+    private String conduitToken;
 
     public PhabricatorBuildWrapperDescriptor() {
         super(PhabricatorBuildWrapper.class);
@@ -62,4 +63,12 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
         return conduitURL;
     }
     public void setConduitURL(String value) { conduitURL = value; }
+
+    public String getConduitToken() {
+        return conduitToken;
+    }
+
+    public void setConduitToken(String conduitToken) {
+        this.conduitToken = conduitToken;
+    }
 }

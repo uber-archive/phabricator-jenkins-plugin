@@ -44,10 +44,10 @@ public class Differential {
      * @param launcher
      * @return
      */
-    public static Differential fromDiffID(String diffID, LauncherFactory launcher) throws IOException, InterruptedException {
+    public static Differential fromDiffID(String diffID, LauncherFactory launcher, String conduitToken) throws IOException, InterruptedException {
         Map params = new HashMap<String, String>();
         params.put("ids", new String[]{diffID});
-        ArcanistClient arc = new ArcanistClient("differential.querydiffs", params);
+        ArcanistClient arc = new ArcanistClient("differential.querydiffs", params, conduitToken);
 
         Differential diff = new Differential(
             diffID,

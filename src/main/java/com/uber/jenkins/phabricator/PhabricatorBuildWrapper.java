@@ -54,12 +54,17 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
 
-
         final Map<String, String> envAdditions = new HashMap<String, String>();
         envAdditions.put(PhabricatorPlugin.WRAP_KEY, "true");
 
+        final String conduitToken = this.getConduitToken();
+        if (!CommonUtils.isBlank(conduitToken)) {
+            // Make this available for the post-build action (PhabricatorNotifier.class)
+            envAdditions.put(PhabricatorPlugin.CONDUIT_TOKEN, conduitToken);
+        }
+
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
-        if (diffID == null || "".equals(diffID)) {
+        if (CommonUtils.isBlank(diffID)) {
             this.addShortText(build);
             this.ignoreBuild(logger, "No differential ID found.");
         } else {
@@ -76,7 +81,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 }
             }
 
-            Differential diff = Differential.fromDiffID(diffID, starter);
+            Differential diff = Differential.fromDiffID(diffID, starter, conduitToken);
             diff.decorate(build, this.getPhabricatorURL());
 
             logger.println("Applying patch for differential");
@@ -113,6 +118,10 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             List<String> patchCommand = new ArrayList<String>(Arrays.asList("arc", "patch", "--nobranch", "--diff", diffID));
             if (!createCommit) {
                 patchCommand.add("--nocommit");
+            }
+            // Use a globally-configured conduit token, if applicable
+            if (!CommonUtils.isBlank(conduitToken)) {
+                patchCommand.add("--conduit-token=" + this.getConduitToken());
             }
             int patchCode = starter.launch()
                     .stdout(logger)
@@ -166,6 +175,10 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
     public String getPhabricatorURL() {
         return this.getDescriptor().getConduitURL();
+    }
+
+    public String getConduitToken() {
+        return this.getDescriptor().getConduitToken();
     }
 
     // Overridden for better type safety.
