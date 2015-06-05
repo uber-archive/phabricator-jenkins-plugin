@@ -17,8 +17,8 @@
       <f:textbox />
     </f:entry>
     <f:entry title="Conduit Token" field="conduitToken"
-          description="Conduit token for Phabricator API. If left blank, reads from ~.arcrc">
-       <f:textbox />
+      description="Conduit token for Phabricator API. If left blank, reads from ~/.arcrc">
+      <f:textbox />
     </f:entry>
   </f:section>
 </j:jelly>
