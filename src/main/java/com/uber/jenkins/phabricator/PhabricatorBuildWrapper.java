@@ -124,6 +124,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 patchCommand.add("--conduit-token=" + this.getConduitToken());
             }
             int patchCode = starter.launch()
+                    .quiet(true)
                     .stdout(logger)
                     .cmds(patchCommand)
                     .join();

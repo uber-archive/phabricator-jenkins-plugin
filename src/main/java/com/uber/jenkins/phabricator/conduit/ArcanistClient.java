@@ -62,7 +62,7 @@ public class ArcanistClient {
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
         // TODO handle bad return code
-        starter.cmds(command).stdout(stdoutBuffer).stderr(stderr).join();
+        starter.quiet(true).cmds(command).stdout(stdoutBuffer).stderr(stderr).join();
         JsonSlurper jsonParser = new JsonSlurper();
         try {
             return (JSONObject) jsonParser.parseText(stdoutBuffer.toString());
