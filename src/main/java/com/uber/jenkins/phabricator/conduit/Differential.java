@@ -36,7 +36,7 @@ import java.util.Map;
 public class Differential {
     private final JSONObject rawJSON;
     private final LauncherFactory launcher;
-    private final String diffID;
+    private final String conduitToken;
 
     /**
      * Instantiate a differential from a diff ID (not differential ID)
@@ -50,18 +50,18 @@ public class Differential {
         ArcanistClient arc = new ArcanistClient("differential.querydiffs", params, conduitToken);
 
         Differential diff = new Differential(
-            diffID,
-            (JSONObject) ((JSONObject) arc.callConduit(launcher.launch(), launcher.getStderr()).get("response")).get(diffID),
-            launcher
+                (JSONObject) ((JSONObject) arc.callConduit(launcher.launch(), launcher.getStderr()).get("response")).get(diffID),
+                launcher,
+                conduitToken
         );
 
         return diff;
     }
 
-    Differential(String diffID, JSONObject rawJSON, LauncherFactory launcher) {
-        this.diffID = diffID;
+    Differential(JSONObject rawJSON, LauncherFactory launcher, String conduitToken) {
         this.rawJSON = rawJSON;
         this.launcher = launcher;
+        this.conduitToken = conduitToken;
     }
 
     public String getRevisionID(boolean formatted) {
@@ -90,7 +90,7 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
-        ArcanistClient arc = new ArcanistClient("harbormaster.sendmessage", params);
+        ArcanistClient arc = new ArcanistClient("harbormaster.sendmessage", params, this.conduitToken);
 
         arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
     }
@@ -108,7 +108,7 @@ public class Differential {
         params.put("message", this.escapeSpecialCharacters(message));
         params.put("silent", silent);
 
-        ArcanistClient arc = new ArcanistClient("differential.createcomment", params);
+        ArcanistClient arc = new ArcanistClient("differential.createcomment", params, this.conduitToken);
 
         return arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
     }

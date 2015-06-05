@@ -67,7 +67,6 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public String getConduitToken() {
         return conduitToken;
     }
-
     public void setConduitToken(String conduitToken) {
         this.conduitToken = conduitToken;
     }
