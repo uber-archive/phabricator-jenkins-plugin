@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.CommonUtils;
 import hudson.Launcher;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
@@ -35,20 +36,33 @@ import java.util.Map;
 public class ArcanistClient {
     private final String methodName;
     private final Map<String, String> params;
+    private final String conduitToken;
 
-    public ArcanistClient(String methodName, Map<String, String> params) {
+    public ArcanistClient(String methodName, Map<String, String> params, String conduitToken) {
         this.methodName = methodName;
         this.params = params;
+        this.conduitToken = conduitToken;
+    }
+
+    private String getConduitCommand(String methodName) {
+        StringBuilder sb = new StringBuilder("arc call-conduit ");
+        sb.append(methodName);
+        if (!CommonUtils.isBlank(this.conduitToken)) {
+            sb.append(" --conduit-token=");
+            sb.append(this.conduitToken);
+        }
+        return sb.toString();
     }
 
     public JSONObject callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
         JSONObject obj = new JSONObject();
         obj.putAll(this.params);
-        List<String> command = new ArrayList<String>(Arrays.asList("sh", "-c", "echo '" + obj.toString() + "' | arc call-conduit " + this.methodName));
+        List<String> command = Arrays.asList(
+                "sh", "-c", "echo '" + obj.toString() + "' | " + this.getConduitCommand(this.methodName));
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
         // TODO handle bad return code
-        starter.cmds(command).stdout(stdoutBuffer).stderr(stderr).join();
+        starter.quiet(true).cmds(command).stdout(stdoutBuffer).stderr(stderr).join();
         JsonSlurper jsonParser = new JsonSlurper();
         try {
             return (JSONObject) jsonParser.parseText(stdoutBuffer.toString());

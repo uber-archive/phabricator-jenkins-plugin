@@ -32,6 +32,7 @@ public class PhabricatorPlugin extends Plugin {    // Diff ID (not differential 
     static final String PHID_FIELD = "PHID";
 
     static final String WRAP_KEY = "PHABRICATOR_JENKINS";
+    public static final String CONDUIT_TOKEN = "CONDUIT_TOKEN";
 
     public static String getIconPath(String icon) {
         if(icon == null) return null;
