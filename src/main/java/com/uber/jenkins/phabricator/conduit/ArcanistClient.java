@@ -44,13 +44,21 @@ public class ArcanistClient {
         this.conduitToken = conduitToken;
     }
 
+    private String getConduitCommand(String methodName) {
+        StringBuilder sb = new StringBuilder("arc call-conduit ");
+        sb.append(methodName);
+        if (!CommonUtils.isBlank(this.conduitToken)) {
+            sb.append(" --conduit-token=");
+            sb.append(this.conduitToken);
+        }
+        return sb.toString();
+    }
+
     public JSONObject callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
         JSONObject obj = new JSONObject();
         obj.putAll(this.params);
-        List<String> command = new ArrayList<String>(Arrays.asList("sh", "-c", "echo '" + obj.toString() + "' | arc call-conduit " + this.methodName));
-        if (!CommonUtils.isBlank(this.conduitToken)) {
-            command.add(" --conduit-token=" + this.conduitToken);
-        }
+        List<String> command = new ArrayList<String>(
+                Arrays.asList("sh", "-c", "echo '" + obj.toString() + "' | " + this.getConduitCommand(this.methodName)));
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
         // TODO handle bad return code
