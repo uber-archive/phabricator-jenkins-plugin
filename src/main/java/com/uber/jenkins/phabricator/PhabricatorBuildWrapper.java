@@ -185,8 +185,16 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return this.getDescriptor().getConduitToken();
     }
 
+    /**
+     * Return the path to the arcanist executable
+     * @return a string, fully-qualified or not, could just be "arc"
+     */
     public String getArcPath() {
-        return this.getDescriptor().getArcPath();
+        final String providedPath = this.getDescriptor().getArcPath();
+        if (CommonUtils.isBlank(providedPath)) {
+            return "arc";
+        }
+        return providedPath;
     }
 
     // Overridden for better type safety.

@@ -46,8 +46,8 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("ids", new String[]{diffID});
 
-        ArcanistClient arc = this.createClient( "differential.querydiffs", params);
-        this.rawJSON = (JSONObject) ((JSONObject) arc.callConduit(launcher.launch(), launcher.getStderr()).get("response")).get(diffID);
+        JSONObject query = this.callConduit("differential.querydiffs", params);
+        this.rawJSON = (JSONObject) ((JSONObject) query.get("response")).get(diffID);
     }
 
     public String getRevisionID(boolean formatted) {
@@ -77,8 +77,12 @@ public class Differential {
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
 
-        ArcanistClient arc = this.createClient("harbormaster.sendmessage", params);
-        arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
+        this.callConduit("harbormaster.sendmessage", params);
+    }
+
+    private JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException {
+        ArcanistClient arc = new ArcanistClient(this.arcPath, methodName, params, this.conduitToken);
+        return arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
     }
 
     /**
@@ -94,12 +98,7 @@ public class Differential {
         params.put("message", this.escapeSpecialCharacters(message));
         params.put("silent", silent);
 
-        ArcanistClient arc = this.createClient("differential.createcomment", params);
-        return arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
-    }
-
-    private ArcanistClient createClient(String methodName, Map<String, String> params) {
-        return new ArcanistClient(this.arcPath, methodName, params, this.conduitToken);
+        return this.callConduit("differential.createcomment", params);
     }
 
     public JSONObject postComment(String message) throws IOException, InterruptedException {
