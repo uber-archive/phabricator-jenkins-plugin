@@ -114,7 +114,7 @@ public class PhabricatorNotifier extends Notifier {
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
 
-        Differential diff = Differential.fromDiffID(diffID, starter, conduitToken, arcPath);
+        Differential diff = new Differential(diffID, starter, conduitToken, arcPath);
 
         String revisionID = diff.getRevisionID();
         if (CommonUtils.isBlank(revisionID)) {

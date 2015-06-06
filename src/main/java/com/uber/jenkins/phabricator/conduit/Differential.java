@@ -39,32 +39,15 @@ public class Differential {
     private final String conduitToken;
     private final String arcPath;
 
-    /**
-     * Instantiate a differential from a diff ID (not differential ID)
-     * @param diffID
-     * @param launcher
-     * @return
-     */
-    public static Differential fromDiffID(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) throws IOException, InterruptedException {
-        Map params = new HashMap<String, String>();
-        params.put("ids", new String[]{diffID});
-        ArcanistClient arc = new ArcanistClient(arcPath, "differential.querydiffs", params, conduitToken);
-
-        Differential diff = new Differential(
-                (JSONObject) ((JSONObject) arc.callConduit(launcher.launch(), launcher.getStderr()).get("response")).get(diffID),
-                launcher,
-                conduitToken,
-                arcPath
-        );
-
-        return diff;
-    }
-
-    Differential(JSONObject rawJSON, LauncherFactory launcher, String conduitToken, String arcPath) {
-        this.rawJSON = rawJSON;
-        this.launcher = launcher;
+    public Differential(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) throws IOException, InterruptedException {
         this.conduitToken = conduitToken;
         this.arcPath = arcPath;
+        this.launcher = launcher;
+        Map params = new HashMap<String, String>();
+        params.put("ids", new String[]{diffID});
+
+        ArcanistClient arc = this.createClient( "differential.querydiffs", params);
+        this.rawJSON = (JSONObject) ((JSONObject) arc.callConduit(launcher.launch(), launcher.getStderr()).get("response")).get(diffID);
     }
 
     public String getRevisionID(boolean formatted) {
@@ -93,8 +76,8 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
-        ArcanistClient arc = new ArcanistClient(this.arcPath, "harbormaster.sendmessage", params, this.conduitToken);
 
+        ArcanistClient arc = this.createClient("harbormaster.sendmessage", params);
         arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
     }
 

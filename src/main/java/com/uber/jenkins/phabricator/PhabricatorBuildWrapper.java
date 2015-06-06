@@ -84,7 +84,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 }
             }
 
-            Differential diff = Differential.fromDiffID(diffID, starter, conduitToken, arcPath);
+            Differential diff = new Differential(diffID, starter, conduitToken, arcPath);
             diff.decorate(build, this.getPhabricatorURL());
 
             logger.println("Applying patch for differential");
