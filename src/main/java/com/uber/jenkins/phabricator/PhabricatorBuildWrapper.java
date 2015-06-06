@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import hudson.EnvVars;
 import hudson.Launcher;
@@ -118,22 +119,22 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                     .cmds(Arrays.asList("git", "submodule", "update", "--init", "--recursive"))
                     .join();
 
-            List<String> patchCommand = new ArrayList<String>(Arrays.asList(arcPath, "patch", "--nobranch", "--diff", diffID));
+            List<String> params = new ArrayList<String>(Arrays.asList("--nobranch", "--diff", diffID));
             if (!createCommit) {
-                patchCommand.add("--nocommit");
+                params.add("--nocommit");
             }
-            // Use a globally-configured conduit token, if applicable
-            if (!CommonUtils.isBlank(conduitToken)) {
-                patchCommand.add("--conduit-token=" + this.getConduitToken());
-            }
-            int patchCode = starter.launch()
-                    .quiet(true)
-                    .stdout(logger)
-                    .cmds(patchCommand)
-                    .join();
 
-            if (patchCode != 0) {
-                logger.println("Error applying arc patch; got non-zero exit code " + patchCode);
+            ArcanistClient arc = new ArcanistClient(
+                    arcPath,
+                    "patch",
+                    null,
+                    conduitToken,
+                    params.toArray(new String[params.size()]));
+
+            int result = arc.callConduit(starter.launch(), logger);
+
+            if (result != 0) {
+                logger.println("[arcanist] Error applying arc patch; got non-zero exit code " + result);
                 return null;
             }
         }
