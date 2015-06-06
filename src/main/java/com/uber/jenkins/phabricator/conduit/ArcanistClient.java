@@ -28,24 +28,26 @@ import net.sf.json.groovy.JsonSlurper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class ArcanistClient {
+    private final String arcPath;
     private final String methodName;
     private final Map<String, String> params;
     private final String conduitToken;
 
-    public ArcanistClient(String methodName, Map<String, String> params, String conduitToken) {
+    public ArcanistClient(String arcPath, String methodName, Map<String, String> params, String conduitToken) {
+        this.arcPath = arcPath;
         this.methodName = methodName;
         this.params = params;
         this.conduitToken = conduitToken;
     }
 
     private String getConduitCommand(String methodName) {
-        StringBuilder sb = new StringBuilder("arc call-conduit ");
+        StringBuilder sb = new StringBuilder(this.arcPath);
+        sb.append(" call-conduit ");
         sb.append(methodName);
         if (!CommonUtils.isBlank(this.conduitToken)) {
             sb.append(" --conduit-token=");

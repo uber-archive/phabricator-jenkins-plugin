@@ -26,13 +26,15 @@ import jenkins.model.Jenkins;
 
 import java.io.File;
 
-public class PhabricatorPlugin extends Plugin {    // Diff ID (not differential ID)
+public class PhabricatorPlugin extends Plugin {
+    // Diff ID (not differential ID)
     static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
     // Phabricator object ID (for Harbormaster)
     static final String PHID_FIELD = "PHID";
 
     static final String WRAP_KEY = "PHABRICATOR_JENKINS";
     public static final String CONDUIT_TOKEN = "CONDUIT_TOKEN";
+    public static final String ARCANIST_PATH = "ARCANIST_PATH";
 
     public static String getIconPath(String icon) {
         if(icon == null) return null;
