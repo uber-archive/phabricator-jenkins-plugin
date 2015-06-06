@@ -20,5 +20,9 @@
       description="Conduit token for Phabricator API. If left blank, reads from ~/.arcrc">
       <f:textbox />
     </f:entry>
+    <f:entry title="Location of arcanist" field="arcPath"
+      description="location of `arc` binary, if not in path">
+      <f:textbox default="arc" />
+    </f:entry>
   </f:section>
 </j:jelly>

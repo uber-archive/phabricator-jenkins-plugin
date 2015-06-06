@@ -32,6 +32,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescriptor {
     private String conduitURL;
     private String conduitToken;
+    private String arcPath;
 
     public PhabricatorBuildWrapperDescriptor() {
         super(PhabricatorBuildWrapper.class);
@@ -69,5 +70,12 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     }
     public void setConduitToken(String conduitToken) {
         this.conduitToken = conduitToken;
+    }
+
+    public String getArcPath() {
+        return arcPath;
+    }
+    public void setArcPath(String arcPath) {
+        this.arcPath = arcPath;
     }
 }

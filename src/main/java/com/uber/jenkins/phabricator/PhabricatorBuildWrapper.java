@@ -54,8 +54,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
 
+        final String arcPath = this.getArcPath();
+
         final Map<String, String> envAdditions = new HashMap<String, String>();
         envAdditions.put(PhabricatorPlugin.WRAP_KEY, "true");
+        envAdditions.put(PhabricatorPlugin.ARCANIST_PATH, arcPath);
 
         final String conduitToken = this.getConduitToken();
         if (!CommonUtils.isBlank(conduitToken)) {
@@ -81,7 +84,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 }
             }
 
-            Differential diff = Differential.fromDiffID(diffID, starter, conduitToken);
+            Differential diff = Differential.fromDiffID(diffID, starter, conduitToken, arcPath);
             diff.decorate(build, this.getPhabricatorURL());
 
             logger.println("Applying patch for differential");
@@ -115,7 +118,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                     .cmds(Arrays.asList("git", "submodule", "update", "--init", "--recursive"))
                     .join();
 
-            List<String> patchCommand = new ArrayList<String>(Arrays.asList("arc", "patch", "--nobranch", "--diff", diffID));
+            List<String> patchCommand = new ArrayList<String>(Arrays.asList(arcPath, "patch", "--nobranch", "--diff", diffID));
             if (!createCommit) {
                 patchCommand.add("--nocommit");
             }
@@ -180,6 +183,10 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
     public String getConduitToken() {
         return this.getDescriptor().getConduitToken();
+    }
+
+    public String getArcPath() {
+        return this.getDescriptor().getArcPath();
     }
 
     // Overridden for better type safety.

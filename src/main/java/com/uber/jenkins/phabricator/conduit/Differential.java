@@ -37,6 +37,7 @@ public class Differential {
     private final JSONObject rawJSON;
     private final LauncherFactory launcher;
     private final String conduitToken;
+    private final String arcPath;
 
     /**
      * Instantiate a differential from a diff ID (not differential ID)
@@ -44,24 +45,26 @@ public class Differential {
      * @param launcher
      * @return
      */
-    public static Differential fromDiffID(String diffID, LauncherFactory launcher, String conduitToken) throws IOException, InterruptedException {
+    public static Differential fromDiffID(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) throws IOException, InterruptedException {
         Map params = new HashMap<String, String>();
         params.put("ids", new String[]{diffID});
-        ArcanistClient arc = new ArcanistClient("differential.querydiffs", params, conduitToken);
+        ArcanistClient arc = new ArcanistClient(arcPath, "differential.querydiffs", params, conduitToken);
 
         Differential diff = new Differential(
                 (JSONObject) ((JSONObject) arc.callConduit(launcher.launch(), launcher.getStderr()).get("response")).get(diffID),
                 launcher,
-                conduitToken
+                conduitToken,
+                arcPath
         );
 
         return diff;
     }
 
-    Differential(JSONObject rawJSON, LauncherFactory launcher, String conduitToken) {
+    Differential(JSONObject rawJSON, LauncherFactory launcher, String conduitToken, String arcPath) {
         this.rawJSON = rawJSON;
         this.launcher = launcher;
         this.conduitToken = conduitToken;
+        this.arcPath = arcPath;
     }
 
     public String getRevisionID(boolean formatted) {
@@ -90,7 +93,7 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
-        ArcanistClient arc = new ArcanistClient("harbormaster.sendmessage", params, this.conduitToken);
+        ArcanistClient arc = new ArcanistClient(this.arcPath, "harbormaster.sendmessage", params, this.conduitToken);
 
         arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
     }
@@ -108,9 +111,12 @@ public class Differential {
         params.put("message", this.escapeSpecialCharacters(message));
         params.put("silent", silent);
 
-        ArcanistClient arc = new ArcanistClient("differential.createcomment", params, this.conduitToken);
-
+        ArcanistClient arc = this.createClient("differential.createcomment", params);
         return arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
+    }
+
+    private ArcanistClient createClient(String methodName, Map<String, String> params) {
+        return new ArcanistClient(this.arcPath, methodName, params, this.conduitToken);
     }
 
     public JSONObject postComment(String message) throws IOException, InterruptedException {
