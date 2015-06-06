@@ -22,14 +22,15 @@ package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.CommonUtils;
 import hudson.Launcher;
+import hudson.util.ArgumentListBuilder;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 public class ArcanistClient {
@@ -37,34 +38,58 @@ public class ArcanistClient {
     private final String methodName;
     private final Map<String, String> params;
     private final String conduitToken;
+    private final String[] arguments;
 
-    public ArcanistClient(String arcPath, String methodName, Map<String, String> params, String conduitToken) {
+    public ArcanistClient(String arcPath, String methodName, Map<String, String> params, String conduitToken, String... arguments) {
         this.arcPath = arcPath;
         this.methodName = methodName;
         this.params = params;
         this.conduitToken = conduitToken;
+        this.arguments = arguments;
     }
 
-    private String getConduitCommand(String methodName) {
-        StringBuilder sb = new StringBuilder(this.arcPath);
-        sb.append(" call-conduit ");
-        sb.append(methodName);
+    private ArgumentListBuilder getConduitCommand() {
+        ArgumentListBuilder builder = new ArgumentListBuilder(this.arcPath, this.methodName);
+        builder.add(arguments);
+
         if (!CommonUtils.isBlank(this.conduitToken)) {
-            sb.append(" --conduit-token=");
-            sb.append(this.conduitToken);
+            builder.addMasked("--conduit-token=" + this.conduitToken);
         }
-        return sb.toString();
+        return builder;
     }
 
-    public JSONObject callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
-        JSONObject obj = new JSONObject();
-        obj.putAll(this.params);
-        List<String> command = Arrays.asList(
-                "sh", "-c", "echo '" + obj.toString() + "' | " + this.getConduitCommand(this.methodName));
+    private Launcher.ProcStarter getCommand(Launcher.ProcStarter starter) throws IOException {
+        Launcher.ProcStarter command = starter.cmds(this.getConduitCommand());
+
+        if (this.params != null) {
+            JSONObject obj = new JSONObject();
+            obj.putAll(this.params);
+
+            InputStream jsonStream = IOUtils.toInputStream(obj.toString(), "UTF-8");
+            command = command.stdin(jsonStream);
+        }
+        return command;
+    }
+
+    public int callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
+        Launcher.ProcStarter command = this.getCommand(starter);
+        return command.stdout(stderr).stderr(stderr).join();
+    }
+
+    public JSONObject parseConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
+        Launcher.ProcStarter command = this.getCommand(starter);
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
-        // TODO handle bad return code
-        starter.quiet(true).cmds(command).stdout(stdoutBuffer).stderr(stderr).join();
+        int returnCode = command.
+                stdout(stdoutBuffer).
+                stderr(stderr).
+                join();
+
+        if (returnCode != 0) {
+            stderr.println("[arcanist] returned non-zero exit code " + returnCode);
+            stderr.println("[arcanist] output: " + stdoutBuffer.toString());
+        }
+
         JsonSlurper jsonParser = new JsonSlurper();
         try {
             return (JSONObject) jsonParser.parseText(stdoutBuffer.toString());

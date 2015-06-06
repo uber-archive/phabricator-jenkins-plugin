@@ -81,8 +81,8 @@ public class Differential {
     }
 
     private JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException {
-        ArcanistClient arc = new ArcanistClient(this.arcPath, methodName, params, this.conduitToken);
-        return arc.callConduit(this.launcher.launch(), this.launcher.getStderr());
+        ArcanistClient arc = new ArcanistClient(this.arcPath, "call-conduit", params, this.conduitToken, methodName);
+        return arc.parseConduit(this.launcher.launch(), this.launcher.getStderr());
     }
 
     /**
@@ -95,7 +95,7 @@ public class Differential {
         Map params = new HashMap<String, String>();
         params.put("revision_id", this.getRevisionID(false));
         params.put("action", action);
-        params.put("message", this.escapeSpecialCharacters(message));
+        params.put("message", message);
         params.put("silent", silent);
 
         return this.callConduit("differential.createcomment", params);
@@ -103,15 +103,6 @@ public class Differential {
 
     public JSONObject postComment(String message) throws IOException, InterruptedException {
         return postComment(message, true, "none");
-    }
-
-    /**
-     * Don't mangle quotes because reasons
-     * @param input
-     * @return
-     */
-    private String escapeSpecialCharacters(final String input) {
-        return input.replaceAll("\n", "\\\\n").replaceAll("\t", "    ");
     }
 
     /**
