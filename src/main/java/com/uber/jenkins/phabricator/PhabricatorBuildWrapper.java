@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
+import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import hudson.EnvVars;
 import hudson.Launcher;
@@ -85,13 +86,19 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 }
             }
 
-            Differential diff = new Differential(diffID, starter, conduitToken, arcPath);
-            diff.decorate(build, this.getPhabricatorURL());
+            Differential diff;
+            try {
+                diff = new Differential(diffID, starter, conduitToken, arcPath);
+                diff.decorate(build, this.getPhabricatorURL());
 
-            logger.println("Applying patch for differential");
+                logger.println("Applying patch for differential");
 
-            // Post a silent notification
-            diff.postComment(diff.getBuildStartedMessage(environment));
+                // Post a silent notification
+                diff.postComment(diff.getBuildStartedMessage(environment));
+            } catch (ArcanistUsageException e) {
+                logger.println("[arcanist] unable to apply patch");
+                return null;
+            }
 
             String baseCommit = "origin/master";
             if (!applyToMaster) {

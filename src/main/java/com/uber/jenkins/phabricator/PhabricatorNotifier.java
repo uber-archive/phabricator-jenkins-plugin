@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
@@ -114,7 +115,13 @@ public class PhabricatorNotifier extends Notifier {
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
 
-        Differential diff = new Differential(diffID, starter, conduitToken, arcPath);
+        Differential diff;
+        try {
+            diff = new Differential(diffID, starter, conduitToken, arcPath);
+        } catch (ArcanistUsageException e) {
+            logger.println("[arcanist] unable to fetch differential");
+            return true;
+        }
 
         String revisionID = diff.getRevisionID();
         if (CommonUtils.isBlank(revisionID)) {
@@ -162,7 +169,12 @@ public class PhabricatorNotifier extends Notifier {
         String commentAction = "none";
         if (runHarbormaster) {
             logger.println("Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
-            diff.harbormaster(phid, harbormasterSuccess);
+            try {
+                diff.harbormaster(phid, harbormasterSuccess);
+            } catch (ArcanistUsageException e) {
+                logger.println("[arcanist] unable to post to harbormaster");
+                return true;
+            }
         } else {
             logger.println("Harbormaster integration not enabled for this build.");
             if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
@@ -198,11 +210,20 @@ public class PhabricatorNotifier extends Notifier {
                 comment += String.format(" %s for more details.", environment.get("BUILD_URL"));
             }
 
-            JSONObject result = diff.postComment(comment, silent, commentAction);
+            JSONObject result = null;
+            try {
+                result = diff.postComment(comment, silent, commentAction);
+            } catch (ArcanistUsageException e) {
+                logger.println("[arcanist] unable to post comment");
+            }
             if(!(result.get("errorMessage") instanceof JSONNull)) {
                 logger.println("Get error " + result.get("errorMessage") + " with action " +
                         commentAction +"; trying again with action 'none'");
-                diff.postComment(comment, silent, "none");
+                try {
+                    diff.postComment(comment, silent, "none");
+                } catch (ArcanistUsageException e) {
+                    logger.println("[arcanist] unable to post comment");
+                }
             }
         }
 
@@ -290,14 +311,6 @@ public class PhabricatorNotifier extends Notifier {
             return null;
         }
         return coberturaAction.getResult();
-    }
-
-    /**
-     * Get the base phabricator URL
-     * @return a phabricator URL
-     */
-    private String getPhabricatorURL() {
-        return this.getDescriptor().getConduitURL();
     }
 
     private boolean ignoreBuild(PrintStream logger, String message) {

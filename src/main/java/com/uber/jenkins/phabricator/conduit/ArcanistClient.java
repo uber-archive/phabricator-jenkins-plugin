@@ -76,7 +76,8 @@ public class ArcanistClient {
         return command.stdout(stderr).stderr(stderr).join();
     }
 
-    public JSONObject parseConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
+    public JSONObject parseConduit(Launcher.ProcStarter starter, PrintStream stderr)
+            throws ArcanistUsageException, IOException, InterruptedException {
         Launcher.ProcStarter command = this.getCommand(starter);
         ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
 
@@ -86,15 +87,17 @@ public class ArcanistClient {
                 join();
 
         if (returnCode != 0) {
+            String errorMessage = stdoutBuffer.toString();
             stderr.println("[arcanist] returned non-zero exit code " + returnCode);
-            stderr.println("[arcanist] output: " + stdoutBuffer.toString());
+            stderr.println("[arcanist] output: " + errorMessage);
+            throw new ArcanistUsageException(errorMessage);
         }
 
         JsonSlurper jsonParser = new JsonSlurper();
         try {
             return (JSONObject) jsonParser.parseText(stdoutBuffer.toString());
         } catch(net.sf.json.JSONException e) {
-            stderr.println("[phabricator] Unable to parse JSON from response: " + stdoutBuffer.toString());
+            stderr.println("[arcanist] Unable to parse JSON from response: " + stdoutBuffer.toString());
             throw e;
         }
     }

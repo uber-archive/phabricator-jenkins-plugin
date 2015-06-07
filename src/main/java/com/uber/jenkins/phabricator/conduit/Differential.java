@@ -39,7 +39,7 @@ public class Differential {
     private final String conduitToken;
     private final String arcPath;
 
-    public Differential(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) throws IOException, InterruptedException {
+    public Differential(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) throws IOException, InterruptedException, ArcanistUsageException {
         this.conduitToken = conduitToken;
         this.arcPath = arcPath;
         this.launcher = launcher;
@@ -72,7 +72,7 @@ public class Differential {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void harbormaster(String phid, boolean pass) throws IOException, InterruptedException {
+    public void harbormaster(String phid, boolean pass) throws IOException, InterruptedException, ArcanistUsageException {
         Map params = new HashMap<String, String>();
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
@@ -80,7 +80,7 @@ public class Differential {
         this.callConduit("harbormaster.sendmessage", params);
     }
 
-    private JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException {
+    private JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException, ArcanistUsageException {
         ArcanistClient arc = new ArcanistClient(this.arcPath, "call-conduit", params, this.conduitToken, methodName);
         return arc.parseConduit(this.launcher.launch(), this.launcher.getStderr());
     }
@@ -91,7 +91,7 @@ public class Differential {
      * @param silent whether or not to trigger an email
      * @param action phabricator comment action, e.g. 'resign', 'reject', 'none'
      */
-    public JSONObject postComment(String message, boolean silent, String action) throws IOException, InterruptedException {
+    public JSONObject postComment(String message, boolean silent, String action) throws IOException, InterruptedException, ArcanistUsageException {
         Map params = new HashMap<String, String>();
         params.put("revision_id", this.getRevisionID(false));
         params.put("action", action);
@@ -101,7 +101,7 @@ public class Differential {
         return this.callConduit("differential.createcomment", params);
     }
 
-    public JSONObject postComment(String message) throws IOException, InterruptedException {
+    public JSONObject postComment(String message) throws IOException, InterruptedException, ArcanistUsageException {
         return postComment(message, true, "none");
     }
 
