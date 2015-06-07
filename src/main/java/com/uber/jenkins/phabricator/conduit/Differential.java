@@ -30,6 +30,8 @@ import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,7 +121,13 @@ public class Differential {
 
     public String getPhabricatorLink(String phabricatorURL) {
         String revisionID = this.getRevisionID(true);
-        return String.format("%s%s", phabricatorURL, revisionID);
+        try {
+            URL base = new URL(phabricatorURL);
+            return new URL(base, revisionID).toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return String.format("%s%s", phabricatorURL, revisionID);
+        }
     }
 
     public void decorate(AbstractBuild build, String phabricatorURL) {
