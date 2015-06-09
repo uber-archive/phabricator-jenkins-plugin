@@ -26,6 +26,7 @@ import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import net.sf.json.JSONException;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
@@ -49,7 +50,27 @@ public class Differential {
         params.put("ids", new String[]{diffID});
 
         JSONObject query = this.callConduit("differential.querydiffs", params);
-        this.rawJSON = (JSONObject) ((JSONObject) query.get("response")).get(diffID);
+        JSONObject response;
+        try {
+            response = query.getJSONObject("response");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new ArcanistUsageException(
+                    String.format("No 'response' object found in conduit call: (%s) %s",
+                            e.getMessage(),
+                            query.toString(2)));
+        }
+        try {
+            this.rawJSON = response.getJSONObject(diffID);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new ArcanistUsageException(
+                    String.format("Unable to find '%s' key in response: (%s) %s",
+                            diffID,
+                            e.getMessage(),
+                            response.toString(2)));
+
+        }
     }
 
     public String getRevisionID(boolean formatted) {
