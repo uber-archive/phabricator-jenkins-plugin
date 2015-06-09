@@ -97,6 +97,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 diff.postComment(diff.getBuildStartedMessage(environment));
             } catch (ArcanistUsageException e) {
                 logger.println("[arcanist] unable to apply patch");
+                logger.println(e.getMessage());
                 return null;
             }
 
