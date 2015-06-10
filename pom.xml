@@ -7,8 +7,8 @@
   </parent>
 
   <artifactId>phabricator-plugin</artifactId>
-  <name>Phabricator Plugin</name>
-  <description>Integrate Jenkins with Phabricator and Uberalls</description>
+  <name>Phabricator Differential Plugin</name>
+  <description>Integrate Jenkins with Phabricator Differentials and Uberalls</description>
   <version>1.6-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Plugin</url>
