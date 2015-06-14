@@ -38,14 +38,14 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean createCommit;
     private final boolean applyToMaster;
     private final boolean uberDotArcanist;
-    private final boolean disableBuildStartedMessage;
+    private final boolean showBuildStartedMessage;
 
     @DataBoundConstructor
-    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean uberDotArcanist, boolean disableBuildStartedMessage) {
+    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean uberDotArcanist, boolean showBuildStartedMessage) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
         this.uberDotArcanist = uberDotArcanist;
-        this.disableBuildStartedMessage = disableBuildStartedMessage;
+        this.showBuildStartedMessage = showBuildStartedMessage;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 logger.println("Applying patch for differential");
 
                 // Post a silent notification if option is not disabled.
-		if (!disableBuildStartedMessage) {
+                if (showBuildStartedMessage) {
                  diff.postComment(diff.getBuildStartedMessage(environment));
                 }
             } catch (ArcanistUsageException e) {
@@ -191,8 +191,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public boolean isDisableBuildStartedMessage() {
-        return disableBuildStartedMessage;
+    public boolean isShowBuildStartedMessage() {
+        return showBuildStartedMessage;
     }
 
     public String getPhabricatorURL() {
