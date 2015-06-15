@@ -95,7 +95,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
                 logger.println("Applying patch for differential");
 
-                // Post a silent notification if option is not disabled.
+                // Post a silent notification if option is enabled
                 if (showBuildStartedMessage) {
                     diff.postComment(diff.getBuildStartedMessage(environment));
                 }
