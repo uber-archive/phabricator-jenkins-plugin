@@ -38,12 +38,14 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean createCommit;
     private final boolean applyToMaster;
     private final boolean uberDotArcanist;
+    private final boolean showBuildStartedMessage;
 
     @DataBoundConstructor
-    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean uberDotArcanist) {
+    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean uberDotArcanist, boolean showBuildStartedMessage) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
         this.uberDotArcanist = uberDotArcanist;
+        this.showBuildStartedMessage = showBuildStartedMessage;
     }
 
     @Override
@@ -93,8 +95,10 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
                 logger.println("Applying patch for differential");
 
-                // Post a silent notification
-                diff.postComment(diff.getBuildStartedMessage(environment));
+                // Post a silent notification if option is enabled
+                if (showBuildStartedMessage) {
+                    diff.postComment(diff.getBuildStartedMessage(environment));
+                }
             } catch (ArcanistUsageException e) {
                 logger.println("[arcanist] unable to apply patch");
                 logger.println(e.getMessage());
@@ -184,6 +188,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @SuppressWarnings("UnusedDeclaration")
     public boolean isUberDotArcanist() {
         return uberDotArcanist;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean isShowBuildStartedMessage() {
+        return showBuildStartedMessage;
     }
 
     public String getPhabricatorURL() {
