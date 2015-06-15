@@ -12,4 +12,8 @@
            description="Run `npm install uber-dot-arcanist` before applying patch">
       <f:checkbox />
   </f:entry>
+  <f:entry title="Show 'Build Started:' message" field="showBuildStartedMessage"
+           description="Shows the 'Build Started:' information message in Phabricator.">
+      <f:checkbox default="true" />
+  </f:entry>
 </j:jelly>
