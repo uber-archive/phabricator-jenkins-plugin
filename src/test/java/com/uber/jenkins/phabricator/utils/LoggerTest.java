@@ -49,5 +49,4 @@ public class LoggerTest {
         logger.info(tag, message);
         assertEquals("[phabricator-jenkins] This is a great plugin!\n", byteArrayOutputStream.toString());
     }
-
 }
