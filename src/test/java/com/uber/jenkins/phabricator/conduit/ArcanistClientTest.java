@@ -37,7 +37,7 @@ public class ArcanistClientTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    Map<String, String> emptyParams = new HashMap<String, String>();
+    private final Map<String, String> emptyParams = new HashMap<String, String>();
 
     @Test
     public void testEcho() throws Exception {
