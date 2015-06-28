@@ -34,6 +34,7 @@ public abstract class Task {
         SUCCESS,
         FAILURE,
         IGNORED,
+        SKIPPED,
         UNKNWON
     };
 
