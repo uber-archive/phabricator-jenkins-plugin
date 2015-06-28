@@ -44,6 +44,7 @@
   </pluginRepositories>
 
   <dependencies>
+    <!-- production dependencies -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -67,6 +68,14 @@
         <groupId>net.java.dev.jna</groupId>
         <artifactId>jna</artifactId>
         <version>3.2.2</version>
+    </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <scope>test</scope>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>2.0.23-beta</version>
     </dependency>
   </dependencies>
 

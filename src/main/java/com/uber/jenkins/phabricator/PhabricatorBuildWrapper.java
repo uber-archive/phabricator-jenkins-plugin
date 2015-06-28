@@ -24,6 +24,7 @@ import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
+import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -89,16 +90,17 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 }
             }
 
+            DifferentialClient diffClient = new DifferentialClient(diffID, starter, conduitToken, arcPath);
             Differential diff;
             try {
-                diff = new Differential(diffID, starter, conduitToken, arcPath);
+                diff = new Differential(diffClient);
                 diff.decorate(build, this.getPhabricatorURL());
 
                 logger.println("Applying patch for differential");
 
                 // Post a silent notification if option is enabled
                 if (showBuildStartedMessage) {
-                    diff.postComment(diff.getBuildStartedMessage(environment));
+                    diffClient.postComment(diff.getBuildStartedMessage(environment));
                 }
             } catch (ArcanistUsageException e) {
                 logger.println("[arcanist] unable to apply patch");
