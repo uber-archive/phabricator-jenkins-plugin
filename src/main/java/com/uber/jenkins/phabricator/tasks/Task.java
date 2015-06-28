@@ -27,7 +27,18 @@ import com.uber.jenkins.phabricator.utils.Logger;
  */
 public abstract class Task {
 
+    /**
+     * Task results.
+     */
+    public enum Result {
+        SUCCESS,
+        FAILURE,
+        IGNORED,
+        UNKNWON
+    };
+
     protected Logger logger;
+    protected Result result = Result.UNKNWON;
 
     /**
      * Task constructor.
@@ -35,15 +46,18 @@ public abstract class Task {
      */
     public Task(Logger logger) {
         this.logger = logger;
+
     }
 
     /**
      * Runs the task workflow.
      */
-    public void run() {
+    public Result run() {
         setUp();
         execute();
         tearDown();
+
+        return result;
     }
 
     /**
