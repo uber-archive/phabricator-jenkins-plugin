@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import com.uber.jenkins.phabricator.CommonUtils;
+import com.uber.jenkins.phabricator.utils.CommonUtils;
 import hudson.Launcher;
 import hudson.util.ArgumentListBuilder;
 import net.sf.json.JSONObject;
