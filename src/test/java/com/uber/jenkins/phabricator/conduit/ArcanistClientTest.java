@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.conduit;
 
 import hudson.Launcher;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,6 +63,19 @@ public class ArcanistClientTest {
         JSONObject result = client.parseConduit(getLauncher().launch(), System.err);
         assertTrue(result.has("hello"));
         assertEquals(result.getString("hello"), "world");
+    }
+
+    @Test(expected = ArcanistUsageException.class)
+    public void testNonZeroExitCode() throws Exception {
+        ArcanistClient client = new ArcanistClient("false", "", emptyParams, null);
+
+        client.parseConduit(getLauncher().launch(), System.err);
+    }
+
+    @Test(expected = JSONException.class)
+    public void testNonJsonOutput() throws Exception {
+        ArcanistClient client = new ArcanistClient("echo", "not-json", emptyParams, null);
+        client.parseConduit(getLauncher().launch(), System.err);
     }
 
     private Launcher getLauncher() {
