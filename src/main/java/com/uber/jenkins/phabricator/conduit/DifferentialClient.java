@@ -37,11 +37,11 @@ public class DifferentialClient {
     private final LauncherFactory launcher;
     private final String diffID;
 
-    public DifferentialClient(String diffID, LauncherFactory launcher, String arcPath, String conduitToken) {
+    public DifferentialClient(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) {
         this.diffID = diffID;
         this.launcher = launcher;
-        this.arcPath = arcPath;
         this.conduitToken = conduitToken;
+        this.arcPath = arcPath;
     }
 
     /**
