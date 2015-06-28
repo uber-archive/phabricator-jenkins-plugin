@@ -84,8 +84,8 @@ public class PhabricatorNotifier extends Notifier {
             coverage.setOwner(build);
         }
 
-        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(),
-                logger.getStream(), environment.get("GIT_URL"), environment.get("GIT_BRANCH"));
+        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
+                environment.get("GIT_URL"), environment.get("GIT_BRANCH"));
         final boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
         final String conduitToken = environment.get(PhabricatorPlugin.CONDUIT_TOKEN, null);
         final String arcPath = environment.get(PhabricatorPlugin.ARCANIST_PATH, "arc");

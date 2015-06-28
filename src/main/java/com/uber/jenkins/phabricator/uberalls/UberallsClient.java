@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.uberalls;
 
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.conduit.Differential;
+import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
@@ -50,12 +51,14 @@ public class UberallsClient {
     public static final String LINE_COVERAGE_KEY = "lineCoverage";
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
 
+    private static final String TAG = "uberalls-client";
+
     private final String baseURL;
-    private final PrintStream logger;
+    private final Logger logger;
     private final String repository;
     private final String branch;
 
-    public UberallsClient(String baseURL, PrintStream logger, String repository, String branch) {
+    public UberallsClient(String baseURL, Logger logger, String repository, String branch) {
         this.baseURL = baseURL;
         this.logger = logger;
         this.repository = repository;
@@ -89,7 +92,7 @@ public class UberallsClient {
                     ((Double) coverage.getDouble(LINE_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue());
         } catch (Exception e) {
-            e.printStackTrace(logger);
+            e.printStackTrace(logger.getStream());
         }
 
         return null;
@@ -120,7 +123,7 @@ public class UberallsClient {
                 int statusCode = client.executeMethod(request);
 
                 if (statusCode != HttpStatus.SC_OK) {
-                    logger.println("[uberalls] call failed: " + request.getStatusLine());
+                    logger.info(TAG, "Call failed: " + request.getStatusLine());
                     return false;
                 }
                 return true;
@@ -151,20 +154,20 @@ public class UberallsClient {
             int statusCode = client.executeMethod(request);
 
             if (statusCode != HttpStatus.SC_OK) {
-                logger.println("[uberalls] call failed: " + request.getStatusLine());
+                logger.info(TAG, "Call failed: " + request.getStatusLine());
                 return null;
             }
             return request.getResponseBodyAsString();
         } catch (URISyntaxException e) {
-            e.printStackTrace(logger);
+            e.printStackTrace(logger.getStream());
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != 404) {
-                e.printStackTrace(logger);
+                e.printStackTrace(logger.getStream());
             }
         } catch (ClientProtocolException e) {
-            e.printStackTrace(logger);
+            e.printStackTrace(logger.getStream());
         } catch (IOException e) {
-            e.printStackTrace(logger);
+            e.printStackTrace(logger.getStream());
         }
         return null;
     }
