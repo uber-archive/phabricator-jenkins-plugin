@@ -50,58 +50,16 @@ public class UberallsClient {
     public static final String LINE_COVERAGE_KEY = "lineCoverage";
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
 
-    private final EnvVars environment;
     private final String baseURL;
     private final PrintStream logger;
+    private final String repository;
+    private final String branch;
 
-    public boolean recordCoverage(String currentSHA, String branch, CodeCoverageMetrics codeCoverageMetrics) {
-        if (codeCoverageMetrics.isValid()) {
-            JSONObject params = new JSONObject();
-            params.put("sha", currentSHA);
-            params.put("branch", branch);
-            params.put(PACKAGE_COVERAGE_KEY, codeCoverageMetrics.getPackageCoveragePercent());
-            params.put(FILES_COVERAGE_KEY, codeCoverageMetrics.getFilesCoveragePercent());
-            params.put(CLASSES_COVERAGE_KEY, codeCoverageMetrics.getClassesCoveragePercent());
-            params.put(METHOD_COVERAGE_KEY, codeCoverageMetrics.getMethodCoveragePercent());
-            params.put(LINE_COVERAGE_KEY, codeCoverageMetrics.getLineCoveragePercent());
-            params.put(CONDITIONAL_COVERAGE_KEY, codeCoverageMetrics.getConditionalCoveragePercent());
-            params.put("repository", this.environment.get("GIT_URL"));
-
-            try {
-                HttpClient client = new HttpClient();
-                PostMethod request = new PostMethod(getBuilder().build().toString());
-                request.addRequestHeader("Content-Type", "application/json");
-                StringRequestEntity requestEntity = new StringRequestEntity(
-                        params.toString(),
-                        ContentType.APPLICATION_JSON.toString(),
-                        "UTF-8");
-                request.setRequestEntity(requestEntity);
-                int statusCode = client.executeMethod(request);
-
-                if (statusCode != HttpStatus.SC_OK) {
-                    logger.println("[uberalls] call failed: " + request.getStatusLine());
-                    return false;
-                }
-                return true;
-
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (HttpResponseException e) {
-                // e.g. 404, pass
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return false;
-    }
-
-    public UberallsClient(String baseURL, EnvVars environment, PrintStream logger) {
+    public UberallsClient(String baseURL, PrintStream logger, String repository, String branch) {
         this.baseURL = baseURL;
-        this.environment = environment;
         this.logger = logger;
+        this.repository = repository;
+        this.branch = branch;
     }
 
     public String getBaseURL() {
@@ -137,12 +95,56 @@ public class UberallsClient {
         return null;
     }
 
-    public String getCoverage(String value) {
+    public boolean recordCoverage(String sha, CodeCoverageMetrics codeCoverageMetrics) {
+        if (codeCoverageMetrics.isValid()) {
+            JSONObject params = new JSONObject();
+            params.put("sha", sha);
+            params.put("branch", branch);
+            params.put("repository", repository);
+            params.put(PACKAGE_COVERAGE_KEY, codeCoverageMetrics.getPackageCoveragePercent());
+            params.put(FILES_COVERAGE_KEY, codeCoverageMetrics.getFilesCoveragePercent());
+            params.put(CLASSES_COVERAGE_KEY, codeCoverageMetrics.getClassesCoveragePercent());
+            params.put(METHOD_COVERAGE_KEY, codeCoverageMetrics.getMethodCoveragePercent());
+            params.put(LINE_COVERAGE_KEY, codeCoverageMetrics.getLineCoveragePercent());
+            params.put(CONDITIONAL_COVERAGE_KEY, codeCoverageMetrics.getConditionalCoveragePercent());
+
+            try {
+                HttpClient client = new HttpClient();
+                PostMethod request = new PostMethod(getBuilder().build().toString());
+                request.addRequestHeader("Content-Type", "application/json");
+                StringRequestEntity requestEntity = new StringRequestEntity(
+                        params.toString(),
+                        ContentType.APPLICATION_JSON.toString(),
+                        "UTF-8");
+                request.setRequestEntity(requestEntity);
+                int statusCode = client.executeMethod(request);
+
+                if (statusCode != HttpStatus.SC_OK) {
+                    logger.println("[uberalls] call failed: " + request.getStatusLine());
+                    return false;
+                }
+                return true;
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (HttpResponseException e) {
+                // e.g. 404, pass
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
+    public String getCoverage(String sha) {
         URIBuilder builder;
         try {
             builder = getBuilder()
-                .setParameter("repository", this.environment.get("GIT_URL"))
-                .setParameter("sha", value);
+                .setParameter("sha", sha)
+                .setParameter("repository", repository);
 
             HttpClient client = new HttpClient();
             HttpMethod request = new GetMethod(builder.build().toString());
