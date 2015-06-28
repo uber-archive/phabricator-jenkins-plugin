@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
+import com.uber.jenkins.phabricator.utils.CommonUtils;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
