@@ -33,13 +33,13 @@ public abstract class Task {
     public enum Result {
         SUCCESS,
         FAILURE,
-        IGNORED,
-        SKIPPED,
+        IGNORED, // For incorrect input.
+        SKIPPED, // For incorrect configuration.
         UNKNWON
     };
 
-    protected Logger logger;
     protected Result result = Result.UNKNWON;
+    private Logger logger;
 
     /**
      * Task constructor.
@@ -47,7 +47,6 @@ public abstract class Task {
      */
     public Task(Logger logger) {
         this.logger = logger;
-
     }
 
     /**
