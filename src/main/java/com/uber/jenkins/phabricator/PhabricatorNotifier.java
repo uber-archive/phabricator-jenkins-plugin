@@ -25,6 +25,7 @@ import com.uber.jenkins.phabricator.conduit.Differential;
 
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
+import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -76,14 +77,14 @@ public class PhabricatorNotifier extends Notifier {
     public final boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher,
                                  final BuildListener listener) throws InterruptedException, IOException {
         EnvVars environment = build.getEnvironment(listener);
-        PrintStream logger = listener.getLogger();
+        Logger logger = new Logger(listener.getLogger());
 
         CoverageResult coverage = getUberallsCoverage(build, listener);
         if (coverage != null) {
             coverage.setOwner(build);
         }
 
-        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment, logger);
+        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment, logger.getStream());
         final boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
         final String conduitToken = environment.get(PhabricatorPlugin.CONDUIT_TOKEN, null);
         final String arcPath = environment.get(PhabricatorPlugin.ARCANIST_PATH, "arc");
@@ -97,21 +98,21 @@ public class PhabricatorNotifier extends Notifier {
             }
             if (uberallsEnabled && coverage != null) {
                 if (!uberallsConfigured) {
-                    logger.println("[uberalls] enabled but no server configured. skipping.");
+                    logger.info("uberalls", "enabled but no server configured. skipping.");
                 } else {
                     String currentSHA = environment.get("GIT_COMMIT");
                     CodeCoverageMetrics codeCoverageMetrics = new CodeCoverageMetrics(coverage);
 
                     if (!CommonUtils.isBlank(currentSHA) && codeCoverageMetrics.isValid()) {
-                        logger.println("[uberalls] sending coverage report for " + currentSHA + " as " +
+                        logger.info("uberalls", "sending coverage report for " + currentSHA + " as " +
                                 codeCoverageMetrics.toString());
                         uberalls.recordCoverage(currentSHA, environment.get("GIT_BRANCH"), codeCoverageMetrics);
                     } else {
-                        logger.println("[uberalls] no line coverage available for " + currentSHA);
+                        logger.info("uberalls", "no line coverage available for " + currentSHA);
                     }
                 }
             }
-            return this.ignoreBuild(logger, "No differential ID found.");
+            return this.ignoreBuild(logger.getStream(), "No differential ID found.");
         }
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
@@ -120,13 +121,13 @@ public class PhabricatorNotifier extends Notifier {
         try {
             diff = new Differential(diffID, starter, conduitToken, arcPath);
         } catch (ArcanistUsageException e) {
-            logger.println("[arcanist] unable to fetch differential");
+            logger.info("arcanist", "unable to fetch differential");
             return true;
         }
 
         String revisionID = diff.getRevisionID();
         if (CommonUtils.isBlank(revisionID)) {
-            return this.ignoreBuild(logger, "Unable to load revisionID from conduit for diff ID " + diffID);
+            return this.ignoreBuild(logger.getStream(), "Unable to load revisionID from conduit for diff ID " + diffID);
         }
 
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
@@ -139,12 +140,12 @@ public class PhabricatorNotifier extends Notifier {
         if (coverage != null) {
             Ratio lineCoverage = coverage.getCoverage(CoverageMetric.LINE);
             if (lineCoverage == null) {
-                logger.println("[uberalls] no line coverage found, skipping...");
+                logger.info("uberalls", "no line coverage found, skipping...");
             } else {
                 if (uberallsConfigured) {
-                    comment = getCoverageComment(lineCoverage, uberalls, diff, logger, environment.get("BUILD_URL"));
+                    comment = getCoverageComment(lineCoverage, uberalls, diff, logger.getStream(), environment.get("BUILD_URL"));
                 } else {
-                    logger.println("[uberalls] no backend configured, skipping...");
+                    logger.info("uberalls", "no backend configured, skipping...");
                 }
             }
         }
@@ -164,20 +165,20 @@ public class PhabricatorNotifier extends Notifier {
         } else if (build.getResult() == Result.ABORTED) {
             comment = "Build was aborted";
         } else {
-            logger.print("Unknown build status " + build.getResult().toString());
+            logger.info("uberalls", "Unknown build status " + build.getResult().toString());
         }
 
         String commentAction = "none";
         if (runHarbormaster) {
-            logger.println("Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
+            logger.info("uberalls", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
             try {
                 diff.harbormaster(phid, harbormasterSuccess);
             } catch (ArcanistUsageException e) {
-                logger.println("[arcanist] unable to post to harbormaster");
+                logger.info("arcanist", "unable to post to harbormaster");
                 return true;
             }
         } else {
-            logger.println("Harbormaster integration not enabled for this build.");
+            logger.info("uberalls", "Harbormaster integration not enabled for this build.");
             if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
                 commentAction = "resign";
             } else if (build.getResult().isWorseOrEqualTo(Result.UNSTABLE)) {
@@ -187,7 +188,7 @@ public class PhabricatorNotifier extends Notifier {
 
         String customComment;
         try {
-            customComment = getRemoteComment(build, logger, this.commentFile, this.commentSize);
+            customComment = getRemoteComment(build, logger.getStream(), this.commentFile, this.commentSize);
 
             if (!CommonUtils.isBlank(customComment)) {
                 if (comment == null) {
@@ -197,7 +198,7 @@ public class PhabricatorNotifier extends Notifier {
                 }
             }
         } catch(InterruptedException e) {
-            e.printStackTrace(logger);
+            e.printStackTrace(logger.getStream());
         } catch (IOException e) {
             Util.displayIOException(e, listener);
         }
@@ -215,15 +216,15 @@ public class PhabricatorNotifier extends Notifier {
             try {
                 result = diff.postComment(comment, silent, commentAction);
             } catch (ArcanistUsageException e) {
-                logger.println("[arcanist] unable to post comment");
+                logger.info("arcanist", "unable to post comment");
             }
             if(!(result.get("errorMessage") instanceof JSONNull)) {
-                logger.println("Get error " + result.get("errorMessage") + " with action " +
+                logger.info("arcanist", "Get error " + result.get("errorMessage") + " with action " +
                         commentAction + "; trying again with action 'none'");
                 try {
                     diff.postComment(comment, silent, "none");
                 } catch (ArcanistUsageException e) {
-                    logger.println("[arcanist] unable to post comment");
+                    logger.info("arcanist", "unable to post comment");
                 }
             }
         }
