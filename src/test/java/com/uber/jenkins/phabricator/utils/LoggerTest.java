@@ -47,7 +47,7 @@ public class LoggerTest {
         String message = "This is a great plugin!";
 
         logger.info(tag, message);
-        assertEquals("[phabricator-jenkins] This is a great plugin!", byteArrayOutputStream.toString());
+        assertEquals("[phabricator-jenkins] This is a great plugin!\n", byteArrayOutputStream.toString());
     }
 
 }
