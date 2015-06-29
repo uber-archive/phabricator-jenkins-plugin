@@ -24,6 +24,7 @@ import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.tasks.GenericBuildTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -85,36 +86,28 @@ public class PhabricatorNotifier extends Notifier {
             coverage.setOwner(build);
         }
 
-        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
-                environment.get("GIT_URL"), environment.get("GIT_BRANCH"));
+        final String branch = environment.get("GIT_BRANCH");
+        final UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
+                environment.get("GIT_URL"), branch);
         final boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
         final String conduitToken = environment.get(PhabricatorPlugin.CONDUIT_TOKEN, null);
         final String arcPath = environment.get(PhabricatorPlugin.ARCANIST_PATH, "arc");
+        final boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
+        final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
 
-        boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
-
-        String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
+        // Handle non-differential build invocations.
         if (CommonUtils.isBlank(diffID)) {
             if (needsDecoration) {
-                build.addAction(PhabricatorPostbuildAction.createShortText("master", null));
+                build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
-            if (uberallsEnabled && coverage != null) {
-                if (!uberallsConfigured) {
-                    logger.info("uberalls", "enabled but no server configured. skipping.");
-                } else {
-                    String currentSHA = environment.get("GIT_COMMIT");
-                    CodeCoverageMetrics codeCoverageMetrics = new CodeCoverageMetrics(coverage);
 
-                    if (!CommonUtils.isBlank(currentSHA) && codeCoverageMetrics.isValid()) {
-                        logger.info("uberalls", "sending coverage report for " + currentSHA + " as " +
-                                codeCoverageMetrics.toString());
-                        uberalls.recordCoverage(currentSHA, codeCoverageMetrics);
-                    } else {
-                        logger.info("uberalls", "no line coverage available for " + currentSHA);
-                    }
-                }
-            }
-            return this.ignoreBuild(logger.getStream(), "No differential ID found.");
+            GenericBuildTask genericBuildTask = new GenericBuildTask(logger, uberalls,
+                    new CodeCoverageMetrics(coverage), uberallsEnabled,
+                    environment.get("GIT_COMMIT"));
+
+            // Ignore the result.
+            genericBuildTask.run();
+            return true;
         }
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
