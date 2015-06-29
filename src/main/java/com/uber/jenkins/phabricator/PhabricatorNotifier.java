@@ -84,7 +84,8 @@ public class PhabricatorNotifier extends Notifier {
             coverage.setOwner(build);
         }
 
-        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), environment, logger.getStream());
+        UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
+                environment.get("GIT_URL"), environment.get("GIT_BRANCH"));
         final boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
         final String conduitToken = environment.get(PhabricatorPlugin.CONDUIT_TOKEN, null);
         final String arcPath = environment.get(PhabricatorPlugin.ARCANIST_PATH, "arc");
@@ -106,7 +107,7 @@ public class PhabricatorNotifier extends Notifier {
                     if (!CommonUtils.isBlank(currentSHA) && codeCoverageMetrics.isValid()) {
                         logger.info("uberalls", "sending coverage report for " + currentSHA + " as " +
                                 codeCoverageMetrics.toString());
-                        uberalls.recordCoverage(currentSHA, environment.get("GIT_BRANCH"), codeCoverageMetrics);
+                        uberalls.recordCoverage(currentSHA, codeCoverageMetrics);
                     } else {
                         logger.info("uberalls", "no line coverage available for " + currentSHA);
                     }
