@@ -32,28 +32,25 @@ import hudson.plugins.cobertura.targets.CoverageResult;
 public class GenericBuildTask extends Task {
 
     protected UberallsClient uberallsClient;
-    protected CoverageResult coverageResult;
+    protected CodeCoverageMetrics codeCoverageMetrics;
     protected boolean uberallsEnabled;
-    protected String branch;
     protected String commitSha;
 
     /**
      * GenericBuildTask constructor.
      * @param logger The logger.
      * @param uberallsClient The uberalls client.
-     * @param coverageResult The coverage result.
+     * @param codeCoverageMetrics The coverage metrics.
      * @param uberallsEnabled Whether uberalls is enabled.
-     * @param branch The branch.
      * @param commitSha The commit sha.
      */
     public GenericBuildTask(Logger logger, UberallsClient uberallsClient,
-                            CoverageResult coverageResult, boolean uberallsEnabled,
-                            String branch, String commitSha) {
+                            CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
+                            String commitSha) {
         super(logger);
         this.uberallsClient = uberallsClient;
-        this.coverageResult = coverageResult;
+        this.codeCoverageMetrics = codeCoverageMetrics;
         this.uberallsEnabled = uberallsEnabled;
-        this.branch = branch;
         this.commitSha = commitSha;
     }
 
@@ -69,9 +66,9 @@ public class GenericBuildTask extends Task {
      * {@inheritDoc}
      */
     @Override
-    protected void setUp() {
+    protected void setup() {
         // Handle bad input.
-        if (coverageResult == null) {
+        if (codeCoverageMetrics == null || !codeCoverageMetrics.isValid()) {
             info("Coverage result not found. Ignoring build.");
             result = Result.IGNORED;
         } else if (!uberallsEnabled || CommonUtils.isBlank(uberallsClient.getBaseURL())) {
@@ -86,11 +83,11 @@ public class GenericBuildTask extends Task {
     @Override
     protected void execute() {
         if (result == Result.UNKNWON) {
-            CodeCoverageMetrics codeCoverageMetrics = new CodeCoverageMetrics(coverageResult);
-            if (!CommonUtils.isBlank(commitSha) && codeCoverageMetrics.isValid()) {
-                info(String.format("Sending coverage result for %s as %s", commitSha));
-                uberallsClient.recordCoverage(commitSha, branch, codeCoverageMetrics);
-                result = Result.SUCCESS;
+            if (!CommonUtils.isBlank(commitSha)) {
+                info(String.format("Sending coverage result for %s as %s", commitSha,
+                        codeCoverageMetrics.toString()));
+                result = uberallsClient.recordCoverage(commitSha, codeCoverageMetrics) ?
+                        Result.SUCCESS : Result.FAILURE;
             } else {
                 info("No line coverage found. Ignoring build.");
                 result = Result.IGNORED;
