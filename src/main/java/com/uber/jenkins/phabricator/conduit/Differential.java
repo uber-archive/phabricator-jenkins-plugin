@@ -20,12 +20,10 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildAction;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
-import net.sf.json.JSONException;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
@@ -36,11 +34,9 @@ import java.net.URL;
 public class Differential {
     private JSONObject rawJSON;
 
-    private final DifferentialClient client;
 
-    public Differential(DifferentialClient client) throws ArcanistUsageException, IOException, InterruptedException {
-        this.client = client;
-        this.rawJSON = client.fetchDiff();
+    public Differential(JSONObject rawJSON) throws ArcanistUsageException, IOException, InterruptedException {
+        this.rawJSON = rawJSON;
     }
 
     public String getRevisionID(boolean formatted) {

@@ -121,7 +121,7 @@ public class PhabricatorNotifier extends Notifier {
         DifferentialClient diffClient = new DifferentialClient(diffID, starter, conduitToken, arcPath);
         Differential diff;
         try {
-            diff = new Differential(diffClient);
+            diff = new Differential(diffClient.fetchDiff());
         } catch (ArcanistUsageException e) {
             logger.info("arcanist", "unable to fetch differential");
             return true;
@@ -174,9 +174,9 @@ public class PhabricatorNotifier extends Notifier {
         if (runHarbormaster) {
             logger.info("uberalls", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
             try {
-                diffClient.harbormaster(phid, harbormasterSuccess);
+                diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
             } catch (ArcanistUsageException e) {
-                logger.info("arcanist", "unable to post to harbormaster");
+                logger.info("arcanist", "unable to post to sendHarbormasterMessage");
                 return true;
             }
         } else {

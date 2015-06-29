@@ -93,7 +93,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             DifferentialClient diffClient = new DifferentialClient(diffID, starter, conduitToken, arcPath);
             Differential diff;
             try {
-                diff = new Differential(diffClient);
+                diff = new Differential(diffClient.fetchDiff());
                 diff.decorate(build, this.getPhabricatorURL());
 
                 logger.println("Applying patch for differential");

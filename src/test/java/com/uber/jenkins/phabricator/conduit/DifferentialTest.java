@@ -20,12 +20,11 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-
 import hudson.EnvVars;
 import junit.framework.TestCase;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.mockito.Mockito.*;
@@ -34,40 +33,41 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class DifferentialTest extends TestCase {
-    private static final String fakeDiffID = "not-a-real-id";
-    @Rule
-    Differential d;
+    private static final String FAKE_DIFF_ID = "not-a-real-id";
 
-    public DifferentialTest() throws InterruptedException, ArcanistUsageException, IOException {
-        d = diffWithResponse();
+    Differential differential;
+
+    @Before
+    public void setupDiff () throws InterruptedException, ArcanistUsageException, IOException {
+        differential = diffWithResponse();
     }
 
     @Test
     public void testFetchRevisionID() throws Exception {
-        assertEquals(fakeDiffID, d.getRevisionID(false));
+        assertEquals(FAKE_DIFF_ID, differential.getRevisionID(false));
     }
 
     @Test
     public void testGetPhabricatorLink() throws Exception {
-        assertTrue(d.getPhabricatorLink("http://example.com").contains(fakeDiffID));
+        assertTrue(differential.getPhabricatorLink("http://example.com").contains(FAKE_DIFF_ID));
     }
 
     @Test
     public void testGetPhabricatorLinkInvalidURL() throws Exception {
         // Try our best to join URLs, even when they are wrong
-        assertTrue(d.getPhabricatorLink("aoeu").contains("aoeu"));
+        assertTrue(differential.getPhabricatorLink("aoeu").contains("aoeu"));
     }
 
     @Test
     public void testGetBuildStartedMessage() throws Exception {
-        assertTrue(d.getBuildStartedMessage(new EnvVars()).contains("Build started"));
+        assertTrue(differential.getBuildStartedMessage(new EnvVars()).contains("Build started"));
     }
 
     private Differential diffWithResponse() throws InterruptedException, ArcanistUsageException, IOException {
         DifferentialClient client = mock(DifferentialClient.class);
         when(client.fetchDiff()).thenReturn(getValidQueryResponse());
 
-        return new Differential(client);
+        return new Differential(client.fetchDiff());
     }
 
     private JSONObject getValidQueryResponse() throws IOException {
