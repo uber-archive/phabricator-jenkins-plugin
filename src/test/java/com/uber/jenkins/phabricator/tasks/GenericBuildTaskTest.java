@@ -23,7 +23,6 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.plugins.cobertura.targets.CoverageResult;
 import org.junit.Before;
 import org.junit.Test;
 
