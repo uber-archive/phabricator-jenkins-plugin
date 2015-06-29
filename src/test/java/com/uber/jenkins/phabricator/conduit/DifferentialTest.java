@@ -24,10 +24,7 @@ import hudson.EnvVars;
 import junit.framework.TestCase;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
-import org.junit.Before;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,9 +34,8 @@ public class DifferentialTest extends TestCase {
 
     Differential differential;
 
-    @Before
-    public void setupDiff () throws InterruptedException, ArcanistUsageException, IOException {
-        differential = diffWithResponse();
+    protected void setUp() throws IOException, ArcanistUsageException, InterruptedException {
+        differential = new Differential(getValidQueryResponse());
     }
 
     @Test
@@ -61,13 +57,6 @@ public class DifferentialTest extends TestCase {
     @Test
     public void testGetBuildStartedMessage() throws Exception {
         assertTrue(differential.getBuildStartedMessage(new EnvVars()).contains("Build started"));
-    }
-
-    private Differential diffWithResponse() throws InterruptedException, ArcanistUsageException, IOException {
-        DifferentialClient client = mock(DifferentialClient.class);
-        when(client.fetchDiff()).thenReturn(getValidQueryResponse());
-
-        return new Differential(client.fetchDiff());
     }
 
     private JSONObject getValidQueryResponse() throws IOException {
