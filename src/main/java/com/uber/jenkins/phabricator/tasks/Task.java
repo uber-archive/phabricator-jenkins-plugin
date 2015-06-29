@@ -53,7 +53,7 @@ public abstract class Task {
      * Runs the task workflow.
      */
     public Result run() {
-        setUp();
+        setup();
         execute();
         tearDown();
 
@@ -77,7 +77,7 @@ public abstract class Task {
     /**
      * Sets up the environment before task execution.
      */
-    protected abstract void setUp();
+    protected abstract void setup();
 
     /**
      * Executes the task workflow.
