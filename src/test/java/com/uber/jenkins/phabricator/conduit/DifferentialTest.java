@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.conduit;
 
 import hudson.EnvVars;
 import junit.framework.TestCase;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.junit.Test;
@@ -57,6 +58,40 @@ public class DifferentialTest extends TestCase {
     @Test
     public void testGetBuildStartedMessage() throws Exception {
         assertTrue(differential.getBuildStartedMessage(new EnvVars()).contains("Build started"));
+    }
+
+    @Test
+    public void testGetBranch() {
+        assertEquals("a-branch-name", differential.getBranch());
+    }
+
+    @Test
+    public void testGetBranchWithEmptyResponse() throws Exception {
+        JSONObject empty = new JSONObject();
+        empty.put("branch", JSONNull.getInstance());
+        Differential diff = new Differential(empty);
+        assertEquals("(none)", diff.getBranch());
+    }
+
+    @Test
+    public void testGetBranchWithInvalidResponse() throws Exception {
+        JSONObject invalid = new JSONObject();
+        invalid.put("branch", true);
+        Differential diff = new Differential(invalid);
+        assertEquals("(unknown)", diff.getBranch());
+    }
+
+    @Test
+    public void testGetBaseCommit() throws Exception {
+        assertEquals("aaaaaaaa", differential.getBaseCommit());
+    }
+
+    @Test
+    public  void testGetSummaryMessage() throws Exception {
+        String message = differential.getSummaryMessage("http://example.com");
+        assertTrue(message.contains("ai@uber.com"));
+        assertTrue(message.contains("http://example.com"));
+        assertTrue(message.contains("aiden"));
     }
 
     private JSONObject getValidQueryResponse() throws IOException {
