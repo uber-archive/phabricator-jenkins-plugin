@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 
+import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -118,15 +119,16 @@ public class PhabricatorNotifier extends Notifier {
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
 
+        DifferentialClient diffClient = new DifferentialClient(diffID, starter, conduitToken, arcPath);
         Differential diff;
         try {
-            diff = new Differential(diffID, starter, conduitToken, arcPath);
+            diff = new Differential(diffClient.fetchDiff());
         } catch (ArcanistUsageException e) {
             logger.info("arcanist", "unable to fetch differential");
             return true;
         }
 
-        String revisionID = diff.getRevisionID();
+        String revisionID = diff.getRevisionID(true);
         if (CommonUtils.isBlank(revisionID)) {
             return this.ignoreBuild(logger.getStream(), "Unable to load revisionID from conduit for diff ID " + diffID);
         }
@@ -173,9 +175,9 @@ public class PhabricatorNotifier extends Notifier {
         if (runHarbormaster) {
             logger.info("uberalls", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
             try {
-                diff.harbormaster(phid, harbormasterSuccess);
+                diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
             } catch (ArcanistUsageException e) {
-                logger.info("arcanist", "unable to post to harbormaster");
+                logger.info("arcanist", "unable to post to sendHarbormasterMessage");
                 return true;
             }
         } else {
@@ -215,7 +217,7 @@ public class PhabricatorNotifier extends Notifier {
 
             JSONObject result = null;
             try {
-                result = diff.postComment(comment, silent, commentAction);
+                result = diffClient.postComment(comment, silent, commentAction);
             } catch (ArcanistUsageException e) {
                 logger.info("arcanist", "unable to post comment");
             }
@@ -223,7 +225,7 @@ public class PhabricatorNotifier extends Notifier {
                 logger.info("arcanist", "Get error " + result.get("errorMessage") + " with action " +
                         commentAction + "; trying again with action 'none'");
                 try {
-                    diff.postComment(comment, silent, "none");
+                    diffClient.postComment(comment, silent, "none");
                 } catch (ArcanistUsageException e) {
                     logger.info("arcanist", "unable to post comment");
                 }

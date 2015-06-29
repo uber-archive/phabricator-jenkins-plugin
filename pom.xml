@@ -44,6 +44,7 @@
   </pluginRepositories>
 
   <dependencies>
+    <!-- production dependencies -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -68,6 +69,14 @@
         <artifactId>jna</artifactId>
         <version>3.2.2</version>
     </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <scope>test</scope>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>2.0.23-beta</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -83,7 +92,10 @@
         <artifactId>cobertura-maven-plugin</artifactId>
         <version>2.6</version>
         <configuration>
-          <format>xml</format>
+          <formats>
+            <format>xml</format>
+            <format>html</format>
+          </formats>
           <maxmem>256m</maxmem>
           <!-- aggregated reports for multi-module projects -->
           <aggregate>true</aggregate>
