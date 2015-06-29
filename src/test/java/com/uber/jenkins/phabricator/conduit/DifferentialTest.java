@@ -65,5 +65,4 @@ public class DifferentialTest extends TestCase {
         );
         return (JSONObject) new JsonSlurper().parse(input);
     }
-
 }

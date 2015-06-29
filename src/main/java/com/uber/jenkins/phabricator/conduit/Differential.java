@@ -68,7 +68,6 @@ public class Differential {
             URL base = new URL(phabricatorURL);
             return new URL(base, revisionID).toString();
         } catch (MalformedURLException e) {
-            e.printStackTrace();
             return String.format("%s%s", phabricatorURL, revisionID);
         }
     }
