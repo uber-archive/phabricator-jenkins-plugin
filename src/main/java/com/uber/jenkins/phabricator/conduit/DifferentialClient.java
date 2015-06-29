@@ -32,10 +32,10 @@ import java.util.Map;
  * DifferentialClient handles all interaction with conduit/arc for differentials
  */
 public class DifferentialClient {
+    private final String diffID;
+    private final LauncherFactory launcher;
     private final String arcPath;
     private final String conduitToken;
-    private final LauncherFactory launcher;
-    private final String diffID;
 
     public DifferentialClient(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) {
         this.diffID = diffID;
