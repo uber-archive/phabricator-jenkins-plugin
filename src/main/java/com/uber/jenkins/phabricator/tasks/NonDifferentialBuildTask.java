@@ -59,7 +59,7 @@ public class NonDifferentialBuildTask extends Task {
      */
     @Override
     protected String getTag() {
-        return "generic-build";
+        return "non-differential";
     }
 
     /**
