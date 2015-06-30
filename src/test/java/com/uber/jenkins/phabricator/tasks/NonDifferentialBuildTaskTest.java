@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 
 import static org.mockito.Mockito.*;
 
-public class GenericBuildTaskTest {
+public class NonDifferentialBuildTaskTest {
 
     private UberallsClient uberallsClient;
     private CodeCoverageMetrics codeCoverageMetrics;
@@ -44,14 +44,14 @@ public class GenericBuildTaskTest {
     @Test
     public void testNullCoverageResult() {
         assertEquals(Task.Result.IGNORED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient, null, true,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient, null, true,
                         TestUtils.TEST_SHA).run());
     }
 
     @Test
     public void testUberallsDisabled() {
         assertEquals(Task.Result.SKIPPED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, false, TestUtils.TEST_SHA).run());
     }
 
@@ -60,7 +60,7 @@ public class GenericBuildTaskTest {
         uberallsClient = TestUtils.getUberallsClient(null,
                 TestUtils.getDefaultLogger(), TestUtils.TEST_REPOSITORY, TestUtils.TEST_BRANCH);
         assertEquals(Task.Result.SKIPPED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 
@@ -69,7 +69,7 @@ public class GenericBuildTaskTest {
         uberallsClient = TestUtils.getUberallsClient("",
                 TestUtils.getDefaultLogger(), TestUtils.TEST_REPOSITORY, TestUtils.TEST_BRANCH);
         assertEquals(Task.Result.SKIPPED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 
@@ -78,28 +78,28 @@ public class GenericBuildTaskTest {
         uberallsClient = TestUtils.getUberallsClient("    ",
                 TestUtils.getDefaultLogger(), TestUtils.TEST_REPOSITORY, TestUtils.TEST_BRANCH);
         assertEquals(Task.Result.SKIPPED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 
     @Test
     public void testNullCommitSha() {
         assertEquals(Task.Result.IGNORED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, null).run());
     }
 
     @Test
     public void testEmptyCommitSha() {
         assertEquals(Task.Result.IGNORED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, "").run());
     }
 
     @Test
     public void testBlankCommitSha() {
         assertEquals(Task.Result.IGNORED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, "    ").run());
     }
 
@@ -108,7 +108,7 @@ public class GenericBuildTaskTest {
         codeCoverageMetrics = TestUtils.getCodeCoverageMetrics(TestUtils.TEST_SHA, 50.0f, 50.0f,
                 50.0f, 50.0f, -1.0f, 50.0f);
         assertEquals(Task.Result.IGNORED,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 
@@ -117,7 +117,7 @@ public class GenericBuildTaskTest {
         when(uberallsClient.recordCoverage(eq(TestUtils.TEST_SHA), eq(codeCoverageMetrics)))
                 .thenReturn(false);
         assertEquals(Task.Result.FAILURE,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 
@@ -126,7 +126,7 @@ public class GenericBuildTaskTest {
         when(uberallsClient.recordCoverage(eq(TestUtils.TEST_SHA), eq(codeCoverageMetrics)))
                 .thenReturn(true);
         assertEquals(Task.Result.SUCCESS,
-                new GenericBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
+                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 }

@@ -29,7 +29,7 @@ import hudson.plugins.cobertura.targets.CoverageResult;
 /**
  * Generic build task.
  */
-public class GenericBuildTask extends Task {
+public class NonDifferentialBuildTask extends Task {
 
     protected UberallsClient uberallsClient;
     protected CodeCoverageMetrics codeCoverageMetrics;
@@ -44,9 +44,9 @@ public class GenericBuildTask extends Task {
      * @param uberallsEnabled Whether uberalls is enabled.
      * @param commitSha The commit sha.
      */
-    public GenericBuildTask(Logger logger, UberallsClient uberallsClient,
-                            CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
-                            String commitSha) {
+    public NonDifferentialBuildTask(Logger logger, UberallsClient uberallsClient,
+                                    CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
+                                    String commitSha) {
         super(logger);
         this.uberallsClient = uberallsClient;
         this.codeCoverageMetrics = codeCoverageMetrics;

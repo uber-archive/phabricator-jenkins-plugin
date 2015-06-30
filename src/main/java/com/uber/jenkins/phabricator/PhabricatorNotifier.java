@@ -24,7 +24,7 @@ import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
-import com.uber.jenkins.phabricator.tasks.GenericBuildTask;
+import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -101,12 +101,12 @@ public class PhabricatorNotifier extends Notifier {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            GenericBuildTask genericBuildTask = new GenericBuildTask(logger, uberalls,
+            NonDifferentialBuildTask nonDifferentialBuildTask = new NonDifferentialBuildTask(logger, uberalls,
                     new CodeCoverageMetrics(coverage), uberallsEnabled,
                     environment.get("GIT_COMMIT"));
 
             // Ignore the result.
-            genericBuildTask.run();
+            nonDifferentialBuildTask.run();
             return true;
         }
 
