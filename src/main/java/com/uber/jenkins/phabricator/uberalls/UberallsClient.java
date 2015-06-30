@@ -99,7 +99,7 @@ public class UberallsClient {
     }
 
     public boolean recordCoverage(String sha, CodeCoverageMetrics codeCoverageMetrics) {
-        if (codeCoverageMetrics.isValid()) {
+        if (codeCoverageMetrics != null && codeCoverageMetrics.isValid()) {
             JSONObject params = new JSONObject();
             params.put("sha", sha);
             params.put("branch", branch);
