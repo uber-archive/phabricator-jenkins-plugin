@@ -1,3 +1,7 @@
 {
-  "revisionID": "not-a-real-id"
+  "revisionID": "not-a-real-id",
+  "branch": "a-branch-name",
+  "sourceControlBaseRevision": "aaaaaaaa",
+  "authorName": "aiden",
+  "authorEmail": "ai@uber.com"
 }
