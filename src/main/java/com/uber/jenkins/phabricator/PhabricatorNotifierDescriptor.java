@@ -36,11 +36,17 @@ import org.kohsuke.stapler.StaplerRequest;
  * for the actual HTML fragment for the configuration screen.
  */
 @SuppressWarnings("UnusedDeclaration")
-@Extension // This indicates to Jenkins that this is an implementation of an extension point.
+@Extension
 public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Publisher> {
     private String conduitURL;
     private String uberallsURL;
     private String commentFile;
+    private String commentSize;
+
+    public PhabricatorNotifierDescriptor() {
+        super(PhabricatorNotifier.class);
+        load();
+    }
 
     public String getCommentSize() {
         return commentSize;
@@ -48,13 +54,6 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
 
     public void setCommentSize(String commentSize) {
         this.commentSize = commentSize;
-    }
-
-    private String commentSize;
-
-    public PhabricatorNotifierDescriptor() {
-        super(PhabricatorNotifier.class);
-        load();
     }
 
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
