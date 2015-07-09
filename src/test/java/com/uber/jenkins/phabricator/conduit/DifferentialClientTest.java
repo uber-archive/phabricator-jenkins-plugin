@@ -68,6 +68,7 @@ public class DifferentialClientTest {
         sentinel.put("something", "here");
 
         mockConduitResponse(client, sentinel);
+
         JSONObject response = client.postComment("hello");
         assertEquals(response, sentinel);
     }
@@ -97,7 +98,6 @@ public class DifferentialClientTest {
         JSONObject response = client.fetchDiff();
         assertEquals("world", response.get("hello"));
     }
-
 
     private void mockConduitResponse(DifferentialClient client, JSONObject response) throws InterruptedException, ArcanistUsageException, IOException {
         doReturn(response).when(client).callConduit(

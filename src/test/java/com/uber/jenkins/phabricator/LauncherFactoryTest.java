@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator;
 
 
+import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.EnvVars;
 import hudson.FilePath;
 import org.junit.Rule;
@@ -40,12 +41,7 @@ public class LauncherFactoryTest {
 
     @Test
     public void testLauncherFactoryIsSane() throws Exception {
-        LauncherFactory factory = new LauncherFactory(
-                j.createLocalLauncher(),
-                env,
-                System.err,
-                new FilePath(j.getWebAppRoot())
-        );
+        LauncherFactory factory = TestUtils.createLauncherFactory(j);
         assertEquals(factory.getStderr(), System.err);
 
         OutputStream out = new ByteArrayOutputStream();
