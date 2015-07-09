@@ -284,8 +284,7 @@ public class PhabricatorNotifier extends Notifier {
 
         FilePath source = src[0];
 
-        int DEFAULT_COMMENT_SIZE = 1000;
-        int maxLength = DEFAULT_COMMENT_SIZE;
+        int maxLength = 1000;
         if (!CommonUtils.isBlank(maxSize)) {
             maxLength = parseInt(maxSize, 10);
         }
