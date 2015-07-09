@@ -22,8 +22,6 @@ package com.uber.jenkins.phabricator;
 
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.EnvVars;
-import hudson.FilePath;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -36,8 +34,6 @@ import static org.junit.Assert.assertEquals;
 public class LauncherFactoryTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
-
-    private final EnvVars env = new EnvVars();
 
     @Test
     public void testLauncherFactoryIsSane() throws Exception {

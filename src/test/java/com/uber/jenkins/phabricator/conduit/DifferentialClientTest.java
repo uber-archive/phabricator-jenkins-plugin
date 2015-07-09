@@ -115,7 +115,6 @@ public class DifferentialClientTest {
         ));
     }
 
-
     private JSONObject getValidFetchDiffResponse() throws IOException {
         InputStream input = getClass().getResourceAsStream(
                 "validFetchDiffResponse.json"
