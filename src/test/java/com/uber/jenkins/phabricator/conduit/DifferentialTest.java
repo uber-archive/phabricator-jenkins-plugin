@@ -20,15 +20,14 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.EnvVars;
 import junit.framework.TestCase;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
-import net.sf.json.groovy.JsonSlurper;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 public class DifferentialTest extends TestCase {
     private static final String FAKE_DIFF_ID = "not-a-real-id";
@@ -36,7 +35,8 @@ public class DifferentialTest extends TestCase {
     Differential differential;
 
     protected void setUp() throws IOException, ArcanistUsageException, InterruptedException {
-        differential = new Differential(getValidQueryResponse());
+        JSONObject response = TestUtils.getJSONFromFile(getClass(), "validDifferentialQueryResponse");
+        differential = new Differential(response);
     }
 
     @Test
@@ -92,12 +92,5 @@ public class DifferentialTest extends TestCase {
         assertTrue(message.contains("ai@uber.com"));
         assertTrue(message.contains("http://example.com"));
         assertTrue(message.contains("aiden"));
-    }
-
-    private JSONObject getValidQueryResponse() throws IOException {
-        InputStream input = getClass().getResourceAsStream(
-                "validDifferentialQueryResponse.json"
-        );
-        return (JSONObject) new JsonSlurper().parse(input);
     }
 }

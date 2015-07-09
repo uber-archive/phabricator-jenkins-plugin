@@ -21,13 +21,12 @@
 package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.LauncherFactory;
+import com.uber.jenkins.phabricator.utils.TestUtils;
 import net.sf.json.JSONObject;
-import net.sf.json.groovy.JsonSlurper;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.anyMap;
@@ -35,9 +34,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class DifferentialClientTest {
-    private final String DUMMY_DIFF_ID = "123";
-    private final String DUMMY_CONDUIT_TOKEN = "notarealtoken";
-    private final String DUMMY_ARC_PATH = "echo";
+    private static final String DUMMY_DIFF_ID = "123";
+    private static final String DUMMY_CONDUIT_TOKEN = "notarealtoken";
+    private static final String DUMMY_ARC_PATH = "echo";
 
     private DifferentialClient client;
 
@@ -93,7 +92,7 @@ public class DifferentialClientTest {
 
     @Test
     public void testFetchDiffWithValidResponse() throws Exception {
-        JSONObject realResponse = getValidFetchDiffResponse();
+        JSONObject realResponse = TestUtils.getJSONFromFile(getClass(), "validFetchDiffResponse");
         mockConduitResponse(client, realResponse);
 
         JSONObject response = client.fetchDiff();
@@ -105,12 +104,5 @@ public class DifferentialClientTest {
                 anyString(),
                 anyMap()
         );
-    }
-
-    private JSONObject getValidFetchDiffResponse() throws IOException {
-        InputStream input = getClass().getResourceAsStream(
-                "validFetchDiffResponse.json"
-        );
-        return (JSONObject) new JsonSlurper().parse(input);
     }
 }
