@@ -20,26 +20,21 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import com.uber.jenkins.phabricator.utils.TestUtils;
+import com.uber.jenkins.phabricator.LauncherFactory;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class DifferentialClientTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-
     private final String DUMMY_DIFF_ID = "123";
     private final String DUMMY_CONDUIT_TOKEN = "notarealtoken";
     private final String DUMMY_ARC_PATH = "echo";
@@ -48,7 +43,13 @@ public class DifferentialClientTest {
 
     @Before
     public void setUp() throws Exception {
-        client = createClient();
+        LauncherFactory factory = mock(LauncherFactory.class);
+        client = spy(new DifferentialClient(
+                DUMMY_DIFF_ID,
+                factory,
+                DUMMY_CONDUIT_TOKEN,
+                DUMMY_ARC_PATH
+        ));
     }
 
     @Test
@@ -104,15 +105,6 @@ public class DifferentialClientTest {
                 anyString(),
                 anyMap()
         );
-    }
-
-    private DifferentialClient createClient() throws Exception {
-        return spy(new DifferentialClient(
-                DUMMY_DIFF_ID,
-                TestUtils.createLauncherFactory(j),
-                DUMMY_CONDUIT_TOKEN,
-                DUMMY_ARC_PATH
-        ));
     }
 
     private JSONObject getValidFetchDiffResponse() throws IOException {

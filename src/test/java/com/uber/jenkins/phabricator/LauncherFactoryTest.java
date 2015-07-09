@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator;
 
-
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
