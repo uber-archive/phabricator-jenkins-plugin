@@ -20,35 +20,27 @@
 
 package com.uber.jenkins.phabricator;
 
-import hudson.model.Action;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
+import com.uber.jenkins.phabricator.utils.TestUtils;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
-/**
- * Ripped from https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildSummaryAction.java
- */
-@ExportedBean(defaultVisibility=2)
-public class PhabricatorPostbuildSummaryAction implements Action {
-    private final String iconPath;
-    private final StringBuilder textBuilder = new StringBuilder();
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 
-    public PhabricatorPostbuildSummaryAction(String iconPath) {
-        this.iconPath = PhabricatorPlugin.getIconPath(iconPath);
-    }
+import static org.junit.Assert.assertEquals;
 
-    /* Action methods */
-    public String getUrlName() { return ""; }
-    public String getDisplayName() { return ""; }
-    public String getIconFileName() { return null; }
+public class LauncherFactoryTest {
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
-    @Exported public String getIconPath() { return iconPath; }
-    @Exported public String getText() { return textBuilder.toString(); }
+    @Test
+    public void testLauncherFactoryIsSane() throws Exception {
+        LauncherFactory factory = TestUtils.createLauncherFactory(j);
+        assertEquals(factory.getStderr(), System.err);
 
-    public void appendText(String text) {
-        if(false) {
-            text = StringEscapeUtils.escapeHtml(text);
-        }
-        textBuilder.append(text);
+        OutputStream out = new ByteArrayOutputStream();
+        factory.launch().stdout(out).cmdAsSingleString("echo hello").join();
+        assertEquals(out.toString(), "hello\n");
     }
 }

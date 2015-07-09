@@ -21,12 +21,20 @@
 package com.uber.jenkins.phabricator.utils;
 
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
+import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
+import net.sf.json.JSONObject;
+import net.sf.json.groovy.JsonSlurper;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 
 import static org.mockito.Mockito.*;
@@ -49,6 +57,19 @@ public class TestUtils {
 
     public static UberallsClient getDefaultUberallsClient() {
         return getUberallsClient(TEST_BASE_URL, getDefaultLogger(), TEST_REPOSITORY, TEST_BRANCH);
+    }
+
+    public static EnvVars getDefaultEnvVars() {
+        return new EnvVars();
+    }
+
+    public static LauncherFactory createLauncherFactory(JenkinsRule j) throws Exception {
+        return new LauncherFactory(
+                j.createLocalLauncher(),
+                getDefaultEnvVars(),
+                System.err,
+                new FilePath(j.getWebAppRoot())
+        );
     }
 
     public static CodeCoverageMetrics getCodeCoverageMetrics(String sha1,
@@ -81,6 +102,15 @@ public class TestUtils {
 
     public static CoverageResult getDefaultCoverageResult() {
         return getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
+    }
+
+    public static JSONObject getJSONFromFile(Class<?> klass, String filename) throws IOException {
+        InputStream in = klass.getResourceAsStream(String.format("%s.json", filename));
+        return slurpFromInputStream(in);
+    }
+
+    private static JSONObject slurpFromInputStream(InputStream in) throws IOException {
+        return (JSONObject) new JsonSlurper().parse(in);
     }
 
     private static void setCoverage(CoverageResult coverageResult, CoverageMetric coverageMetric,

@@ -114,8 +114,22 @@ public class DifferentialClient {
     }
 
     protected JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException, ArcanistUsageException {
-        ArcanistClient arc = new ArcanistClient(this.arcPath, "call-conduit", params, this.conduitToken, methodName);
+        ArcanistClient arc = getArcanistClient(methodName, params);
         return arc.parseConduit(this.launcher.launch(), this.launcher.getStderr());
     }
 
+    /**
+     * Get a new arcanist client.
+     * @param params parameters to pass to arcanist
+     * @return a new ArcanistClient
+     */
+    protected ArcanistClient getArcanistClient(String methodName, Map<String, String> params) {
+        return new ArcanistClient(
+                this.arcPath,
+                "call-conduit",
+                params,
+                conduitToken,
+                methodName
+        );
+    }
 }
