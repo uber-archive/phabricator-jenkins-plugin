@@ -52,7 +52,7 @@ import java.io.*;
 import static java.lang.Integer.parseInt;
 
 public class PhabricatorNotifier extends Notifier {
-
+    private static final int DEFAULT_COMMENT_SIZE = 1000;
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -284,7 +284,7 @@ public class PhabricatorNotifier extends Notifier {
 
         FilePath source = src[0];
 
-        int maxLength = 1000;
+        int maxLength = DEFAULT_COMMENT_SIZE;
         if (!CommonUtils.isBlank(maxSize)) {
             maxLength = parseInt(maxSize, 10);
         }
