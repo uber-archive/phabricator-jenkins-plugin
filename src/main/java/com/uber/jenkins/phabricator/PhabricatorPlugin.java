@@ -37,8 +37,12 @@ public class PhabricatorPlugin extends Plugin {
     public static final String ARCANIST_PATH = "ARCANIST_PATH";
 
     public static String getIconPath(String icon) {
-        if(icon == null) return null;
-        if(icon.startsWith("/")) return icon;
+        if (icon == null) {
+            return null;
+        }
+        if (icon.startsWith("/")) {
+            return icon;
+        }
 
         // Try plugin images dir, fallback to Hudson images dir
         PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(PhabricatorPlugin.class);

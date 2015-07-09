@@ -115,7 +115,7 @@ public class Differential {
         }
         try {
             return (String) branchName;
-        } catch(ClassCastException e) {
+        } catch (ClassCastException e) {
             return "(unknown)";
         }
     }

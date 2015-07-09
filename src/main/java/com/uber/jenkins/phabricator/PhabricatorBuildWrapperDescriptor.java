@@ -63,11 +63,15 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public String getConduitURL() {
         return conduitURL;
     }
-    public void setConduitURL(String value) { conduitURL = value; }
+
+    public void setConduitURL(String value) {
+        conduitURL = value;
+    }
 
     public String getConduitToken() {
         return conduitToken;
     }
+
     public void setConduitToken(String conduitToken) {
         this.conduitToken = conduitToken;
     }
@@ -75,6 +79,7 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public String getArcPath() {
         return arcPath;
     }
+
     public void setArcPath(String arcPath) {
         this.arcPath = arcPath;
     }

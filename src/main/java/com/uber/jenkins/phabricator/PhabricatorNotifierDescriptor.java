@@ -85,7 +85,10 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         }
         return null;
     }
-    public void setConduitURL(String value) { conduitURL = value; }
+
+    public void setConduitURL(String value) {
+        conduitURL = value;
+    }
 
     public String getUberallsURL() {
         if (uberallsURL != null && !"".equals(uberallsURL)) {
@@ -93,7 +96,10 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         }
         return null;
     }
-    public void setUberallsURL(String value) { uberallsURL = value; }
+
+    public void setUberallsURL(String value) {
+        uberallsURL = value;
+    }
 
     public void setCommentFile(String commentFile) {
         this.commentFile = commentFile;

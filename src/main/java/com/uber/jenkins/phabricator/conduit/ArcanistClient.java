@@ -96,7 +96,7 @@ public class ArcanistClient {
         JsonSlurper jsonParser = new JsonSlurper();
         try {
             return (JSONObject) jsonParser.parseText(stdoutBuffer.toString());
-        } catch(net.sf.json.JSONException e) {
+        } catch (net.sf.json.JSONException e) {
             stderr.println("[arcanist] Unable to parse JSON from response: " + stdoutBuffer.toString());
             throw e;
         }
