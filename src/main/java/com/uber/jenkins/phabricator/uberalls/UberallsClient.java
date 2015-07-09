@@ -23,7 +23,6 @@ package com.uber.jenkins.phabricator.uberalls;
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.utils.Logger;
-import hudson.EnvVars;
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
@@ -40,7 +39,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 public class UberallsClient {
@@ -132,6 +130,7 @@ public class UberallsClient {
                 e.printStackTrace();
             } catch (HttpResponseException e) {
                 // e.g. 404, pass
+                logger.info(TAG, "HTTP Response error recording metrics: " + e);
             } catch (ClientProtocolException e) {
                 e.printStackTrace();
             } catch (IOException e) {

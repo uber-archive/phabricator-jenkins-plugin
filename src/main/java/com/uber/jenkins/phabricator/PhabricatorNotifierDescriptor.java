@@ -27,7 +27,6 @@ import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
-
 /**
  * Descriptor for {@link PhabricatorNotifier}. Used as a singleton.
  * The class is marked as public so that it can be accessed from views.
@@ -85,7 +84,10 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         }
         return null;
     }
-    public void setConduitURL(String value) { conduitURL = value; }
+
+    public void setConduitURL(String value) {
+        conduitURL = value;
+    }
 
     public String getUberallsURL() {
         if (uberallsURL != null && !"".equals(uberallsURL)) {
@@ -93,7 +95,10 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         }
         return null;
     }
-    public void setUberallsURL(String value) { uberallsURL = value; }
+
+    public void setUberallsURL(String value) {
+        uberallsURL = value;
+    }
 
     public void setCommentFile(String commentFile) {
         this.commentFile = commentFile;

@@ -35,10 +35,10 @@ public abstract class Task {
         FAILURE,
         IGNORED, // For incorrect input.
         SKIPPED, // For incorrect configuration.
-        UNKNWON
-    };
+        UNKNOWN
+    }
 
-    protected Result result = Result.UNKNWON;
+    protected Result result = Result.UNKNOWN;
     private Logger logger;
 
     /**

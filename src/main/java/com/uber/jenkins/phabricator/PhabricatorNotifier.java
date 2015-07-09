@@ -193,7 +193,7 @@ public class PhabricatorNotifier extends Notifier {
                     comment = String.format("%s\n\n```\n%s\n```\n", comment, customComment);
                 }
             }
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
         } catch (IOException e) {
             Util.displayIOException(e, listener);
@@ -214,7 +214,7 @@ public class PhabricatorNotifier extends Notifier {
             } catch (ArcanistUsageException e) {
                 logger.info("arcanist", "unable to post comment");
             }
-            if(!(result.get("errorMessage") instanceof JSONNull)) {
+            if (!(result.get("errorMessage") instanceof JSONNull)) {
                 logger.info("arcanist", "Get error " + result.get("errorMessage") + " with action " +
                         commentAction + "; trying again with action 'none'");
                 try {

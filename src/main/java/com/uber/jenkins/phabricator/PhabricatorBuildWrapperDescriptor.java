@@ -26,7 +26,6 @@ import hudson.tasks.BuildWrapperDescriptor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
-
 @SuppressWarnings("UnusedDeclaration")
 @Extension // This indicates to Jenkins that this is an implementation of an extension point.
 public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescriptor {
@@ -63,11 +62,15 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public String getConduitURL() {
         return conduitURL;
     }
-    public void setConduitURL(String value) { conduitURL = value; }
+
+    public void setConduitURL(String value) {
+        conduitURL = value;
+    }
 
     public String getConduitToken() {
         return conduitToken;
     }
+
     public void setConduitToken(String conduitToken) {
         this.conduitToken = conduitToken;
     }
@@ -75,6 +78,7 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public String getArcPath() {
         return arcPath;
     }
+
     public void setArcPath(String arcPath) {
         this.arcPath = arcPath;
     }

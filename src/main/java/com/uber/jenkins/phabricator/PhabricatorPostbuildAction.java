@@ -46,17 +46,47 @@ public class PhabricatorPostbuildAction implements BuildBadgeAction {
     }
 
     /* Action methods */
-    public String getUrlName() { return ""; }
-    public String getDisplayName() { return ""; }
-    public String getIconFileName() { return null; }
+    public String getUrlName() {
+        return "";
+    }
 
-    @Exported public boolean isTextOnly() { return (iconPath == null); }
-    @Exported public String getIconPath() { return iconPath; }
-    @Exported public String getText() { return text; }
-    @Exported public String getColor() { return color; }
-    @Exported public String getBackground() { return background; }
-    @Exported public String getBorder() { return border; }
-    @Exported public String getBorderColor() { return borderColor; }
-    @Exported public String getLink() { return link; }
+    public String getDisplayName() {
+        return "";
+    }
 
+    public String getIconFileName() {
+        return null;
+    }
+
+    @Exported public boolean isTextOnly() {
+        return (iconPath == null);
+    }
+
+    @Exported public String getIconPath() {
+        return iconPath;
+    }
+
+    @Exported public String getText() {
+        return text;
+    }
+
+    @Exported public String getColor() {
+        return color;
+    }
+
+    @Exported public String getBackground() {
+        return background;
+    }
+
+    @Exported public String getBorder() {
+        return border;
+    }
+
+    @Exported public String getBorderColor() {
+        return borderColor;
+    }
+
+    @Exported public String getLink() {
+        return link;
+    }
 }

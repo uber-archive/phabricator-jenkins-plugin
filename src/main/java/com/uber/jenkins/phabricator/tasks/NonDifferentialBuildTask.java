@@ -24,7 +24,6 @@ import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
-import hudson.plugins.cobertura.targets.CoverageResult;
 
 /**
  * Generic build task.
@@ -82,7 +81,7 @@ public class NonDifferentialBuildTask extends Task {
      */
     @Override
     protected void execute() {
-        if (result == Result.UNKNWON) {
+        if (result == Result.UNKNOWN) {
             if (!CommonUtils.isBlank(commitSha)) {
                 info(String.format("Sending coverage result for %s as %s", commitSha,
                         codeCoverageMetrics.toString()));

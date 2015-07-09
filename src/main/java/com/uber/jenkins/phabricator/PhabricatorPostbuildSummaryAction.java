@@ -21,14 +21,13 @@
 package com.uber.jenkins.phabricator;
 
 import hudson.model.Action;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * Ripped from https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildSummaryAction.java
  */
-@ExportedBean(defaultVisibility=2)
+@ExportedBean(defaultVisibility = 2)
 public class PhabricatorPostbuildSummaryAction implements Action {
     private final String iconPath;
     private final StringBuilder textBuilder = new StringBuilder();
@@ -38,17 +37,27 @@ public class PhabricatorPostbuildSummaryAction implements Action {
     }
 
     /* Action methods */
-    public String getUrlName() { return ""; }
-    public String getDisplayName() { return ""; }
-    public String getIconFileName() { return null; }
+    public String getUrlName() {
+        return "";
+    }
 
-    @Exported public String getIconPath() { return iconPath; }
-    @Exported public String getText() { return textBuilder.toString(); }
+    public String getDisplayName() {
+        return "";
+    }
+
+    public String getIconFileName() {
+        return null;
+    }
+
+    @Exported public String getIconPath() {
+        return iconPath;
+    }
+
+    @Exported public String getText() {
+        return textBuilder.toString();
+    }
 
     public void appendText(String text) {
-        if(false) {
-            text = StringEscapeUtils.escapeHtml(text);
-        }
         textBuilder.append(text);
     }
 }

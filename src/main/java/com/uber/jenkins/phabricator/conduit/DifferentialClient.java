@@ -100,7 +100,6 @@ public class DifferentialClient {
         return this.callConduit("sendHarbormasterMessage.sendmessage", params);
     }
 
-
     /**
      * Post a comment on the differential
      * @param message the string message to post
