@@ -34,7 +34,6 @@ import java.net.URL;
 public class Differential {
     private JSONObject rawJSON;
 
-
     public Differential(JSONObject rawJSON) throws ArcanistUsageException, IOException, InterruptedException {
         this.rawJSON = rawJSON;
     }

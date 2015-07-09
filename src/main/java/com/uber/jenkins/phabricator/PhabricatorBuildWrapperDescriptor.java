@@ -26,7 +26,6 @@ import hudson.tasks.BuildWrapperDescriptor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
-
 @SuppressWarnings("UnusedDeclaration")
 @Extension // This indicates to Jenkins that this is an implementation of an extension point.
 public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescriptor {

@@ -4,6 +4,12 @@
         "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
 
 <module name="Checker">
+  <!-- Double blank lines -->
+  <module name="RegexpMultiline">
+    <property name="format" value="\n\n\n"/>
+    <property name="message" value="Double blank lines."/>
+  </module>
+
   <module name="TreeWalker">
     <module name="OneTopLevelClass"/>
     <module name="NoLineWrap"/>
@@ -13,6 +19,7 @@
     <module name="EmptyLineSeparator">
       <property name="allowNoEmptyLineBetweenFields" value="true"/>
     </module>
+
     <module name="AvoidEscapedUnicodeCharacters"/>
     <module name="NeedBraces"/>
     <module name="LeftCurly"/>

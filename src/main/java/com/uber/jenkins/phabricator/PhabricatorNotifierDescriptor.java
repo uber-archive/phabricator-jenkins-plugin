@@ -27,7 +27,6 @@ import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
-
 /**
  * Descriptor for {@link PhabricatorNotifier}. Used as a singleton.
  * The class is marked as public so that it can be accessed from views.
