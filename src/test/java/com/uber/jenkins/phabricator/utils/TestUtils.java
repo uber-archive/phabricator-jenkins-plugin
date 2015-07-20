@@ -101,7 +101,13 @@ public class TestUtils {
     }
 
     public static CoverageResult getDefaultCoverageResult() {
-        return getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
+        return getCoverageResult(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    public static CoverageResult getEmptyCoverageResult() {
+        CoverageResult coverageResult = mock(CoverageResult.class);
+        setCoverage(coverageResult, CoverageMetric.LINE, null);
+        return coverageResult;
     }
 
     public static JSONObject getJSONFromFile(Class<?> klass, String filename) throws IOException {
