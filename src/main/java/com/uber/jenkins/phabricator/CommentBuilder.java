@@ -56,12 +56,7 @@ public class CommentBuilder {
      * @return
      */
     public boolean hasCoverageAvailable() {
-        if (currentCoverage == null) {
-            return false;
-        }
-
-        Ratio lineCoverage = currentCoverage.getCoverage(CoverageMetric.LINE);
-        return lineCoverage != null;
+        return currentCoverage != null && currentCoverage.getCoverage(CoverageMetric.LINE) != null;
     }
 
     /**
