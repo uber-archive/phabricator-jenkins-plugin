@@ -127,9 +127,10 @@ public class PhabricatorNotifier extends Notifier {
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
 
         boolean runHarbormaster = !CommonUtils.isBlank(phid);
-        boolean harbormasterSuccess = false;
+        Result buildResult = build.getResult();
+        boolean harbormasterSuccess = buildResult.isBetterOrEqualTo(Result.SUCCESS);
 
-        CommentBuilder commenter = new CommentBuilder(logger, build.getResult(), coverage, environment.get("BUILD_URL"));
+        CommentBuilder commenter = new CommentBuilder(logger, buildResult, coverage, environment.get("BUILD_URL"));
 
         // First add in info about the change in coverage, if applicable
         if (commenter.hasCoverageAvailable()) {
@@ -140,10 +141,6 @@ public class PhabricatorNotifier extends Notifier {
             }
         } else {
             logger.info("uberalls", "no line coverage found, skipping...");
-        }
-
-        if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
-            harbormasterSuccess = true;
         }
 
         // Add in comments about the build result
