@@ -36,8 +36,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.plugins.cobertura.CoberturaBuildAction;
-import hudson.plugins.cobertura.Ratio;
-import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -128,41 +126,28 @@ public class PhabricatorNotifier extends Notifier {
 
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
 
-        boolean runHarbormaster = phid != null && !"".equals(phid);
+        boolean runHarbormaster = !CommonUtils.isBlank(phid);
         boolean harbormasterSuccess = false;
 
-        String comment = null;
+        CommentBuilder commenter = new CommentBuilder(logger, build.getResult(), coverage, environment.get("BUILD_URL"));
 
-        if (coverage != null) {
-            Ratio lineCoverage = coverage.getCoverage(CoverageMetric.LINE);
-            if (lineCoverage == null) {
-                logger.info("uberalls", "no line coverage found, skipping...");
+        // First add in info about the change in coverage, if applicable
+        if (commenter.hasCoverageAvailable()) {
+            if (uberallsConfigured) {
+                commenter.processParentCoverage(uberalls.getParentCoverage(diff), diff.getBranch());
             } else {
-                if (uberallsConfigured) {
-                    comment = getCoverageComment(lineCoverage, uberalls, diff, logger.getStream(), environment.get("BUILD_URL"));
-                } else {
-                    logger.info("uberalls", "no backend configured, skipping...");
-                }
+                logger.info("uberalls", "no backend configured, skipping...");
             }
+        } else {
+            logger.info("uberalls", "no line coverage found, skipping...");
         }
 
         if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
             harbormasterSuccess = true;
-            if (comment == null && (this.commentOnSuccess || !runHarbormaster)) {
-                comment = "Build is green";
-            }
-        } else if (build.getResult() == Result.UNSTABLE) {
-            comment = "Build is unstable";
-        } else if (build.getResult() == Result.FAILURE) {
-            // TODO look for message here.
-            if (!runHarbormaster || this.commentWithConsoleLinkOnFailure) {
-                comment = "Build has FAILED";
-            }
-        } else if (build.getResult() == Result.ABORTED) {
-            comment = "Build was aborted";
-        } else {
-            logger.info("uberalls", "Unknown build status " + build.getResult().toString());
         }
+
+        // Add in comments about the build result
+        commenter.processBuildResult(this.commentOnSuccess, this.commentWithConsoleLinkOnFailure, runHarbormaster);
 
         String commentAction = "none";
         if (runHarbormaster) {
@@ -182,33 +167,25 @@ public class PhabricatorNotifier extends Notifier {
             }
         }
 
-        String customComment;
         try {
-            customComment = getRemoteComment(build, logger.getStream(), this.commentFile, this.commentSize);
-
-            if (!CommonUtils.isBlank(customComment)) {
-                if (comment == null) {
-                    comment = String.format("```\n%s\n```\n\n", customComment);
-                } else {
-                    comment = String.format("%s\n\n```\n%s\n```\n", comment, customComment);
-                }
-            }
+            String customComment = getRemoteComment(build, logger.getStream(), this.commentFile, this.commentSize);
+            commenter.addUserComment(customComment);
         } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
         } catch (IOException e) {
             Util.displayIOException(e, listener);
         }
 
-        if (comment != null) {
+        if (commenter.hasComment()) {
             boolean silent = false;
             if (this.commentWithConsoleLinkOnFailure && build.getResult().isWorseOrEqualTo(Result.UNSTABLE)) {
-                comment += String.format("\n\nLink to build: %s", environment.get("BUILD_URL"));
-                comment += String.format("\nSee console output for more information: %sconsole", environment.get("BUILD_URL"));
+                commenter.addBuildFailureMessage();
             } else {
-                comment += String.format(" %s for more details.", environment.get("BUILD_URL"));
+                commenter.addBuildLink();
             }
 
             JSONObject result = null;
+            String comment = commenter.getComment();
             try {
                 result = diffClient.postComment(comment, silent, commentAction);
             } catch (ArcanistUsageException e) {
@@ -226,37 +203,6 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         return true;
-    }
-
-    private String getCoverageComment(Ratio lineCoverage, UberallsClient uberalls, Differential diff,
-                                      PrintStream logger, String buildUrl) {
-        Float lineCoveragePercent = lineCoverage.getPercentageFloat();
-        logger.println("[uberalls] line coverage: " + lineCoveragePercent);
-        logger.println("[uberalls] fetching coverage from " + uberalls.getBaseURL());
-        CodeCoverageMetrics parentCoverage = uberalls.getParentCoverage(diff);
-        if (parentCoverage == null) {
-            logger.println("[uberalls] unable to find coverage for parent commit (" + diff.getBaseCommit() + ")");
-            return null;
-        } else {
-            logger.println("[uberalls] found parent coverage as " + parentCoverage.getLineCoveragePercent());
-            String coverageComment;
-            float coverageDelta = lineCoveragePercent - parentCoverage.getLineCoveragePercent();
-            String coverageDeltaDisplay = String.format("%.3f", coverageDelta);
-            String lineCoverageDisplay = String.format("%.3f", lineCoveragePercent);
-            if (coverageDelta > 0) {
-                coverageComment = "Coverage increased (+" + coverageDeltaDisplay + "%) to " + lineCoverageDisplay + "%";
-            } else if (coverageDelta < 0) {
-                coverageComment = "Coverage decreased (" + coverageDeltaDisplay + "%) to " + lineCoverageDisplay + "%";
-            } else {
-                coverageComment = "Coverage remained the same (" + lineCoverageDisplay + "%)";
-            }
-
-            final String coberturaUrl = buildUrl + "cobertura";
-            coverageComment += " when pulling **" + diff.getBranch() + "** into " +
-                    parentCoverage.getSha1().substring(0, 7) + ". See " + coberturaUrl + " for the coverage report";
-
-            return coverageComment;
-        }
     }
 
     /**
