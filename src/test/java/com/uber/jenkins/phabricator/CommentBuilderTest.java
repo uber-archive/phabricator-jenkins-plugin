@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class CommentBuilderTest {
-    private static final Logger logger = new Logger(System.out);
+    private static final Logger logger = TestUtils.getDefaultLogger();
     private static final String FAKE_BUILD_URL = "http://example.com/job/123";
     private static final String FAKE_BRANCH_NAME = "oober-is-great";
 

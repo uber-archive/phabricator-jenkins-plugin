@@ -22,14 +22,12 @@ package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
-
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -39,18 +37,14 @@ import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.targets.CoverageResult;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
-
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.*;
-
-import static java.lang.Integer.parseInt;
+import java.io.IOException;
+import java.io.PrintStream;
 
 public class PhabricatorNotifier extends Notifier {
-    private static final int DEFAULT_COMMENT_SIZE = 1000;
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -164,8 +158,9 @@ public class PhabricatorNotifier extends Notifier {
             }
         }
 
+        RemoteCommentFetcher commentFetcher = new RemoteCommentFetcher(build.getWorkspace(), logger, this.commentFile, this.commentSize);
         try {
-            String customComment = getRemoteComment(build, logger.getStream(), this.commentFile, this.commentSize);
+            String customComment = commentFetcher.getRemoteComment();
             commenter.addUserComment(customComment);
         } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
@@ -200,43 +195,6 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         return true;
-    }
-
-    /**
-     * Attempt to read a remote comment file
-     * @param build the build
-     * @param logger the logger
-     * @return the contents of the string
-     * @throws InterruptedException
-     */
-    private String getRemoteComment(AbstractBuild<?, ?> build, PrintStream logger, String commentFile, String maxSize) throws InterruptedException, IOException {
-        if (CommonUtils.isBlank(commentFile)) {
-            logger.println("[comment-file] no comment file configured");
-            return null;
-        }
-
-        FilePath workspace = build.getWorkspace();
-        FilePath[] src = workspace.list(commentFile);
-        if (src.length == 0) {
-            logger.println("[comment-file] no files found by path: '" + commentFile + "'");
-            return null;
-        }
-        if (src.length > 1) {
-            logger.println("[comment-file] Found multiple matches. Reading first only.");
-        }
-
-        FilePath source = src[0];
-
-        int maxLength = DEFAULT_COMMENT_SIZE;
-        if (!CommonUtils.isBlank(maxSize)) {
-            maxLength = parseInt(maxSize, 10);
-        }
-        if (source.length() < maxLength) {
-            maxLength = (int)source.length();
-        }
-        byte[] buffer = new byte[maxLength];
-        source.read().read(buffer, 0, maxLength);
-        return new String(buffer);
     }
 
     private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) {
