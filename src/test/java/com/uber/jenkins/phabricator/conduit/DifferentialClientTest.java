@@ -35,21 +35,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class DifferentialClientTest {
-    private static final String DUMMY_DIFF_ID = "123";
-    private static final String DUMMY_CONDUIT_TOKEN = "notarealtoken";
-    private static final String DUMMY_ARC_PATH = "echo";
 
-    private DifferentialClient client;
+    private DifferentialClient differentialClient;
 
     @Before
     public void setUp() throws Exception {
-        LauncherFactory factory = mock(LauncherFactory.class);
-        client = spy(new DifferentialClient(
-                DUMMY_DIFF_ID,
-                factory,
-                DUMMY_CONDUIT_TOKEN,
-                DUMMY_ARC_PATH
-        ));
+        differentialClient = TestUtils.getDefaultDifferentialClient();
     }
 
     @Test
@@ -57,9 +48,9 @@ public class DifferentialClientTest {
         JSONObject sentinel = new JSONObject();
         sentinel.put("hi", "there");
 
-        mockConduitResponse(client, sentinel);
+        mockConduitResponse(differentialClient, sentinel);
 
-        JSONObject response = client.postComment("hello", true, "none");
+        JSONObject response = differentialClient.postComment("hello", true, "none");
         assertEquals(sentinel, response);
     }
 
@@ -68,44 +59,44 @@ public class DifferentialClientTest {
         JSONObject sentinel = new JSONObject();
         sentinel.put("something", "here");
 
-        mockConduitResponse(client, sentinel);
+        mockConduitResponse(differentialClient, sentinel);
 
-        JSONObject response = client.postComment("hello");
+        JSONObject response = differentialClient.postComment("hello");
         assertEquals(response, sentinel);
     }
 
     @Test(expected = ArcanistUsageException.class)
     public void testFetchDiffWithEmptyResponse() throws Exception {
         JSONObject empty = new JSONObject();
-        mockConduitResponse(client, empty);
+        mockConduitResponse(differentialClient, empty);
 
-        client.fetchDiff();
+        differentialClient.fetchDiff();
     }
 
     @Test(expected = ArcanistUsageException.class)
     public void testFetchDiffWithNoDiff() throws Exception {
         JSONObject noDiff = new JSONObject();
         noDiff.put("response", null);
-        mockConduitResponse(client, noDiff);
+        mockConduitResponse(differentialClient, noDiff);
 
-        client.fetchDiff();
+        differentialClient.fetchDiff();
     }
 
     @Test
     public void testFetchDiffWithOtherDiff() throws Exception {
         JSONObject otherDiff = TestUtils.getJSONFromFile(getClass(), "fetchDiffResponseMissingDiff");
-        mockConduitResponse(client, otherDiff);
+        mockConduitResponse(differentialClient, otherDiff);
 
-        JSONObject response = client.fetchDiff();
+        JSONObject response = differentialClient.fetchDiff();
         assertTrue(response.isEmpty());
     }
 
     @Test
     public void testFetchDiffWithValidResponse() throws Exception {
         JSONObject realResponse = TestUtils.getJSONFromFile(getClass(), "validFetchDiffResponse");
-        mockConduitResponse(client, realResponse);
+        mockConduitResponse(differentialClient, realResponse);
 
-        JSONObject response = client.fetchDiff();
+        JSONObject response = differentialClient.fetchDiff();
         assertEquals("world", response.get("hello"));
     }
 
