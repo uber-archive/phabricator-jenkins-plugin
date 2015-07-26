@@ -24,6 +24,7 @@ import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
+import com.uber.jenkins.phabricator.tasks.PostCommentTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -169,29 +170,14 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         if (commenter.hasComment()) {
-            boolean silent = false;
-            if (this.commentWithConsoleLinkOnFailure && build.getResult().isWorseOrEqualTo(Result.UNSTABLE)) {
+            if (commentWithConsoleLinkOnFailure &&
+                    buildResult.isWorseOrEqualTo(hudson.model.Result.UNSTABLE)) {
                 commenter.addBuildFailureMessage();
             } else {
                 commenter.addBuildLink();
             }
 
-            JSONObject result = null;
-            String comment = commenter.getComment();
-            try {
-                result = diffClient.postComment(comment, silent, commentAction);
-            } catch (ArcanistUsageException e) {
-                logger.info("arcanist", "unable to post comment");
-            }
-            if (!(result.get("errorMessage") instanceof JSONNull)) {
-                logger.info("arcanist", "Get error " + result.get("errorMessage") + " with action " +
-                        commentAction + "; trying again with action 'none'");
-                try {
-                    diffClient.postComment(comment, silent, "none");
-                } catch (ArcanistUsageException e) {
-                    logger.info("arcanist", "unable to post comment");
-                }
-            }
+            new PostCommentTask(logger, diffClient, commenter.getComment(), commentAction).run();
         }
 
         return true;
