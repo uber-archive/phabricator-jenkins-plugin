@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-import com.uber.jenkins.phabricator.CommentBuilder;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -46,23 +45,12 @@ public class PostCommentTask extends Task {
      * @param logger The logger.
      */
     public PostCommentTask(Logger logger, DifferentialClient differentialClient,
-                           String commentAction,
-                           CommentBuilder commentBuilder,
-                           boolean commentWithConsoleLinkOnFailure,
-                           hudson.model.Result buildResult) {
+                           String comment, String commentAction) {
         super(logger);
 
         this.differentialClient = differentialClient;
+        this.comment = comment;
         this.commentAction = commentAction;
-
-        if (commentWithConsoleLinkOnFailure &&
-                buildResult.isWorseOrEqualTo(hudson.model.Result.UNSTABLE)) {
-            commentBuilder.addBuildFailureMessage();
-        } else {
-            commentBuilder.addBuildLink();
-        }
-
-        comment = commentBuilder.getComment();
     }
 
     /**
@@ -86,10 +74,12 @@ public class PostCommentTask extends Task {
      */
     @Override
     protected void execute() {
-        JSONObject result = postDifferentialComment(comment, SILENT, commentAction);
-        if (!(result.get("errorMessage") instanceof JSONNull)) {
+        JSONObject postDifferentialCommentResult = postDifferentialComment(comment, SILENT,
+                commentAction);
+        if (result == null ||
+                !(postDifferentialCommentResult.get("errorMessage") instanceof JSONNull)) {
             info(String.format("Got error %s with action %s. Re-trying with action 'none'",
-                    result.get("errorMessage"), commentAction));
+                    postDifferentialCommentResult.get("errorMessage"), commentAction));
             postDifferentialComment(comment, SILENT, DEFAULT_COMMENT_ACTION);
         }
     }
@@ -104,7 +94,10 @@ public class PostCommentTask extends Task {
 
     private JSONObject postDifferentialComment(String message, boolean silent, String action) {
         try {
-            return differentialClient.postComment(message, silent, action);
+            JSONObject postDifferentialCommentResult = differentialClient.postComment(message,
+                    silent, action);
+            result = Result.SUCCESS;
+            return postDifferentialCommentResult;
         } catch (ArcanistUsageException e) {
             info("unable to post comment");
         } catch (IOException e) {
@@ -113,6 +106,7 @@ public class PostCommentTask extends Task {
             throw new RuntimeException(e);
         }
 
+        result = Result.FAILURE;
         return null;
     }
 }
