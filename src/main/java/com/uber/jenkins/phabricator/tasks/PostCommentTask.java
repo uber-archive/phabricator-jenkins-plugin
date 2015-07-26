@@ -76,10 +76,14 @@ public class PostCommentTask extends Task {
     protected void execute() {
         JSONObject postDifferentialCommentResult = postDifferentialComment(comment, SILENT,
                 commentAction);
-        if (result == null ||
+        if (postDifferentialCommentResult == null ||
                 !(postDifferentialCommentResult.get("errorMessage") instanceof JSONNull)) {
-            info(String.format("Got error %s with action %s. Re-trying with action 'none'",
-                    postDifferentialCommentResult.get("errorMessage"), commentAction));
+            if (postDifferentialCommentResult != null) {
+                info(String.format("Got error %s with action %s",
+                        postDifferentialCommentResult.get("errorMessage"), commentAction));
+            }
+
+            info("Re-trying with action 'none'");
             postDifferentialComment(comment, SILENT, DEFAULT_COMMENT_ACTION);
         }
     }
