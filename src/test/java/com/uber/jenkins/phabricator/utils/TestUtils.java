@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.utils;
 
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.LauncherFactory;
+import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -46,6 +47,10 @@ public class TestUtils {
     public static final String TEST_BRANCH = "test-branch";
     public static final String TEST_SHA = "test-sha";
 
+    public static final String TEST_DIFFERENTIAL_ID = "123";
+    private static final String TEST_CONDUIT_TOKEN = "notarealtoken";
+    private static final String TEST_ARC_PATH = "echo";
+
     public static Logger getDefaultLogger() {
         return new Logger(new PrintStream(new ByteArrayOutputStream()));
     }
@@ -57,6 +62,12 @@ public class TestUtils {
 
     public static UberallsClient getDefaultUberallsClient() {
         return getUberallsClient(TEST_BASE_URL, getDefaultLogger(), TEST_REPOSITORY, TEST_BRANCH);
+    }
+
+    public static DifferentialClient getDefaultDifferentialClient() {
+        LauncherFactory factory = mock(LauncherFactory.class);
+        return spy(new DifferentialClient(TEST_DIFFERENTIAL_ID, factory, TEST_CONDUIT_TOKEN,
+                TEST_ARC_PATH));
     }
 
     public static EnvVars getDefaultEnvVars() {
