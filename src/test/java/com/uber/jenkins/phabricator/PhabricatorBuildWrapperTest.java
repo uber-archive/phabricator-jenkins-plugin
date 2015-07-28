@@ -49,4 +49,15 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         Result result = build.getResult();
         assertSuccessfulBuild(result);
     }
+
+    @Test
+    public void testRoundTripConfiguration() throws Exception {
+        p.getBuildWrappersList().add(wrapper);
+
+        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
+
+        PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
+        j.assertEqualBeans(wrapper, after,
+                "createCommit,applyToMaster,showBuildStartedMessage,uberDotArcanist");
+    }
 }
