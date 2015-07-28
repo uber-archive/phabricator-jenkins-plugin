@@ -46,6 +46,7 @@ public class DifferentialClient {
 
     /**
      * Posts a comment to a differential
+     * @param revisionID the revision ID (e.g. "D1234" without the "D")
      * @param message
      * @param silent whether or not to trigger an email
      * @param action phabricator comment action, e.g. 'resign', 'reject', 'none'
@@ -102,6 +103,7 @@ public class DifferentialClient {
 
     /**
      * Post a comment on the differential
+     * @param revisionID the revision ID (e.g. "D1234" without the "D")
      * @param message the string message to post
      * @return
      * @throws IOException
