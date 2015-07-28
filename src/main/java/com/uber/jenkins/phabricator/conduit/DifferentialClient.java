@@ -50,9 +50,9 @@ public class DifferentialClient {
      * @param silent whether or not to trigger an email
      * @param action phabricator comment action, e.g. 'resign', 'reject', 'none'
      */
-    public JSONObject postComment(String message, boolean silent, String action) throws IOException, InterruptedException, ArcanistUsageException {
+    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException, InterruptedException, ArcanistUsageException {
         Map params = new HashMap<String, String>();
-        params.put("revision_id", this.diffID);
+        params.put("revision_id", revisionID);
         params.put("action", action);
         params.put("message", message);
         params.put("silent", silent);
@@ -108,8 +108,8 @@ public class DifferentialClient {
      * @throws InterruptedException
      * @throws ArcanistUsageException
      */
-    public JSONObject postComment(String message) throws IOException, InterruptedException, ArcanistUsageException {
-        return postComment(message, true, "none");
+    public JSONObject postComment(String revisionID, String message) throws IOException, InterruptedException, ArcanistUsageException {
+        return postComment(revisionID, message, true, "none");
     }
 
     protected JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException, ArcanistUsageException {

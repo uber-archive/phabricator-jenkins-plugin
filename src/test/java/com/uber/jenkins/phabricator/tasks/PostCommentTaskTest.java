@@ -20,19 +20,18 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
-import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 public class PostCommentTaskTest {
 
@@ -41,6 +40,7 @@ public class PostCommentTaskTest {
 
     private String TEST_COMMENT = "They are selling like hotcakes!";
     private String TEST_COMMENT_ACTION = "none";
+    private String TEST_REVISION_ID = "something";
 
     @Before
     public void setup() {
@@ -52,12 +52,13 @@ public class PostCommentTaskTest {
     public void testPostDifferentialFailed() throws Exception {
         doThrow(new ArcanistUsageException("")).when(differentialClient).postComment(
                 anyString(),
+                anyString(),
                 anyBoolean(),
                 anyString()
         );
 
-        PostCommentTask postCommentTask = new PostCommentTask(logger, differentialClient, TEST_COMMENT,
-                TEST_COMMENT_ACTION);
+        PostCommentTask postCommentTask = new PostCommentTask(logger, differentialClient,
+                TEST_REVISION_ID, TEST_COMMENT, TEST_COMMENT_ACTION);
         Task.Result result = postCommentTask.run();
         assert result == Task.Result.FAILURE;
     }
@@ -66,11 +67,12 @@ public class PostCommentTaskTest {
     public void testPostDifferentialSuccess() throws Exception {
         doReturn(new JSONObject()).when(differentialClient).postComment(
                 anyString(),
+                anyString(),
                 anyBoolean(),
                 anyString()
         );
 
-        assert new PostCommentTask(logger, differentialClient, TEST_COMMENT,
-                TEST_COMMENT_ACTION).run() == Task.Result.SUCCESS;
+        assert new PostCommentTask(logger, differentialClient, TEST_REVISION_ID,
+                TEST_COMMENT, TEST_COMMENT_ACTION).run() == Task.Result.SUCCESS;
     }
 }

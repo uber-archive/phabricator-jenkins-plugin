@@ -38,8 +38,6 @@ import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.targets.CoverageResult;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -177,7 +175,7 @@ public class PhabricatorNotifier extends Notifier {
                 commenter.addBuildLink();
             }
 
-            new PostCommentTask(logger, diffClient, commenter.getComment(), commentAction).run();
+            new PostCommentTask(logger, diffClient, diff.getRevisionID(false), commenter.getComment(), commentAction).run();
         }
 
         return true;
