@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import net.sf.json.JSONObject;
 import org.junit.Before;
@@ -32,7 +31,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 public class DifferentialClientTest {
 
@@ -50,7 +49,7 @@ public class DifferentialClientTest {
 
         mockConduitResponse(differentialClient, sentinel);
 
-        JSONObject response = differentialClient.postComment("hello", true, "none");
+        JSONObject response = differentialClient.postComment("anything", "hello", true, "none");
         assertEquals(sentinel, response);
     }
 
@@ -61,7 +60,7 @@ public class DifferentialClientTest {
 
         mockConduitResponse(differentialClient, sentinel);
 
-        JSONObject response = differentialClient.postComment("hello");
+        JSONObject response = differentialClient.postComment("anything", "hello");
         assertEquals(response, sentinel);
     }
 

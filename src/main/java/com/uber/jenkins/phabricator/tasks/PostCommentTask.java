@@ -36,19 +36,21 @@ public class PostCommentTask extends Task {
     private static final boolean SILENT = false;
     private static final String DEFAULT_COMMENT_ACTION = "none";
 
-    private DifferentialClient differentialClient;
-    private String commentAction;
-    private String comment;
+    private final DifferentialClient differentialClient;
+    private final String revisionID;
+    private final String comment;
+    private final String commentAction;
 
     /**
      * PostCommentTask constructor.
      * @param logger The logger.
      */
     public PostCommentTask(Logger logger, DifferentialClient differentialClient,
-                           String comment, String commentAction) {
+                           String revisionID, String comment, String commentAction) {
         super(logger);
 
         this.differentialClient = differentialClient;
+        this.revisionID = revisionID;
         this.comment = comment;
         this.commentAction = commentAction;
     }
@@ -98,8 +100,8 @@ public class PostCommentTask extends Task {
 
     private JSONObject postDifferentialComment(String message, boolean silent, String action) {
         try {
-            JSONObject postDifferentialCommentResult = differentialClient.postComment(message,
-                    silent, action);
+            JSONObject postDifferentialCommentResult = differentialClient.postComment(revisionID,
+                    message, silent, action);
             result = Result.SUCCESS;
             return postDifferentialCommentResult;
         } catch (ArcanistUsageException e) {

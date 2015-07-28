@@ -100,7 +100,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
                 // Post a silent notification if option is enabled
                 if (showBuildStartedMessage) {
-                    diffClient.postComment(diff.getBuildStartedMessage(environment));
+                    diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
                 }
             } catch (ArcanistUsageException e) {
                 logger.println("[arcanist] unable to apply patch");
