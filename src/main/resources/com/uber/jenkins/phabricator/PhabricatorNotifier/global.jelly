@@ -11,10 +11,12 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-  <f:section title="Uberalls" name="uberalls">
-    <f:entry title="Uberalls URL" field="uberallsURL"
-      description="Location of the Uberalls instance">
-      <f:textbox />
-    </f:entry>
-  </f:section>
+  <f:section title="Uberalls">
+    <f:optionalBlock title="Arc Callback with Uberalls" name="uberalls" checked="true">
+      <f:entry title="Uberalls URL" field="uberallsURL"
+               description="Location of the Uberalls instance">
+        <f:textbox />
+      </f:entry>
+    </f:optionalBlock>
+    </f:section>
 </j:jelly>

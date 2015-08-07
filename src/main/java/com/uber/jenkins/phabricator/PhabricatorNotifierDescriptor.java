@@ -42,6 +42,7 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
     private String uberallsURL;
     private String commentFile;
     private String commentSize;
+    private boolean enabled = true;
 
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
@@ -57,8 +58,7 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
     }
 
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-        // Indicates that this builder can be used with all kinds of project types
-        return true;
+        return getEnabled();
     }
 
     /**
@@ -72,9 +72,22 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
         // set that to properties and call save().
-        req.bindJSON(this, formData.getJSONObject("uberalls"));
+        if (formData.containsKey("uberalls")) {
+            req.bindJSON(this, formData.getJSONObject("uberalls"));
+            setEnabled(true);
+        } else {
+            setEnabled(false);
+        }
         save();
         return super.configure(req, formData);
+    }
+
+    public boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getConduitURL() {
