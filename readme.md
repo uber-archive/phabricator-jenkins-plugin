@@ -108,6 +108,12 @@ mvn hpi:run
 
 Open your browser to your [local instance](http://localhost:8080/jenkins/)
 
+Pull Requests
+-------------
+
+Please open all pull requests / issues against
+https://github.com/uber/phabricator-jenkins-plugin
+
 License
 -------
 
