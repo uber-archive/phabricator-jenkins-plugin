@@ -12,18 +12,14 @@
     so it should be straightforward to find them.
   -->
   <f:section title="Phabricator">
-    <f:optionalBlock title="Arc Patch Change Handoff" name="phabricator" checked="true">
-      <f:entry title="Phabricator URL" field="conduitURL"
-               description="Location of the Phabricator instance">
+    <f:optionalBlock title="Harbormaster Conduit Publisher" name="harbormaster-conduit-notifier" checked="true">
+      <f:entry title="Conduit URL" field="conduitURL"
+               description="Location of the Phabricator API">
         <f:textbox />
       </f:entry>
       <f:entry title="Conduit Token" field="conduitToken"
-               description="Conduit token for Phabricator API. If left blank, reads from ~/.arcrc">
+               description="Conduit Token">
         <f:textbox />
-      </f:entry>
-      <f:entry title="Location of arcanist" field="arcPath"
-               description="location of `arc` binary, if not in path">
-        <f:textbox default="arc" />
       </f:entry>
     </f:optionalBlock>
   </f:section>

@@ -32,6 +32,7 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     private String conduitURL;
     private String conduitToken;
     private String arcPath;
+    private boolean enabled = true;
 
     public PhabricatorBuildWrapperDescriptor() {
         super(PhabricatorBuildWrapper.class);
@@ -40,7 +41,7 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
 
     @Override
     public boolean isApplicable(AbstractProject<?, ?> abstractProject) {
-        return true;
+        return getEnabled();
     }
 
     /**
@@ -54,9 +55,22 @@ public final class PhabricatorBuildWrapperDescriptor extends BuildWrapperDescrip
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
         // set that to properties and call save().
-        req.bindJSON(this, formData.getJSONObject("phabricator"));
+        if (formData.containsKey("phabricator")) {
+            req.bindJSON(this, formData.getJSONObject("phabricator"));
+            setEnabled(true);
+        } else {
+            setEnabled(false);
+        }
         save();
         return super.configure(req,formData);
+    }
+
+    public boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getConduitURL() {
