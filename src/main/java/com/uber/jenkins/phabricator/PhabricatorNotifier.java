@@ -38,6 +38,8 @@ import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.targets.CoverageResult;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
+import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -141,11 +143,16 @@ public class PhabricatorNotifier extends Notifier {
 
         String commentAction = "none";
         if (runHarbormaster) {
-            logger.info("uberalls", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
+            logger.info("harbormaster", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
             try {
-                diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
+                JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
+                if (result.containsKey("errorMessage") && !(result.get("errorMessage") instanceof JSONNull)) {
+                    logger.info("harbormaster",
+                            String.format("Error from Harbormaster: %s", result.getString("errorMessage")));
+                    return false;
+                }
             } catch (ArcanistUsageException e) {
-                logger.info("arcanist", "unable to post to sendHarbormasterMessage");
+                logger.info("arcanist", "unable to post to harbormaster");
                 return true;
             }
         } else {

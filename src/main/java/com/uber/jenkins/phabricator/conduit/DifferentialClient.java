@@ -98,7 +98,7 @@ public class DifferentialClient {
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
 
-        return this.callConduit("sendHarbormasterMessage.sendmessage", params);
+        return this.callConduit("harbormaster.sendmessage", params);
     }
 
     /**
