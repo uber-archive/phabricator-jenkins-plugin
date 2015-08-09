@@ -18,49 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.uber.jenkins.phabricator.utils;
+package com.uber.jenkins.phabricator.credentials;
 
-import java.io.PrintStream;
+import com.cloudbees.plugins.credentials.CredentialsNameProvider;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
-/**
- * Logger utility.
- */
-public class Logger {
-    private static final String LOG_FORMAT = "[%s] %s";
-
-    private PrintStream stream;
-
-    /**
-     * Logger constructor.
-     * @param stream The stream.
-     */
-    public Logger(PrintStream stream) {
-        this.stream = stream;
-    }
-
-    /**
-     * Gets the stream.
-     * @return The stream where logs go to.
-     */
-    public PrintStream getStream() {
-        return stream;
-    }
-
-    /**
-     * Logs the message to the stream.
-     * @param tag The tag for the message.
-     * @param message The message to log.
-     */
-    public void info(String tag, String message) {
-        stream.println(String.format(LOG_FORMAT, tag, message));
-    }
-
-    /**
-     * Logs the message to the stream as a warning.
-     * @param tag The tag for the message.
-     * @param message The message to log.
-     */
-    public void warn(String tag, String message) {
-        info(tag, message);
+public class ConduitCredentialsNameProvider extends CredentialsNameProvider<ConduitCredentialsImpl> {
+    @NonNull
+    @Override
+    public String getName(@NonNull ConduitCredentialsImpl credentials) {
+        return credentials.getUrl();
     }
 }

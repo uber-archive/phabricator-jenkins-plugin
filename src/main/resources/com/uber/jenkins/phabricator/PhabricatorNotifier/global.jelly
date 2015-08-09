@@ -1,4 +1,7 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly
+        xmlns:j="jelly:core"
+        xmlns:f="/lib/form"
+        xmlns:c="/lib/credentials">
   <!--
     This Jelly script is used to produce the global configuration option.
 
@@ -11,10 +14,16 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-  <f:section title="Uberalls" name="uberalls">
-    <f:entry title="Uberalls URL" field="uberallsURL"
-      description="Location of the Uberalls instance">
-      <f:textbox />
-    </f:entry>
+  <f:section title="Phabricator Notifications" name="uberalls">
+    <f:optionalBlock>
+      <f:entry title="Default Phabricator Credentials" field="credentialsID"
+               description="Conduit URI and Token">
+        <c:select />
+      </f:entry>
+      <f:entry title="Uberalls URL" field="uberallsURL"
+               description="Location of the Uberalls instance">
+        <f:textbox />
+      </f:entry>
+    </f:optionalBlock>
   </f:section>
 </j:jelly>

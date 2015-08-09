@@ -27,7 +27,6 @@ import jenkins.model.Jenkins;
 import java.io.File;
 
 public class PhabricatorPlugin extends Plugin {
-    public static final String CONDUIT_TOKEN = "CONDUIT_TOKEN";
     public static final String ARCANIST_PATH = "ARCANIST_PATH";
 
     // Diff ID (not differential ID)

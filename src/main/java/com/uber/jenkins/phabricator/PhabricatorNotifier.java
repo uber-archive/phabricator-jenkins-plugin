@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
@@ -33,6 +34,7 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.targets.CoverageResult;
@@ -83,7 +85,9 @@ public class PhabricatorNotifier extends Notifier {
         final UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
                 environment.get("GIT_URL"), branch);
         final boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
-        final String conduitToken = environment.get(PhabricatorPlugin.CONDUIT_TOKEN, null);
+
+        final String conduitToken = getConduitToken(build.getParent(), logger);
+
         final String arcPath = environment.get(PhabricatorPlugin.ARCANIST_PATH, "arc");
         final boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
         final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
@@ -229,6 +233,15 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public String getCommentFile() {
         return commentFile;
+    }
+
+    public String getConduitToken(Job owner, Logger logger) {
+        ConduitCredentials credentials = this.getDescriptor().getCredentials(owner);
+        if (credentials != null) {
+            return credentials.getToken().getPlainText();
+        }
+        logger.warn("credentials", "No credentials configured.");
+        return null;
     }
 
     // Overridden for better type safety.

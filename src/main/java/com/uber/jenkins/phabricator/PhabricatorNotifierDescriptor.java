@@ -20,11 +20,18 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
+import com.uber.jenkins.phabricator.utils.CommonUtils;
 import hudson.Extension;
 import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
@@ -38,7 +45,7 @@ import org.kohsuke.stapler.StaplerRequest;
 @SuppressWarnings("UnusedDeclaration")
 @Extension
 public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Publisher> {
-    private String conduitURL;
+    private String credentialsID;
     private String uberallsURL;
     private String commentFile;
     private String commentSize;
@@ -68,6 +75,17 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         return "Post to Phabricator";
     }
 
+    @SuppressWarnings("unused")
+    public ListBoxModel doFillCredentialsIDItems(@AncestorInPath Jenkins context,
+                                                 @QueryParameter String remoteBase) {
+        return ConduitCredentialsDescriptor.doFillCredentialsIDItems(
+                context);
+    }
+
+    public ConduitCredentials getCredentials(Job owner) {
+        return ConduitCredentialsDescriptor.getCredentials(owner, credentialsID);
+    }
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
@@ -77,19 +95,16 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         return super.configure(req, formData);
     }
 
-    public String getConduitURL() {
-        if (conduitURL != null && !"".equals(conduitURL)) {
-            return conduitURL;
-        }
-        return null;
+    public String getCredentialsID() {
+        return credentialsID;
     }
 
-    public void setConduitURL(String value) {
-        conduitURL = value;
+    public void setCredentialsID(String credentialsID) {
+        this.credentialsID = credentialsID;
     }
 
     public String getUberallsURL() {
-        if (uberallsURL != null && !"".equals(uberallsURL)) {
+        if (!CommonUtils.isBlank(uberallsURL)) {
             return uberallsURL;
         }
         return null;
