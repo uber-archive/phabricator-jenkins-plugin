@@ -84,7 +84,7 @@ public class PhabricatorNotifier extends Notifier {
         final String branch = environment.get("GIT_BRANCH");
         final UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
                 environment.get("GIT_URL"), branch);
-        final boolean needsDecoration = environment.get(PhabricatorPlugin.WRAP_KEY, null) == null;
+        final boolean needsDecoration = build.getActions(PhabricatorPostbuildAction.class).size() == 0;
 
         final String conduitToken = getConduitToken(build.getParent(), logger);
 
@@ -116,6 +116,10 @@ public class PhabricatorNotifier extends Notifier {
         } catch (ArcanistUsageException e) {
             logger.info("arcanist", "unable to fetch differential");
             return true;
+        }
+
+        if (needsDecoration) {
+            diff.decorate(build, this.getPhabricatorURL(build.getParent()));
         }
 
         String revisionID = diff.getRevisionID(true);
@@ -236,11 +240,19 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     public String getConduitToken(Job owner, Logger logger) {
-        ConduitCredentials credentials = this.getDescriptor().getCredentials(owner);
+        ConduitCredentials credentials = getDescriptor().getCredentials(owner);
         if (credentials != null) {
             return credentials.getToken().getPlainText();
         }
         logger.warn("credentials", "No credentials configured.");
+        return null;
+    }
+
+    public String getPhabricatorURL(Job owner) {
+        ConduitCredentials credentials = getDescriptor().getCredentials(owner);
+        if (credentials != null) {
+            return credentials.getUrl();
+        }
         return null;
     }
 
