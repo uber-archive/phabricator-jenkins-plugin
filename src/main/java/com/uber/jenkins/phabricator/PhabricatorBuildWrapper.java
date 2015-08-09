@@ -23,17 +23,19 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
 import com.uber.jenkins.phabricator.conduit.Differential;
-import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
+import com.uber.jenkins.phabricator.utils.CommonUtils;
+import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Job;
 import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.*;
 
 public class PhabricatorBuildWrapper extends BuildWrapper {
@@ -55,7 +57,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                              Launcher launcher,
                              BuildListener listener) throws IOException, InterruptedException {
         EnvVars environment = build.getEnvironment(listener);
-        PrintStream logger = listener.getLogger();
+        Logger logger = new Logger(listener.getLogger());
         if (environment == null) {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
@@ -66,11 +68,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         envAdditions.put(PhabricatorPlugin.WRAP_KEY, "true");
         envAdditions.put(PhabricatorPlugin.ARCANIST_PATH, arcPath);
 
-        final String conduitToken = this.getConduitToken();
-        if (!CommonUtils.isBlank(conduitToken)) {
-            // Make this available for the post-build action (PhabricatorNotifier.class)
-            envAdditions.put(PhabricatorPlugin.CONDUIT_TOKEN, conduitToken);
-        }
+        final String conduitToken = this.getConduitToken(build.getParent(), logger);
 
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
@@ -82,11 +80,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             if (uberDotArcanist) {
                 int npmCode = starter.launch()
                         .cmds(Arrays.asList("npm", "install", "uber-dot-arcanist"))
-                        .stdout(logger)
+                        .stdout(logger.getStream())
                         .join();
 
                 if (npmCode != 0) {
-                    logger.println("Got non-zero exit code installing uber-dot-arcanist from npm: " + npmCode);
+                    logger.warn("uber-dot-arcanist", "Got non-zero exit code installing uber-dot-arcanist from npm: " + npmCode);
                 }
             }
 
@@ -94,17 +92,17 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             Differential diff;
             try {
                 diff = new Differential(diffClient.fetchDiff());
-                diff.decorate(build, this.getPhabricatorURL());
+                diff.decorate(build, this.getPhabricatorURL(build.getParent()));
 
-                logger.println("Applying patch for differential");
+                logger.info("arcanist", "Applying patch for differential");
 
                 // Post a silent notification if option is enabled
                 if (showBuildStartedMessage) {
                     diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
                 }
             } catch (ArcanistUsageException e) {
-                logger.println("[arcanist] unable to apply patch");
-                logger.println(e.getMessage());
+                logger.warn("arcanist", "Unable to apply patch");
+                logger.warn("arcanist", e.getMessage());
                 return null;
             }
 
@@ -115,22 +113,22 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
             int resetCode = starter.launch()
                     .cmds(Arrays.asList("git", "reset", "--hard", baseCommit))
-                    .stdout(logger)
+                    .stdout(logger.getStream())
                     .join();
 
             if (resetCode != 0) {
-                logger.println("Got non-zero exit code resetting to base commit " + baseCommit + ": " + resetCode);
+                logger.warn("arcanist", "Got non-zero exit code resetting to base commit " + baseCommit + ": " + resetCode);
             }
 
             // Clean workspace, otherwise `arc patch` may fail
             starter.launch()
-                    .stdout(logger)
+                    .stdout(logger.getStream())
                     .cmds(Arrays.asList("git", "clean", "-fd", "-f"))
                     .join();
 
             // Update submodules recursively.
             starter.launch()
-                    .stdout(logger)
+                    .stdout(logger.getStream())
                     .cmds(Arrays.asList("git", "submodule", "update", "--init", "--recursive"))
                     .join();
 
@@ -146,10 +144,10 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                     conduitToken,
                     params.toArray(new String[params.size()]));
 
-            int result = arc.callConduit(starter.launch(), logger);
+            int result = arc.callConduit(starter.launch(), logger.getStream());
 
             if (result != 0) {
-                logger.println("[arcanist] Error applying arc patch; got non-zero exit code " + result);
+                logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
                 return null;
             }
         }
@@ -170,8 +168,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         build.addAction(PhabricatorPostbuildAction.createShortText("master", null));
     }
 
-    private Environment ignoreBuild(PrintStream logger, String message) {
-        logger.println(message);
+    private Environment ignoreBuild(Logger logger, String message) {
+        logger.info("ignore-build", message);
         return new Environment(){};
     }
 
@@ -198,11 +196,20 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return showBuildStartedMessage;
     }
 
-    public String getPhabricatorURL() {
+    public String getPhabricatorURL(Job owner) {
+        ConduitCredentials credentials = this.getDescriptor().getCredentials(owner);
+        if (credentials != null) {
+            return credentials.getUrl();
+        }
         return this.getDescriptor().getConduitURL();
     }
 
-    public String getConduitToken() {
+    public String getConduitToken(Job owner, Logger logger) {
+        ConduitCredentials credentials = this.getDescriptor().getCredentials(owner);
+        if (credentials != null) {
+            return credentials.getToken().getPlainText();
+        }
+        logger.warn("credentials", "No credentials configured. Falling back to deprecated configuration.");
         return this.getDescriptor().getConduitToken();
     }
 
