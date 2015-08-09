@@ -64,7 +64,7 @@ public class DifferentialClientTest {
         assertEquals(response, sentinel);
     }
 
-    @Test(expected = ArcanistUsageException.class)
+    @Test(expected = ConduitAPIException.class)
     public void testFetchDiffWithEmptyResponse() throws Exception {
         JSONObject empty = new JSONObject();
         mockConduitResponse(differentialClient, empty);
@@ -72,7 +72,7 @@ public class DifferentialClientTest {
         differentialClient.fetchDiff();
     }
 
-    @Test(expected = ArcanistUsageException.class)
+    @Test(expected = ConduitAPIException.class)
     public void testFetchDiffWithNoDiff() throws Exception {
         JSONObject noDiff = new JSONObject();
         noDiff.put("response", null);
@@ -99,7 +99,22 @@ public class DifferentialClientTest {
         assertEquals("world", response.get("hello"));
     }
 
-    private void mockConduitResponse(DifferentialClient client, JSONObject response) throws InterruptedException, ArcanistUsageException, IOException {
+    @Test(expected = ConduitAPIException.class)
+    public void testFetchDiffWithJSONException() throws Exception {
+        JSONObject badResponse = TestUtils.getJSONFromFile(getClass(), "fetchDiffWithResponseArray");
+        mockConduitResponse(differentialClient, badResponse);
+
+        differentialClient.fetchDiff();
+    }
+
+    @Test
+    public void testSendHarbormasterSuccess() throws IOException, ConduitAPIException {
+        JSONObject empty = new JSONObject();
+        mockConduitResponse(differentialClient, empty);
+        differentialClient.sendHarbormasterMessage(TestUtils.TEST_PHID, true);
+    }
+
+    private void mockConduitResponse(DifferentialClient client, JSONObject response) throws IOException, ConduitAPIException {
         doReturn(response).when(client).callConduit(
                 anyString(),
                 anyMap()

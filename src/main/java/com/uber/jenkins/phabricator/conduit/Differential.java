@@ -27,14 +27,13 @@ import hudson.model.AbstractBuild;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Differential {
     private JSONObject rawJSON;
 
-    public Differential(JSONObject rawJSON) throws ArcanistUsageException, IOException, InterruptedException {
+    public Differential(JSONObject rawJSON) {
         this.rawJSON = rawJSON;
     }
 

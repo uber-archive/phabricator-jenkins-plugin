@@ -18,32 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.uber.jenkins.phabricator;
+package com.uber.jenkins.phabricator.conduit;
 
-import hudson.Plugin;
-import hudson.PluginWrapper;
-import jenkins.model.Jenkins;
+public class ConduitAPIException extends Exception {
+    public final int code;
 
-import java.io.File;
+    public ConduitAPIException(String message) {
+        super(message);
+        this.code = 0;
+    }
 
-public class PhabricatorPlugin extends Plugin {
-    // Diff ID (not differential ID)
-    static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
-    // Phabricator object ID (for Harbormaster)
-    static final String PHID_FIELD = "PHID";
-
-    public static String getIconPath(String icon) {
-        if (icon == null) {
-            return null;
-        }
-        if (icon.startsWith("/")) {
-            return icon;
-        }
-
-        // Try plugin images dir, fallback to Hudson images dir
-        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(PhabricatorPlugin.class);
-
-        boolean pluginIconExists = (wrapper != null) && new File(wrapper.baseResourceURL.getPath() + "/images/" + icon).exists();
-        return pluginIconExists ? "/plugin/" + wrapper.getShortName() + "/images/" + icon : Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
+    public ConduitAPIException(String message, int code) {
+        super(message);
+        this.code = code;
     }
 }

@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.utils;
 
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.LauncherFactory;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import hudson.EnvVars;
@@ -31,6 +32,12 @@ import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpRequestHandler;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.ByteArrayOutputStream;
@@ -48,7 +55,8 @@ public class TestUtils {
     public static final String TEST_SHA = "test-sha";
 
     public static final String TEST_DIFFERENTIAL_ID = "123";
-    private static final String TEST_CONDUIT_TOKEN = "notarealtoken";
+    public static final String TEST_CONDUIT_TOKEN = "notarealtoken";
+    public static final String TEST_PHID = "PHID-not-real";
     private static final String TEST_ARC_PATH = "echo";
 
     public static Logger getDefaultLogger() {
@@ -65,9 +73,8 @@ public class TestUtils {
     }
 
     public static DifferentialClient getDefaultDifferentialClient() {
-        LauncherFactory factory = mock(LauncherFactory.class);
-        return spy(new DifferentialClient(TEST_DIFFERENTIAL_ID, factory, TEST_CONDUIT_TOKEN,
-                TEST_ARC_PATH));
+        ConduitAPIClient client = mock(ConduitAPIClient.class);
+        return spy(new DifferentialClient(TEST_DIFFERENTIAL_ID, client));
     }
 
     public static EnvVars getDefaultEnvVars() {
@@ -121,7 +128,7 @@ public class TestUtils {
         return coverageResult;
     }
 
-    public static JSONObject getJSONFromFile(Class<?> klass, String filename) throws IOException {
+    public static JSONObject getJSONFromFile(Class klass, String filename) throws IOException {
         InputStream in = klass.getResourceAsStream(String.format("%s.json", filename));
         return slurpFromInputStream(in);
     }
@@ -136,5 +143,16 @@ public class TestUtils {
             Ratio ratio = Ratio.create(value * 100.0f, 100.0f);
             when(coverageResult.getCoverage(coverageMetric)).thenReturn(ratio);
         }
+    }
+
+    public static HttpRequestHandler makeHttpHandler(final int statusCode, final String body) {
+        return new HttpRequestHandler() {
+            @Override
+            public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
+                response.setStatusCode(statusCode);
+                response.setEntity(new StringEntity(body));
+
+            }
+        };
     }
 }

@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
@@ -50,7 +50,7 @@ public class PostCommentTaskTest {
 
     @Test
     public void testPostDifferentialFailed() throws Exception {
-        doThrow(new ArcanistUsageException("")).when(differentialClient).postComment(
+        doThrow(new ConduitAPIException("")).when(differentialClient).postComment(
                 anyString(),
                 anyString(),
                 anyBoolean(),
