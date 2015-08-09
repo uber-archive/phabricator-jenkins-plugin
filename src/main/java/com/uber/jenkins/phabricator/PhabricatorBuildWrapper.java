@@ -65,7 +65,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         final String arcPath = this.getArcPath();
 
         final Map<String, String> envAdditions = new HashMap<String, String>();
-        envAdditions.put(PhabricatorPlugin.WRAP_KEY, "true");
         envAdditions.put(PhabricatorPlugin.ARCANIST_PATH, arcPath);
 
         final String conduitToken = this.getConduitToken(build.getParent(), logger);

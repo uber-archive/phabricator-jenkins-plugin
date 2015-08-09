@@ -34,8 +34,6 @@ public class PhabricatorPlugin extends Plugin {
     // Phabricator object ID (for Harbormaster)
     static final String PHID_FIELD = "PHID";
 
-    static final String WRAP_KEY = "PHABRICATOR_JENKINS";
-
     public static String getIconPath(String icon) {
         if (icon == null) {
             return null;
