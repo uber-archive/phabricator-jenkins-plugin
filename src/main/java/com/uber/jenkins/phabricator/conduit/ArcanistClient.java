@@ -23,10 +23,7 @@ package com.uber.jenkins.phabricator.conduit;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import hudson.Launcher;
 import hudson.util.ArgumentListBuilder;
-import net.sf.json.JSONObject;
-import net.sf.json.groovy.JsonSlurper;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -60,31 +57,5 @@ public class ArcanistClient {
     public int callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {
         Launcher.ProcStarter command = this.getCommand(starter);
         return command.stdout(stderr).stderr(stderr).join();
-    }
-
-    public JSONObject parseConduit(Launcher.ProcStarter starter, PrintStream stderr)
-            throws ArcanistUsageException, IOException, InterruptedException {
-        Launcher.ProcStarter command = this.getCommand(starter);
-        ByteArrayOutputStream stdoutBuffer = new ByteArrayOutputStream();
-
-        int returnCode = command.
-                stdout(stdoutBuffer).
-                stderr(stderr).
-                join();
-
-        if (returnCode != 0) {
-            String errorMessage = stdoutBuffer.toString();
-            stderr.println("[arcanist] returned non-zero exit code " + returnCode);
-            stderr.println("[arcanist] output: " + errorMessage);
-            throw new ArcanistUsageException(errorMessage);
-        }
-
-        JsonSlurper jsonParser = new JsonSlurper();
-        try {
-            return (JSONObject) jsonParser.parseText(stdoutBuffer.toString());
-        } catch (net.sf.json.JSONException e) {
-            stderr.println("[arcanist] Unable to parse JSON from response: " + stdoutBuffer.toString());
-            throw e;
-        }
     }
 }

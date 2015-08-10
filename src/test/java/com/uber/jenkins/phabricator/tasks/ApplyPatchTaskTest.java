@@ -35,14 +35,14 @@ public class ApplyPatchTaskTest {
     public void testApplyPatchWithValidArc() throws Exception {
         ApplyPatchTask task = getTask("echo", "true");
         Task.Result result = task.run();
-        assertEquals(result.SUCCESS, result);
+        assertEquals(Task.Result.SUCCESS, result);
     }
 
     @Test
     public void testApplyPatchWithInvalidArc() throws Exception {
         ApplyPatchTask task = getTask("false", "echo");
         Task.Result result = task.run();
-        assertEquals(result.FAILURE, result);
+        assertEquals(Task.Result.FAILURE, result);
     }
 
     private ApplyPatchTask getTask(String arcPath, String gitPath) throws Exception {

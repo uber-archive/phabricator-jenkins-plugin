@@ -21,14 +21,11 @@
 package com.uber.jenkins.phabricator.conduit;
 
 import hudson.Launcher;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class ArcanistClientTest {
     @Rule
@@ -48,29 +45,6 @@ public class ArcanistClientTest {
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);
-    }
-
-    @Test
-    public void testParseConduit() throws Exception {
-        String jsonString = "{\"hello\": \"world\"}";
-        ArcanistClient client = new ArcanistClient("echo", jsonString, null);
-
-        JSONObject result = client.parseConduit(getLauncher().launch(), System.err);
-        assertTrue(result.has("hello"));
-        assertEquals(result.getString("hello"), "world");
-    }
-
-    @Test(expected = ArcanistUsageException.class)
-    public void testNonZeroExitCode() throws Exception {
-        ArcanistClient client = new ArcanistClient("false", "", null);
-
-        client.parseConduit(getLauncher().launch(), System.err);
-    }
-
-    @Test(expected = JSONException.class)
-    public void testNonJsonOutput() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "not-json", null);
-        client.parseConduit(getLauncher().launch(), System.err);
     }
 
     private Launcher getLauncher() {
