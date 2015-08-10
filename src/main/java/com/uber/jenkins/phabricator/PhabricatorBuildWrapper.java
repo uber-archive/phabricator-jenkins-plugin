@@ -97,9 +97,9 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return null;
         }
 
-        DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
         Differential diff;
         try {
+            DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
             diff = new Differential(diffClient.fetchDiff());
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
 
