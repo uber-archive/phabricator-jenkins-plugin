@@ -65,12 +65,6 @@
     </dependency>
 
     <dependency>
-      <groupId>net.java.dev.jna</groupId>
-      <artifactId>jna</artifactId>
-      <version>3.2.2</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>credentials</artifactId>
       <version>1.22</version>
