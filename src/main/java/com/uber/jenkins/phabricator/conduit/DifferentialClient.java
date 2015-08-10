@@ -73,7 +73,7 @@ public class DifferentialClient {
             return response.getJSONObject(diffID);
         } catch (JSONException e) {
             throw new ConduitAPIException(
-                    String.format("Unable to find '%s' key in response: (%s) %s",
+                    String.format("Unable to find '%s' key in 'result': (%s) %s",
                             diffID,
                             e.getMessage(),
                             response.toString(2)));
