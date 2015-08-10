@@ -77,13 +77,13 @@ public class ApplyPatchTask extends Task {
     @Override
     protected void execute() {
         try {
-            int resetCode = starter.launch()
+            int exitCode = starter.launch()
                     .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
                     .stdout(logStream)
                     .join();
 
-            if (resetCode != 0) {
-                info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + resetCode);
+            if (exitCode != 0) {
+                info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
             }
 
             // Clean workspace, otherwise `arc patch` may fail
@@ -98,23 +98,19 @@ public class ApplyPatchTask extends Task {
                     .cmds(Arrays.asList(gitPath, "submodule", "update", "--init", "--recursive"))
                     .join();
 
-            List<String> params = new ArrayList<String>(Arrays.asList("--nobranch", "--diff", diffID));
+            List<String> arcPatchParams = new ArrayList<String>(Arrays.asList("--nobranch", "--diff", diffID));
             if (!createCommit) {
-                params.add("--nocommit");
+                arcPatchParams.add("--nocommit");
             }
 
             ArcanistClient arc = new ArcanistClient(
                     arcPath,
                     "patch",
                     conduitToken,
-                    params.toArray(new String[params.size()]));
+                    arcPatchParams.toArray(new String[arcPatchParams.size()]));
 
-            int result = arc.callConduit(starter.launch(), logStream);
-            if (result == 0) {
-                this.result = Result.SUCCESS;
-            } else {
-                this.result = Result.FAILURE;
-            }
+            exitCode = arc.callConduit(starter.launch(), logStream);
+            this.result = exitCode == 0 ? Result.SUCCESS : Result.FAILURE;
         } catch (IOException e) {
             e.printStackTrace(logStream);
             this.result = Result.FAILURE;

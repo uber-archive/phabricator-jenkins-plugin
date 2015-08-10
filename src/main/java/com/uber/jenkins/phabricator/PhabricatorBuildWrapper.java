@@ -184,7 +184,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         if (credentials != null) {
             return credentials.getUrl();
         }
-        return this.getDescriptor().getConduitURL();
+        return getDescriptor().getConduitURL();
     }
 
     private String getConduitToken(Job owner, Logger logger) {
@@ -193,7 +193,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return credentials.getToken().getPlainText();
         }
         logger.warn("credentials", "No credentials configured. Falling back to deprecated configuration.");
-        return this.getDescriptor().getConduitToken();
+        return getDescriptor().getConduitToken();
     }
 
     /**
@@ -201,7 +201,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
      * @return a string, fully-qualified or not, could just be "arc"
      */
     private String getArcPath() {
-        final String providedPath = this.getDescriptor().getArcPath();
+        final String providedPath = getDescriptor().getArcPath();
         if (CommonUtils.isBlank(providedPath)) {
             return "arc";
         }
