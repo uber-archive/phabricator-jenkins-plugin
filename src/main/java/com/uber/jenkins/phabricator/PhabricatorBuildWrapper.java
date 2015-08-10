@@ -39,8 +39,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PhabricatorBuildWrapper extends BuildWrapper {
     private static final String CONDUIT_TAG = "conduit";
@@ -69,8 +67,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         if (environment == null) {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
-
-        final Map<String, String> envAdditions = new HashMap<String, String>();
 
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
@@ -114,6 +110,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                 diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
             }
         } catch (ConduitAPIException e) {
+            e.printStackTrace(logger.getStream());
             logger.warn(CONDUIT_TAG, "Unable to apply patch");
             logger.warn(CONDUIT_TAG, e.getMessage());
             return null;
@@ -135,16 +132,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return null;
         }
 
-        return new Environment() {
-            @Override
-            public void buildEnvVars(Map<String, String> env) {
-                // A little roundabout, but allows us to do overrides per
-                // how EnvVars#override works (PATH+unique=/foo/bar)
-                EnvVars envVars = new EnvVars(env);
-                envVars.putAll(envAdditions);
-                env.putAll(envVars);
-            }
-        };
+        return new Environment(){};
     }
 
     private void addShortText(final AbstractBuild build) {
@@ -191,7 +179,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return showBuildStartedMessage;
     }
 
-    public String getPhabricatorURL(Job owner) {
+    private String getPhabricatorURL(Job owner) {
         ConduitCredentials credentials = getConduitCredentials(owner);
         if (credentials != null) {
             return credentials.getUrl();
@@ -199,7 +187,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return this.getDescriptor().getConduitURL();
     }
 
-    public String getConduitToken(Job owner, Logger logger) {
+    private String getConduitToken(Job owner, Logger logger) {
         ConduitCredentials credentials = getConduitCredentials(owner);
         if (credentials != null) {
             return credentials.getToken().getPlainText();
@@ -212,7 +200,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
      * Return the path to the arcanist executable
      * @return a string, fully-qualified or not, could just be "arc"
      */
-    public String getArcPath() {
+    private String getArcPath() {
         final String providedPath = this.getDescriptor().getArcPath();
         if (CommonUtils.isBlank(providedPath)) {
             return "arc";

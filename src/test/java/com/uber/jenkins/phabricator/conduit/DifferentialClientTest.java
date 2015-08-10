@@ -75,7 +75,7 @@ public class DifferentialClientTest {
     @Test(expected = ConduitAPIException.class)
     public void testFetchDiffWithNoDiff() throws Exception {
         JSONObject noDiff = new JSONObject();
-        noDiff.put("response", null);
+        noDiff.put("result", null);
         mockConduitResponse(differentialClient, noDiff);
 
         differentialClient.fetchDiff();

@@ -27,9 +27,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -37,11 +34,9 @@ public class ArcanistClientTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    private final Map<String, String> emptyParams = new HashMap<String, String>();
-
     @Test
     public void testEcho() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "hello", emptyParams, null);
+        ArcanistClient client = new ArcanistClient("echo", "hello", null);
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);
@@ -49,7 +44,7 @@ public class ArcanistClientTest {
 
     @Test
     public void testEchoWithToken() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "tokentest", emptyParams, "notarealtoken");
+        ArcanistClient client = new ArcanistClient("echo", "tokentest", "notarealtoken");
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);
@@ -58,7 +53,7 @@ public class ArcanistClientTest {
     @Test
     public void testParseConduit() throws Exception {
         String jsonString = "{\"hello\": \"world\"}";
-        ArcanistClient client = new ArcanistClient("echo", jsonString, emptyParams, null);
+        ArcanistClient client = new ArcanistClient("echo", jsonString, null);
 
         JSONObject result = client.parseConduit(getLauncher().launch(), System.err);
         assertTrue(result.has("hello"));
@@ -67,14 +62,14 @@ public class ArcanistClientTest {
 
     @Test(expected = ArcanistUsageException.class)
     public void testNonZeroExitCode() throws Exception {
-        ArcanistClient client = new ArcanistClient("false", "", emptyParams, null);
+        ArcanistClient client = new ArcanistClient("false", "", null);
 
         client.parseConduit(getLauncher().launch(), System.err);
     }
 
     @Test(expected = JSONException.class)
     public void testNonJsonOutput() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "not-json", emptyParams, null);
+        ArcanistClient client = new ArcanistClient("echo", "not-json", null);
         client.parseConduit(getLauncher().launch(), System.err);
     }
 

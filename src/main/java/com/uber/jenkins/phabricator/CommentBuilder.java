@@ -27,7 +27,7 @@ import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
 
-public class CommentBuilder {
+class CommentBuilder {
     private static final String UBERALLS_TAG = "uberalls";
     private final Logger logger;
     private final CoverageResult currentCoverage;

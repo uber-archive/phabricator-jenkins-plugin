@@ -34,13 +34,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 public class PostCommentTaskTest {
-
     private Logger logger;
     private DifferentialClient differentialClient;
 
-    private String TEST_COMMENT = "They are selling like hotcakes!";
-    private String TEST_COMMENT_ACTION = "none";
-    private String TEST_REVISION_ID = "something";
+    private final String TEST_COMMENT = "They are selling like hotcakes!";
+    private final String TEST_COMMENT_ACTION = "none";
+    private final String TEST_REVISION_ID = "something";
 
     @Before
     public void setup() {

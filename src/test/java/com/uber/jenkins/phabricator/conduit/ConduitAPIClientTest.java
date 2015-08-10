@@ -74,7 +74,7 @@ public class ConduitAPIClientTest {
     }
 
     @Test
-    public void testWithParams() throws UnsupportedEncodingException {
+    public void testWithParams() throws UnsupportedEncodingException, ConduitAPIException {
         client = new ConduitAPIClient("http://foo.bar", TestUtils.TEST_CONDUIT_TOKEN);
         Map<String, String> params = new HashMap<String, String>();
         params.put("hello", "world");

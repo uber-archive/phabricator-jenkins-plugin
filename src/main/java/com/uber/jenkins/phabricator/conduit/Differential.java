@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Differential {
-    private JSONObject rawJSON;
+    private final JSONObject rawJSON;
 
     public Differential(JSONObject rawJSON) {
         this.rawJSON = rawJSON;

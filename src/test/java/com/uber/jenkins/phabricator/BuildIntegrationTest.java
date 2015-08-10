@@ -33,14 +33,14 @@ public class BuildIntegrationTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    protected FreeStyleProject p;
+    FreeStyleProject p;
 
-    protected void assertSuccessfulBuild(Result result) {
+    void assertSuccessfulBuild(Result result) {
         assertTrue(result.isCompleteBuild());
         assertTrue(result.isBetterOrEqualTo(Result.SUCCESS));
     }
 
-    protected FreeStyleProject createProject() throws IOException {
+    FreeStyleProject createProject() throws IOException {
         return j.createFreeStyleProject();
     }
 }

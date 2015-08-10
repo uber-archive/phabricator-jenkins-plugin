@@ -25,25 +25,20 @@ import hudson.Launcher;
 import hudson.util.ArgumentListBuilder;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
-import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Map;
 
 public class ArcanistClient {
     private final String arcPath;
     private final String methodName;
-    private final Map<String, String> params;
     private final String conduitToken;
     private final String[] arguments;
 
-    public ArcanistClient(String arcPath, String methodName, Map<String, String> params, String conduitToken, String... arguments) {
+    public ArcanistClient(String arcPath, String methodName, String conduitToken, String... arguments) {
         this.arcPath = arcPath;
         this.methodName = methodName;
-        this.params = params;
         this.conduitToken = conduitToken;
         this.arguments = arguments;
     }
@@ -59,16 +54,7 @@ public class ArcanistClient {
     }
 
     private Launcher.ProcStarter getCommand(Launcher.ProcStarter starter) throws IOException {
-        Launcher.ProcStarter command = starter.cmds(this.getConduitCommand());
-
-        if (this.params != null) {
-            JSONObject obj = new JSONObject();
-            obj.putAll(this.params);
-
-            InputStream jsonStream = IOUtils.toInputStream(obj.toString(), "UTF-8");
-            command = command.stdin(jsonStream);
-        }
-        return command;
+        return starter.cmds(this.getConduitCommand());
     }
 
     public int callConduit(Launcher.ProcStarter starter, PrintStream stderr) throws IOException, InterruptedException {

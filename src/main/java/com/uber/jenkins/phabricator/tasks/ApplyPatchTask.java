@@ -106,7 +106,6 @@ public class ApplyPatchTask extends Task {
             ArcanistClient arc = new ArcanistClient(
                     arcPath,
                     "patch",
-                    null,
                     conduitToken,
                     params.toArray(new String[params.size()]));
 

@@ -51,21 +51,21 @@ public class DifferentialClient {
         params.put("revision_id", revisionID);
         params.put("action", action);
         params.put("message", message);
-        params.put("silent", silent);
+        params.put("silent", Boolean.toString(silent));
 
         return this.callConduit("differential.createcomment", params);
     }
 
     public JSONObject fetchDiff() throws IOException, ConduitAPIException {
         Map params = new HashMap<String, String>();
-        params.put("ids", new String[]{this.diffID});
+        params.put("ids[]", diffID);
         JSONObject query = this.callConduit("differential.querydiffs", params);
         JSONObject response;
         try {
-            response = query.getJSONObject("response");
+            response = query.getJSONObject("result");
         } catch (JSONException e) {
             throw new ConduitAPIException(
-                    String.format("No 'response' object found in conduit call: (%s) %s",
+                    String.format("No 'result' object found in conduit call: (%s) %s",
                             e.getMessage(),
                             query.toString(2)));
         }

@@ -36,6 +36,9 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,20 +80,30 @@ public class ConduitAPIClient {
         }
 
         JsonSlurper jsonParser = new JsonSlurper();
-
         return (JSONObject)jsonParser.parse(responseBody);
     }
 
-    public HttpUriRequest createRequest(String action, Map<String, String> data) throws UnsupportedEncodingException {
-        HttpPost post = new HttpPost(String.format("%s/api/%s", conduitURL, action));
+    public HttpUriRequest createRequest(String action, Map<String, String> data) throws UnsupportedEncodingException, ConduitAPIException {
+        HttpPost post;
+        try {
+            post = new HttpPost(
+                    new URL(new URL(new URL(conduitURL), "/api/"), action).toURI()
+            );
+        } catch (MalformedURLException e) {
+            throw new ConduitAPIException(e.getMessage());
+        } catch (URISyntaxException e) {
+            throw new ConduitAPIException(e.getMessage());
+        }
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair(API_TOKEN_KEY, conduitToken));
         for (Map.Entry<String, String> datum : data.entrySet()) {
             params.add(new BasicNameValuePair(datum.getKey(), datum.getValue()));
         }
+
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
+
         return post;
     }
 }

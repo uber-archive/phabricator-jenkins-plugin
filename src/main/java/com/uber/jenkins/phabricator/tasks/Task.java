@@ -39,7 +39,7 @@ public abstract class Task {
     }
 
     protected Result result = Result.UNKNOWN;
-    private Logger logger;
+    private final Logger logger;
 
     /**
      * Task constructor.

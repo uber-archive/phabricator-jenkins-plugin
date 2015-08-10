@@ -106,7 +106,7 @@ public class PhabricatorNotifier extends Notifier {
 
         ConduitAPIClient conduitClient;
         try {
-            conduitClient = getConduitClient(build.getParent(), logger);
+            conduitClient = getConduitClient(build.getParent());
         } catch (ConduitAPIException e) {
             e.printStackTrace(logger.getStream());
             logger.warn(CONDUIT_TAG, e.getMessage());
@@ -118,7 +118,7 @@ public class PhabricatorNotifier extends Notifier {
         try {
             diff = new Differential(diffClient.fetchDiff());
         } catch (ConduitAPIException e) {
-            logger.info(CONDUIT_TAG, "unable to fetch differential");
+            logger.info(CONDUIT_TAG, "Unable to fetch differential");
             return true;
         }
 
@@ -158,9 +158,9 @@ public class PhabricatorNotifier extends Notifier {
             logger.info("harbormaster", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
             try {
                 JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
-                if (result.containsKey("errorMessage") && !(result.get("errorMessage") instanceof JSONNull)) {
+                if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {
                     logger.info("harbormaster",
-                            String.format("Error from Harbormaster: %s", result.getString("errorMessage")));
+                            String.format("Error from Harbormaster: %s", result.getString("error_info")));
                     return false;
                 }
             } catch (ConduitAPIException e) {
@@ -200,7 +200,7 @@ public class PhabricatorNotifier extends Notifier {
         return true;
     }
 
-    private ConduitAPIClient getConduitClient(Job owner, Logger logger) throws ConduitAPIException {
+    private ConduitAPIClient getConduitClient(Job owner) throws ConduitAPIException {
         ConduitCredentials credentials = getConduitCredentials(owner);
         if (credentials == null) {
             throw new ConduitAPIException("No credentials configured for conduit");
@@ -255,16 +255,7 @@ public class PhabricatorNotifier extends Notifier {
         return getDescriptor().getCredentials(owner);
     }
 
-    public String getConduitToken(Job owner, Logger logger) {
-        ConduitCredentials credentials = getConduitCredentials(owner);
-        if (credentials != null) {
-            return credentials.getToken().getPlainText();
-        }
-        logger.warn("credentials", "No credentials configured.");
-        return null;
-    }
-
-    public String getPhabricatorURL(Job owner) {
+    private String getPhabricatorURL(Job owner) {
         ConduitCredentials credentials = getDescriptor().getCredentials(owner);
         if (credentials != null) {
             return credentials.getUrl();
