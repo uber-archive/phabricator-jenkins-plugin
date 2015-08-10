@@ -45,6 +45,12 @@ public class ApplyPatchTaskTest {
         assertEquals(Task.Result.FAILURE, result);
     }
 
+    @Test
+    public void testBothGitAndArcFailing() throws Exception {
+        ApplyPatchTask task = getTask("false", "false");
+        assertEquals(Task.Result.FAILURE, task.run());
+    }
+
     private ApplyPatchTask getTask(String arcPath, String gitPath) throws Exception {
         return new ApplyPatchTask(
                 TestUtils.getDefaultLogger(),
