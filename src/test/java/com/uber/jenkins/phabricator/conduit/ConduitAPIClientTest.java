@@ -88,5 +88,4 @@ public class ConduitAPIClientTest {
                 server.getServiceAddress().getPort()
         );
     }
-
 }
