@@ -44,7 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ConduitAPIClient {
-    private static final String API_TOKEN_KEY = "api.token";
+    private static final String API_TOKEN_KEY = "token";
+    private static final String CONDUIT_METADATA_KEY = "__conduit__";
 
     private final String conduitURL;
     private final String conduitToken;
@@ -83,6 +84,14 @@ public class ConduitAPIClient {
         return (JSONObject)jsonParser.parse(responseBody);
     }
 
+    /**
+     * Post a URL-encoded "params" key with a JSON-encoded body as per the Conduit API
+     * @param action The name of the Conduit method
+     * @param data The data to be sent to the Conduit method
+     * @return The request to perform
+     * @throws UnsupportedEncodingException
+     * @throws ConduitAPIException
+     */
     public HttpUriRequest createRequest(String action, Map<String, String> data) throws UnsupportedEncodingException, ConduitAPIException {
         HttpPost post;
         try {
@@ -95,13 +104,17 @@ public class ConduitAPIClient {
             throw new ConduitAPIException(e.getMessage());
         }
 
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair(API_TOKEN_KEY, conduitToken));
-        for (Map.Entry<String, String> datum : data.entrySet()) {
-            params.add(new BasicNameValuePair(datum.getKey(), datum.getValue()));
-        }
+        JSONObject params = new JSONObject();
+        params.putAll(data);
 
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+        JSONObject conduitParams = new JSONObject();
+        conduitParams.put(API_TOKEN_KEY, conduitToken);
+        params.put(CONDUIT_METADATA_KEY, conduitParams);
+
+        List<NameValuePair> formData = new ArrayList<NameValuePair>();
+        formData.add(new BasicNameValuePair("params", params.toString()));
+
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData);
         post.setEntity(entity);
 
         return post;
