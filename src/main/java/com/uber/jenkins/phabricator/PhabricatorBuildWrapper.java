@@ -20,11 +20,13 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.uber.jenkins.phabricator.conduit.ArcanistClient;
-import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
+import com.uber.jenkins.phabricator.tasks.ApplyPatchTask;
+import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
@@ -36,9 +38,12 @@ import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
 
 public class PhabricatorBuildWrapper extends BuildWrapper {
+    private static final String CONDUIT_TAG = "conduit";
+    private static final String DEFAULT_GIT_PATH = "git";
+
     private final boolean createCommit;
     private final boolean applyToMaster;
     private final boolean uberDotArcanist;
@@ -52,6 +57,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         this.showBuildStartedMessage = showBuildStartedMessage;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Environment setUp(AbstractBuild build,
                              Launcher launcher,
@@ -62,105 +68,71 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
 
-        final String arcPath = this.getArcPath();
-
-        final Map<String, String> envAdditions = new HashMap<String, String>();
-        envAdditions.put(PhabricatorPlugin.ARCANIST_PATH, arcPath);
-
-        final String conduitToken = this.getConduitToken(build.getParent(), logger);
-
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
             this.addShortText(build);
             this.ignoreBuild(logger, "No differential ID found.");
-        } else {
-            LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
+            return new Environment(){};
+        }
 
-            if (uberDotArcanist) {
-                int npmCode = starter.launch()
-                        .cmds(Arrays.asList("npm", "install", "uber-dot-arcanist"))
-                        .stdout(logger.getStream())
-                        .join();
+        LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
 
-                if (npmCode != 0) {
-                    logger.warn("uber-dot-arcanist", "Got non-zero exit code installing uber-dot-arcanist from npm: " + npmCode);
-                }
-            }
-
-            DifferentialClient diffClient = new DifferentialClient(diffID, starter, conduitToken, arcPath);
-            Differential diff;
-            try {
-                diff = new Differential(diffClient.fetchDiff());
-                diff.decorate(build, this.getPhabricatorURL(build.getParent()));
-
-                logger.info("arcanist", "Applying patch for differential");
-
-                // Post a silent notification if option is enabled
-                if (showBuildStartedMessage) {
-                    diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
-                }
-            } catch (ArcanistUsageException e) {
-                logger.warn("arcanist", "Unable to apply patch");
-                logger.warn("arcanist", e.getMessage());
-                return null;
-            }
-
-            String baseCommit = "origin/master";
-            if (!applyToMaster) {
-                baseCommit = diff.getBaseCommit();
-            }
-
-            int resetCode = starter.launch()
-                    .cmds(Arrays.asList("git", "reset", "--hard", baseCommit))
+        if (uberDotArcanist) {
+            int npmCode = starter.launch()
+                    .cmds(Arrays.asList("npm", "install", "uber-dot-arcanist"))
                     .stdout(logger.getStream())
                     .join();
 
-            if (resetCode != 0) {
-                logger.warn("arcanist", "Got non-zero exit code resetting to base commit " + baseCommit + ": " + resetCode);
-            }
-
-            // Clean workspace, otherwise `arc patch` may fail
-            starter.launch()
-                    .stdout(logger.getStream())
-                    .cmds(Arrays.asList("git", "clean", "-fd", "-f"))
-                    .join();
-
-            // Update submodules recursively.
-            starter.launch()
-                    .stdout(logger.getStream())
-                    .cmds(Arrays.asList("git", "submodule", "update", "--init", "--recursive"))
-                    .join();
-
-            List<String> params = new ArrayList<String>(Arrays.asList("--nobranch", "--diff", diffID));
-            if (!createCommit) {
-                params.add("--nocommit");
-            }
-
-            ArcanistClient arc = new ArcanistClient(
-                    arcPath,
-                    "patch",
-                    null,
-                    conduitToken,
-                    params.toArray(new String[params.size()]));
-
-            int result = arc.callConduit(starter.launch(), logger.getStream());
-
-            if (result != 0) {
-                logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
-                return null;
+            if (npmCode != 0) {
+                logger.warn("uber-dot-arcanist", "Got non-zero exit code installing uber-dot-arcanist from npm: " + npmCode);
             }
         }
 
-        return new Environment() {
-            @Override
-            public void buildEnvVars(Map<String, String> env) {
-                // A little roundabout, but allows us to do overrides per
-                // how EnvVars#override works (PATH+unique=/foo/bar)
-                EnvVars envVars = new EnvVars(env);
-                envVars.putAll(envAdditions);
-                env.putAll(envVars);
+        ConduitAPIClient conduitClient;
+        try {
+            conduitClient = getConduitClient(build.getParent(), logger);
+        } catch (ConduitAPIException e) {
+            e.printStackTrace(logger.getStream());
+            logger.warn(CONDUIT_TAG, e.getMessage());
+            return null;
+        }
+
+        Differential diff;
+        try {
+            DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
+            diff = new Differential(diffClient.fetchDiff());
+            diff.decorate(build, this.getPhabricatorURL(build.getParent()));
+
+            logger.info(CONDUIT_TAG, "Fetching differential from Conduit API");
+
+            // Post a silent notification if option is enabled
+            if (showBuildStartedMessage) {
+                diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
             }
-        };
+        } catch (ConduitAPIException e) {
+            e.printStackTrace(logger.getStream());
+            logger.warn(CONDUIT_TAG, "Unable to apply patch");
+            logger.warn(CONDUIT_TAG, e.getMessage());
+            return null;
+        }
+
+        String baseCommit = "origin/master";
+        if (!applyToMaster) {
+            baseCommit = diff.getBaseCommit();
+        }
+
+        final String conduitToken = this.getConduitToken(build.getParent(), logger);
+        Task.Result result = new ApplyPatchTask(
+                logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
+                DEFAULT_GIT_PATH, createCommit
+        ).run();
+
+        if (result != Task.Result.SUCCESS) {
+            logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
+            return null;
+        }
+
+        return new Environment(){};
     }
 
     private void addShortText(final AbstractBuild build) {
@@ -170,6 +142,18 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private Environment ignoreBuild(Logger logger, String message) {
         logger.info("ignore-build", message);
         return new Environment(){};
+    }
+
+    private ConduitAPIClient getConduitClient(Job owner, Logger logger) throws ConduitAPIException {
+        ConduitCredentials credentials = getConduitCredentials(owner);
+        if (credentials == null) {
+            throw new ConduitAPIException("No credentials configured for conduit");
+        }
+        return new ConduitAPIClient(credentials.getUrl(), getConduitToken(owner, logger));
+    }
+
+    private ConduitCredentials getConduitCredentials(Job owner) {
+        return getDescriptor().getCredentials(owner);
     }
 
     /**
@@ -195,29 +179,29 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return showBuildStartedMessage;
     }
 
-    public String getPhabricatorURL(Job owner) {
-        ConduitCredentials credentials = this.getDescriptor().getCredentials(owner);
+    private String getPhabricatorURL(Job owner) {
+        ConduitCredentials credentials = getConduitCredentials(owner);
         if (credentials != null) {
             return credentials.getUrl();
         }
-        return this.getDescriptor().getConduitURL();
+        return getDescriptor().getConduitURL();
     }
 
-    public String getConduitToken(Job owner, Logger logger) {
-        ConduitCredentials credentials = this.getDescriptor().getCredentials(owner);
+    private String getConduitToken(Job owner, Logger logger) {
+        ConduitCredentials credentials = getConduitCredentials(owner);
         if (credentials != null) {
             return credentials.getToken().getPlainText();
         }
         logger.warn("credentials", "No credentials configured. Falling back to deprecated configuration.");
-        return this.getDescriptor().getConduitToken();
+        return getDescriptor().getConduitToken();
     }
 
     /**
      * Return the path to the arcanist executable
      * @return a string, fully-qualified or not, could just be "arc"
      */
-    public String getArcPath() {
-        final String providedPath = this.getDescriptor().getArcPath();
+    private String getArcPath() {
+        final String providedPath = getDescriptor().getArcPath();
         if (CommonUtils.isBlank(providedPath)) {
             return "arc";
         }

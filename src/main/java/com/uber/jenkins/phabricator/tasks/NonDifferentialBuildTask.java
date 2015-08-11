@@ -30,10 +30,10 @@ import com.uber.jenkins.phabricator.utils.Logger;
  */
 public class NonDifferentialBuildTask extends Task {
 
-    protected UberallsClient uberallsClient;
-    protected CodeCoverageMetrics codeCoverageMetrics;
-    protected boolean uberallsEnabled;
-    protected String commitSha;
+    protected final UberallsClient uberallsClient;
+    protected final CodeCoverageMetrics codeCoverageMetrics;
+    protected final boolean uberallsEnabled;
+    protected final String commitSha;
 
     /**
      * GenericBuildTask constructor.

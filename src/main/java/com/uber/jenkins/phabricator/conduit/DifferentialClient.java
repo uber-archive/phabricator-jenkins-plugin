@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import com.uber.jenkins.phabricator.LauncherFactory;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -33,15 +32,11 @@ import java.util.Map;
  */
 public class DifferentialClient {
     private final String diffID;
-    private final LauncherFactory launcher;
-    private final String arcPath;
-    private final String conduitToken;
+    private final ConduitAPIClient conduit;
 
-    public DifferentialClient(String diffID, LauncherFactory launcher, String conduitToken, String arcPath) {
+    public DifferentialClient(String diffID, ConduitAPIClient conduit) {
         this.diffID = diffID;
-        this.launcher = launcher;
-        this.conduitToken = conduitToken;
-        this.arcPath = arcPath;
+        this.conduit = conduit;
     }
 
     /**
@@ -51,34 +46,34 @@ public class DifferentialClient {
      * @param silent whether or not to trigger an email
      * @param action phabricator comment action, e.g. 'resign', 'reject', 'none'
      */
-    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException, InterruptedException, ArcanistUsageException {
+    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws ConduitAPIException, IOException {
         Map params = new HashMap<String, String>();
         params.put("revision_id", revisionID);
         params.put("action", action);
         params.put("message", message);
-        params.put("silent", silent);
+        params.put("silent", Boolean.toString(silent));
 
         return this.callConduit("differential.createcomment", params);
     }
 
-    public JSONObject fetchDiff() throws ArcanistUsageException, IOException, InterruptedException {
+    public JSONObject fetchDiff() throws IOException, ConduitAPIException {
         Map params = new HashMap<String, String>();
-        params.put("ids", new String[]{this.diffID});
+        params.put("ids[]", diffID);
         JSONObject query = this.callConduit("differential.querydiffs", params);
         JSONObject response;
         try {
-            response = query.getJSONObject("response");
+            response = query.getJSONObject("result");
         } catch (JSONException e) {
-            throw new ArcanistUsageException(
-                    String.format("No 'response' object found in conduit call: (%s) %s",
+            throw new ConduitAPIException(
+                    String.format("No 'result' object found in conduit call: (%s) %s",
                             e.getMessage(),
                             query.toString(2)));
         }
         try {
             return response.getJSONObject(diffID);
         } catch (JSONException e) {
-            throw new ArcanistUsageException(
-                    String.format("Unable to find '%s' key in response: (%s) %s",
+            throw new ConduitAPIException(
+                    String.format("Unable to find '%s' key in 'result': (%s) %s",
                             diffID,
                             e.getMessage(),
                             response.toString(2)));
@@ -93,7 +88,7 @@ public class DifferentialClient {
      * @throws IOException
      * @throws InterruptedException
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass) throws IOException, InterruptedException, ArcanistUsageException {
+    public JSONObject sendHarbormasterMessage(String phid, boolean pass) throws ConduitAPIException, IOException {
         Map params = new HashMap<String, String>();
         params.put("type", pass ? "pass" : "fail");
         params.put("buildTargetPHID", phid);
@@ -110,27 +105,11 @@ public class DifferentialClient {
      * @throws InterruptedException
      * @throws ArcanistUsageException
      */
-    public JSONObject postComment(String revisionID, String message) throws IOException, InterruptedException, ArcanistUsageException {
+    public JSONObject postComment(String revisionID, String message) throws ConduitAPIException, IOException {
         return postComment(revisionID, message, true, "none");
     }
 
-    protected JSONObject callConduit(String methodName, Map<String, String> params) throws IOException, InterruptedException, ArcanistUsageException {
-        ArcanistClient arc = getArcanistClient(methodName, params);
-        return arc.parseConduit(this.launcher.launch(), this.launcher.getStderr());
-    }
-
-    /**
-     * Get a new arcanist client.
-     * @param params parameters to pass to arcanist
-     * @return a new ArcanistClient
-     */
-    protected ArcanistClient getArcanistClient(String methodName, Map<String, String> params) {
-        return new ArcanistClient(
-                this.arcPath,
-                "call-conduit",
-                params,
-                conduitToken,
-                methodName
-        );
+    protected JSONObject callConduit(String methodName, Map<String, String> params) throws ConduitAPIException, IOException {
+        return conduit.perform(methodName, params);
     }
 }

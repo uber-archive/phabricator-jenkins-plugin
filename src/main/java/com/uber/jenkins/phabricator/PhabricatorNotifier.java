@@ -20,9 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
-import com.uber.jenkins.phabricator.conduit.Differential;
-import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.conduit.*;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
@@ -48,6 +46,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 public class PhabricatorNotifier extends Notifier {
+    private static final String UBERALLS_TAG = "uberalls";
+    private static final String CONDUIT_TAG = "conduit";
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -86,9 +86,6 @@ public class PhabricatorNotifier extends Notifier {
                 environment.get("GIT_URL"), branch);
         final boolean needsDecoration = build.getActions(PhabricatorPostbuildAction.class).size() == 0;
 
-        final String conduitToken = getConduitToken(build.getParent(), logger);
-
-        final String arcPath = environment.get(PhabricatorPlugin.ARCANIST_PATH, "arc");
         final boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
         final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
 
@@ -107,14 +104,21 @@ public class PhabricatorNotifier extends Notifier {
             return true;
         }
 
-        LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
+        ConduitAPIClient conduitClient;
+        try {
+            conduitClient = getConduitClient(build.getParent());
+        } catch (ConduitAPIException e) {
+            e.printStackTrace(logger.getStream());
+            logger.warn(CONDUIT_TAG, e.getMessage());
+            return false;
+        }
 
-        DifferentialClient diffClient = new DifferentialClient(diffID, starter, conduitToken, arcPath);
+        DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
         Differential diff;
         try {
             diff = new Differential(diffClient.fetchDiff());
-        } catch (ArcanistUsageException e) {
-            logger.info("arcanist", "unable to fetch differential");
+        } catch (ConduitAPIException e) {
+            logger.info(CONDUIT_TAG, "Unable to fetch differential");
             return true;
         }
 
@@ -140,10 +144,10 @@ public class PhabricatorNotifier extends Notifier {
             if (uberallsConfigured) {
                 commenter.processParentCoverage(uberalls.getParentCoverage(diff), diff.getBranch());
             } else {
-                logger.info("uberalls", "no backend configured, skipping...");
+                logger.info(UBERALLS_TAG, "no backend configured, skipping...");
             }
         } else {
-            logger.info("uberalls", "no line coverage found, skipping...");
+            logger.info(UBERALLS_TAG, "no line coverage found, skipping...");
         }
 
         // Add in comments about the build result
@@ -154,13 +158,13 @@ public class PhabricatorNotifier extends Notifier {
             logger.info("harbormaster", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
             try {
                 JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
-                if (result.containsKey("errorMessage") && !(result.get("errorMessage") instanceof JSONNull)) {
+                if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {
                     logger.info("harbormaster",
-                            String.format("Error from Harbormaster: %s", result.getString("errorMessage")));
+                            String.format("Error from Harbormaster: %s", result.getString("error_info")));
                     return false;
                 }
-            } catch (ArcanistUsageException e) {
-                logger.info("arcanist", "unable to post to harbormaster");
+            } catch (ConduitAPIException e) {
+                logger.info(CONDUIT_TAG, "unable to post to harbormaster");
                 return true;
             }
         } else {
@@ -194,6 +198,14 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         return true;
+    }
+
+    private ConduitAPIClient getConduitClient(Job owner) throws ConduitAPIException {
+        ConduitCredentials credentials = getConduitCredentials(owner);
+        if (credentials == null) {
+            throw new ConduitAPIException("No credentials configured for conduit");
+        }
+        return new ConduitAPIClient(credentials.getUrl(), credentials.getToken().getPlainText());
     }
 
     private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -239,16 +251,11 @@ public class PhabricatorNotifier extends Notifier {
         return commentFile;
     }
 
-    public String getConduitToken(Job owner, Logger logger) {
-        ConduitCredentials credentials = getDescriptor().getCredentials(owner);
-        if (credentials != null) {
-            return credentials.getToken().getPlainText();
-        }
-        logger.warn("credentials", "No credentials configured.");
-        return null;
+    private ConduitCredentials getConduitCredentials(Job owner) {
+        return getDescriptor().getCredentials(owner);
     }
 
-    public String getPhabricatorURL(Job owner) {
+    private String getPhabricatorURL(Job owner) {
         ConduitCredentials credentials = getDescriptor().getCredentials(owner);
         if (credentials != null) {
             return credentials.getUrl();

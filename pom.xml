@@ -48,20 +48,13 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.3</version>
+      <version>4.4.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>cobertura</artifactId>
       <version>1.9.6</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.sf.trove4j</groupId>
-      <artifactId>trove4j</artifactId>
-      <version>3.0.3</version>
-      <type>jar</type>
     </dependency>
 
     <dependency>
@@ -89,6 +82,14 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
       <version>4.12</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.3</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

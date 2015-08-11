@@ -18,36 +18,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.uber.jenkins.phabricator.conduit;
+package com.uber.jenkins.phabricator.tasks;
 
-import hudson.Launcher;
+import com.uber.jenkins.phabricator.utils.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.assertEquals;
 
-public class ArcanistClientTest {
+public class ApplyPatchTaskTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
     @Test
-    public void testEcho() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "hello", null);
-
-        int result = client.callConduit(getLauncher().launch(), System.err);
-        assertEquals(result, 0);
+    public void testApplyPatchWithValidArc() throws Exception {
+        ApplyPatchTask task = getTask("echo", "true");
+        Task.Result result = task.run();
+        assertEquals(Task.Result.SUCCESS, result);
     }
 
     @Test
-    public void testEchoWithToken() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "tokentest", "notarealtoken");
-
-        int result = client.callConduit(getLauncher().launch(), System.err);
-        assertEquals(result, 0);
+    public void testApplyPatchWithInvalidArc() throws Exception {
+        ApplyPatchTask task = getTask("false", "echo");
+        Task.Result result = task.run();
+        assertEquals(Task.Result.FAILURE, result);
     }
 
-    private Launcher getLauncher() {
-        return j.createLocalLauncher();
+    @Test
+    public void testBothGitAndArcFailing() throws Exception {
+        ApplyPatchTask task = getTask("false", "false");
+        assertEquals(Task.Result.FAILURE, task.run());
+    }
+
+    private ApplyPatchTask getTask(String arcPath, String gitPath) throws Exception {
+        return new ApplyPatchTask(
+                TestUtils.getDefaultLogger(),
+                TestUtils.createLauncherFactory(j),
+                TestUtils.TEST_SHA,
+                TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_CONDUIT_TOKEN,
+                arcPath,
+                gitPath, // git path
+                false // createCommit
+        );
     }
 }

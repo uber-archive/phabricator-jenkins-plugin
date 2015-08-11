@@ -28,7 +28,7 @@ import java.io.PrintStream;
 public class Logger {
     private static final String LOG_FORMAT = "[%s] %s";
 
-    private PrintStream stream;
+    private final PrintStream stream;
 
     /**
      * Logger constructor.

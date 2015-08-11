@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSONNull;
@@ -79,10 +79,10 @@ public class PostCommentTask extends Task {
         JSONObject postDifferentialCommentResult = postDifferentialComment(comment, SILENT,
                 commentAction);
         if (postDifferentialCommentResult == null ||
-                !(postDifferentialCommentResult.get("errorMessage") instanceof JSONNull)) {
+                !(postDifferentialCommentResult.get("error_info") instanceof JSONNull)) {
             if (postDifferentialCommentResult != null) {
                 info(String.format("Got error %s with action %s",
-                        postDifferentialCommentResult.get("errorMessage"), commentAction));
+                        postDifferentialCommentResult.get("error_info"), commentAction));
             }
 
             info("Re-trying with action 'none'");
@@ -104,12 +104,10 @@ public class PostCommentTask extends Task {
                     message, silent, action);
             result = Result.SUCCESS;
             return postDifferentialCommentResult;
-        } catch (ArcanistUsageException e) {
-            info("unable to post comment");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (ConduitAPIException e) {
+            info("unable to post comment");
         }
 
         result = Result.FAILURE;

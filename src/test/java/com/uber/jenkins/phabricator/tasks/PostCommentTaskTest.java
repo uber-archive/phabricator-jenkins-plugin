@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-import com.uber.jenkins.phabricator.conduit.ArcanistUsageException;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
@@ -34,13 +34,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 public class PostCommentTaskTest {
-
     private Logger logger;
     private DifferentialClient differentialClient;
 
-    private String TEST_COMMENT = "They are selling like hotcakes!";
-    private String TEST_COMMENT_ACTION = "none";
-    private String TEST_REVISION_ID = "something";
+    private final String TEST_COMMENT = "They are selling like hotcakes!";
+    private final String TEST_COMMENT_ACTION = "none";
+    private final String TEST_REVISION_ID = "something";
 
     @Before
     public void setup() {
@@ -50,7 +49,7 @@ public class PostCommentTaskTest {
 
     @Test
     public void testPostDifferentialFailed() throws Exception {
-        doThrow(new ArcanistUsageException("")).when(differentialClient).postComment(
+        doThrow(new ConduitAPIException("")).when(differentialClient).postComment(
                 anyString(),
                 anyString(),
                 anyBoolean(),

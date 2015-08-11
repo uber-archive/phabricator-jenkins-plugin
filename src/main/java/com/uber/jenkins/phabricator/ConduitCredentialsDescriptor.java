@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConduitCredentialsDescriptor {
-    public static List<ConduitCredentials> availableCredentials(Job owner) {
+    private static List<ConduitCredentials> availableCredentials(Job owner) {
         return CredentialsProvider.lookupCredentials(
                 ConduitCredentials.class,
                 owner,

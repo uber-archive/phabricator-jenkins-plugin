@@ -27,7 +27,7 @@ import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
 
-public class CommentBuilder {
+class CommentBuilder {
     private static final String UBERALLS_TAG = "uberalls";
     private final Logger logger;
     private final CoverageResult currentCoverage;
@@ -95,7 +95,7 @@ public class CommentBuilder {
     }
 
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {
-        if (result == result.SUCCESS) {
+        if (result == Result.SUCCESS) {
             if (comment.length() == 0 && (commentOnSuccess || !runHarbormaster)) {
                 comment.append("Build is green");
             }
