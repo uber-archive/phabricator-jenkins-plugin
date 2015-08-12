@@ -10,15 +10,15 @@ if Harbormaster is not enabled).
 Configuration
 -------------
 
-Navigate to `https://ci.example.com/configure`, replacing ci.example.com with
-the URL for your Jenkins instance.
-
 First, create a bot user and generate a Conduit API token for your Phabricator
 install. This lives at `https://phabricator.example.com/settings/panel/apitokens/`.
 
 ![Conduit Token](/docs/conduit-token.png)
 
-Enter your Conduit credentials by clicking "Add" and selection "Phabricator
+Next, navigate to `https://ci.example.com/configure`, replacing ci.example.com
+with the URL for your Jenkins instance.
+
+Enter your Conduit credentials by clicking "Add" and selecting "Phabricator
 Conduit Key".
 
 ![Add Credentials](/docs/add-credentials.png)
