@@ -69,4 +69,7 @@
     <module name="SimplifyBooleanExpression"/>
     <module name="SimplifyBooleanReturn"/>
   </module>
+  <module name="SuppressionFilter">
+    <property name="file" value="config/checkstyle-suppressions.xml"/>
+  </module>
 </module>
