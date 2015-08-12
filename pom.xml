@@ -142,6 +142,10 @@
     </plugins>
   </build>
 
+  <properties>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+  </properties>
+
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/phabricator-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/phabricator-plugin.git</developerConnection>
