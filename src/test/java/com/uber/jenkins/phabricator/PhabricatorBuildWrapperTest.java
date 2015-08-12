@@ -57,6 +57,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
         PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
         j.assertEqualBeans(wrapper, after,
-                "createCommit,applyToMaster,showBuildStartedMessage,uberDotArcanist");
+                "createCommit,applyToMaster,showBuildStartedMessage");
     }
 }
