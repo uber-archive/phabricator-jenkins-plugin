@@ -142,7 +142,7 @@ public class PhabricatorNotifier extends Notifier {
         // First add in info about the change in coverage, if applicable
         if (commenter.hasCoverageAvailable()) {
             if (uberallsConfigured) {
-                commenter.processParentCoverage(uberalls.getParentCoverage(diff), diff.getBranch());
+                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBranch());
             } else {
                 logger.info(UBERALLS_TAG, "no backend configured, skipping...");
             }

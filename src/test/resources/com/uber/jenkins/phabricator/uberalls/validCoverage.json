@@ -1,0 +1,9 @@
+{
+  "sha": "deadbeef",
+  "lineCoverage": 42,
+  "filesCoverage": 99.99,
+  "packageCoverage": 100,
+  "classesCoverage": 100,
+  "methodCoverage": 42,
+  "conditionalCoverage": 0
+}

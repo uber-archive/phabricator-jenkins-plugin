@@ -21,7 +21,6 @@
 package com.uber.jenkins.phabricator.uberalls;
 
 import com.uber.jenkins.phabricator.CodeCoverageMetrics;
-import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
@@ -67,13 +66,12 @@ public class UberallsClient {
         return this.baseURL;
     }
 
-    public CodeCoverageMetrics getParentCoverage(Differential differential) {
+    public CodeCoverageMetrics getParentCoverage(String sha) {
+        if (sha == null) {
+            return null;
+        }
         try {
-            String sha = differential.getBaseCommit();
-            String coverageJSON = null;
-            if (sha != null) {
-                coverageJSON = getCoverage(sha);
-            }
+            String coverageJSON = getCoverage(sha);
             JsonSlurper jsonParser = new JsonSlurper();
             JSON responseJSON = jsonParser.parseText(coverageJSON);
             if (responseJSON instanceof JSONNull) {
@@ -157,15 +155,11 @@ public class UberallsClient {
                 return null;
             }
             return request.getResponseBodyAsString();
-        } catch (URISyntaxException e) {
-            e.printStackTrace(logger.getStream());
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != 404) {
                 e.printStackTrace(logger.getStream());
             }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace(logger.getStream());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace(logger.getStream());
         }
         return null;
