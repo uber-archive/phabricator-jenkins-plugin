@@ -227,9 +227,6 @@ public class PhabricatorNotifier extends Notifier {
         return true;
     }
 
-    /**
-     * These are used in the config.jelly file to populate the state of the fields
-     */
     @SuppressWarnings("UnusedDeclaration")
     public boolean isCommentOnSuccess() {
         return commentOnSuccess;

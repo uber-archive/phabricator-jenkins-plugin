@@ -50,8 +50,8 @@ public class Differential {
 
     /**
      * Get the summary message
-     * @param phabricatorURL
-     * @return
+     * @param phabricatorURL the root of the Phabricator URL for hyperlinks
+     * @return the summary message to display
      */
     public String getSummaryMessage(String phabricatorURL) {
         return String.format("This was a build of <a href=\"%s\">%s</a> by %s &lt;%s&gt;",
@@ -87,8 +87,8 @@ public class Differential {
 
     /**
      * Get a build started message to post to phabricator
-     * @param environment
-     * @return
+     * @param environment the environment variables for the build
+     * @return the build started message
      */
     public String getBuildStartedMessage(EnvVars environment) {
         return String.format("Build started: %s (console: %sconsole)", environment.get("BUILD_URL"), environment.get("BUILD_URL"));
@@ -96,7 +96,7 @@ public class Differential {
 
     /**
      * Return the base commit of the diff
-     * @return
+     * @return the base revision for git
      */
     public String getBaseCommit() {
         return (String) rawJSON.get("sourceControlBaseRevision");
@@ -104,7 +104,7 @@ public class Differential {
 
     /**
      * Return the local branch name
-     * @return
+     * @return the name of the branch, or unknown
      */
     public String getBranch() {
         Object branchName = rawJSON.get("branch");

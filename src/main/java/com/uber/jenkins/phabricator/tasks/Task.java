@@ -51,6 +51,7 @@ public abstract class Task {
 
     /**
      * Runs the task workflow.
+     * @return the result of the task
      */
     public Result run() {
         setup();
