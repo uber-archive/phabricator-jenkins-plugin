@@ -38,7 +38,6 @@ import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class PhabricatorBuildWrapper extends BuildWrapper {
     private static final String CONDUIT_TAG = "conduit";
@@ -46,14 +45,12 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
     private final boolean createCommit;
     private final boolean applyToMaster;
-    private final boolean uberDotArcanist;
     private final boolean showBuildStartedMessage;
 
     @DataBoundConstructor
-    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean uberDotArcanist, boolean showBuildStartedMessage) {
+    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean showBuildStartedMessage) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
-        this.uberDotArcanist = uberDotArcanist;
         this.showBuildStartedMessage = showBuildStartedMessage;
     }
 
@@ -76,17 +73,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         }
 
         LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
-
-        if (uberDotArcanist) {
-            int npmCode = starter.launch()
-                    .cmds(Arrays.asList("npm", "install", "uber-dot-arcanist"))
-                    .stdout(logger.getStream())
-                    .join();
-
-            if (npmCode != 0) {
-                logger.warn("uber-dot-arcanist", "Got non-zero exit code installing uber-dot-arcanist from npm: " + npmCode);
-            }
-        }
 
         ConduitAPIClient conduitClient;
         try {
@@ -167,11 +153,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @SuppressWarnings("UnusedDeclaration")
     public boolean isApplyToMaster() {
         return applyToMaster;
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
-    public boolean isUberDotArcanist() {
-        return uberDotArcanist;
     }
 
     @SuppressWarnings("UnusedDeclaration")

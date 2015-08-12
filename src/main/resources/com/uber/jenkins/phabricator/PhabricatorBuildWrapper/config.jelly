@@ -1,15 +1,10 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
   <f:entry title="Create git commit" field="createCommit"
            description="Create a git commit with the patch">
       <f:checkbox />
   </f:entry>
   <f:entry title="Apply patch to master" field="applyToMaster"
            description="If true, always arc patch apply to master">
-      <f:checkbox />
-  </f:entry>
-  <f:entry title="Install uber-dot-arcanist" field="uberDotArcanist"
-           description="Run `npm install uber-dot-arcanist` before applying patch">
       <f:checkbox />
   </f:entry>
   <f:entry title="Show 'Build Started:' message" field="showBuildStartedMessage"
