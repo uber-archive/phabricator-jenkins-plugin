@@ -26,6 +26,7 @@ import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.ApplyPatchTask;
+import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -65,6 +66,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
 
+        String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
             this.addShortText(build);
@@ -83,9 +85,9 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return null;
         }
 
+        DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
         Differential diff;
         try {
-            DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
             diff = new Differential(diffClient.fetchDiff());
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
 
@@ -97,7 +99,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             }
         } catch (ConduitAPIException e) {
             e.printStackTrace(logger.getStream());
-            logger.warn(CONDUIT_TAG, "Unable to apply patch");
+            logger.warn(CONDUIT_TAG, "Unable to fetch differential from Conduit API");
             logger.warn(CONDUIT_TAG, e.getMessage());
             return null;
         }
@@ -115,6 +117,12 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         if (result != Task.Result.SUCCESS) {
             logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
+            Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false).run();
+            if (failureResult != Task.Result.SUCCESS) {
+                // such failure, very broke
+                logger.warn("arcanist", "Unable to notify harbormaster of patch failure");
+            }
+            // Indicate failure
             return null;
         }
 

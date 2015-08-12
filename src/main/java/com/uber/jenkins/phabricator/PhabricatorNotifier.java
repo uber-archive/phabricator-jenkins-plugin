@@ -20,10 +20,15 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.uber.jenkins.phabricator.conduit.*;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
+import com.uber.jenkins.phabricator.conduit.Differential;
+import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
+import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
+import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -38,8 +43,6 @@ import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.targets.CoverageResult;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -156,16 +159,12 @@ public class PhabricatorNotifier extends Notifier {
         String commentAction = "none";
         if (runHarbormaster) {
             logger.info("harbormaster", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
-            try {
-                JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess);
-                if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {
-                    logger.info("harbormaster",
-                            String.format("Error from Harbormaster: %s", result.getString("error_info")));
-                    return false;
-                }
-            } catch (ConduitAPIException e) {
-                logger.info(CONDUIT_TAG, "unable to post to harbormaster");
-                return true;
+
+            Task.Result result = new SendHarbormasterResultTask(logger, diffClient, phid, harbormasterSuccess).run();
+
+            if (result != Task.Result.SUCCESS) {
+                logger.info(CONDUIT_TAG, "Unable to post to harbormaster");
+                return false;
             }
         } else {
             logger.info("uberalls", "Harbormaster integration not enabled for this build.");
