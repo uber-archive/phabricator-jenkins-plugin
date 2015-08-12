@@ -13,11 +13,22 @@ Configuration
 Navigate to `https://ci.example.com/configure`, replacing ci.example.com with
 the URL for your Jenkins instance.
 
-Enter the URL of your Phabricator install, and optionally your [Uberalls][] instance.
+First, create a bot user and generate a Conduit API token for your Phabricator
+install. This lives at `https://phabricator.example.com/settings/panel/apitokens/`.
 
-![Configure globally](/docs/configure-globally.png)
+![Conduit Token](/docs/conduit-token.png)
 
-[Uberalls]: https://github.com/uber/uberalls
+Enter your Conduit credentials by clicking "Add" and selection "Phabricator
+Conduit Key".
+
+![Add Credentials](/docs/add-credentials.png)
+
+Fill in your "Phabricator URL" with the base
+URL of your phabricator install, for example `https://phabricator.example.com`.
+Enter the conduit token for your Jenkins bot user (create one if necessary). Add a
+Description for readability.
+
+![Configure Credentials](/docs/configure-credentials.png)
 
 Usage
 -----
