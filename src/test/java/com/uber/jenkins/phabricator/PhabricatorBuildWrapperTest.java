@@ -36,7 +36,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         wrapper = new PhabricatorBuildWrapper(
                 false,
                 false,
-                false,
                 true
         );
     }
