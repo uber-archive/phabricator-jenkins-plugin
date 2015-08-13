@@ -1,6 +1,7 @@
 <!--
   This view is used to render the installed plugins page.
 -->
+<?jelly escape-by-default='true'?>
 <div>
   This plugin integrates Phabricator and Harbormaster with Jenkins and Uberalls.
 </div>

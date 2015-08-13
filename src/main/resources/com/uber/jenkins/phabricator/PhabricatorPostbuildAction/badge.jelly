@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <j:if test="${it.iconPath != null &amp;&amp; it.link == null}">
         <img src="${rootURL}${it.iconPath}" width="16" height="16" alt="${it.text}" title="${it.text}" onclick="javascript:alert('${it.text}')" />
