@@ -46,8 +46,9 @@ public class RemoteCommentFetcher {
 
     /**
      * Attempt to read a remote comment file
-     * @return the contents of the string
-     * @throws InterruptedException
+     * @return the content of the remote comment file, if present
+     * @throws InterruptedException if there is an error fetching the file
+     * @throws IOException if any network error occurs
      */
     public String getRemoteComment() throws InterruptedException, IOException {
         if (CommonUtils.isBlank(commentFile)) {

@@ -42,11 +42,14 @@ public class DifferentialClient {
     /**
      * Posts a comment to a differential
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
-     * @param message
+     * @param message the content of the comment
      * @param silent whether or not to trigger an email
      * @param action phabricator comment action, e.g. 'resign', 'reject', 'none'
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws ConduitAPIException, IOException {
+    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException, ConduitAPIException {
         Map params = new HashMap<String, String>();
         params.put("revision_id", revisionID);
         params.put("action", action);
@@ -56,6 +59,12 @@ public class DifferentialClient {
         return this.callConduit("differential.createcomment", params);
     }
 
+    /**
+     * Fetch a differential from Conduit
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
+     */
     public JSONObject fetchDiff() throws IOException, ConduitAPIException {
         Map params = new HashMap<String, String>();
         params.put("ids", new String[]{diffID});
@@ -85,8 +94,9 @@ public class DifferentialClient {
      * Sets a sendHarbormasterMessage build status
      * @param phid Phabricator object ID
      * @param pass whether or not the build passed
-     * @throws IOException
-     * @throws InterruptedException
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(String phid, boolean pass) throws ConduitAPIException, IOException {
         Map params = new HashMap<String, String>();
@@ -100,10 +110,9 @@ public class DifferentialClient {
      * Post a comment on the differential
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
      * @param message the string message to post
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws ArcanistUsageException
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject postComment(String revisionID, String message) throws ConduitAPIException, IOException {
         return postComment(revisionID, message, true, "none");

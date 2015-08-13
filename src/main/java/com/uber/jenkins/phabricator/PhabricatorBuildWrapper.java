@@ -150,9 +150,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return getDescriptor().getCredentials(owner);
     }
 
-    /**
-     * This is used in config.jelly to populate the state of the checkbox
-     */
     @SuppressWarnings("UnusedDeclaration")
     public boolean isCreateCommit() {
         return createCommit;
