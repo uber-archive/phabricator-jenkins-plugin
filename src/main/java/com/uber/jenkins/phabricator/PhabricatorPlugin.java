@@ -28,9 +28,9 @@ import java.io.File;
 
 public class PhabricatorPlugin extends Plugin {
     // Diff ID (not differential ID)
-    static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
+    public static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
     // Phabricator object ID (for Harbormaster)
-    static final String PHID_FIELD = "PHID";
+    public static final String PHID_FIELD = "PHID";
 
     public static String getIconPath(String icon) {
         if (icon == null) {

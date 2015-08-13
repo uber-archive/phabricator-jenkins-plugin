@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
@@ -51,9 +52,15 @@ public class ConduitCredentialsDescriptor {
         if (available.size() == 0) {
             return null;
         }
+        CredentialsMatcher matcher;
+        if (credentialsID != null) {
+            matcher = CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsID));
+        } else {
+            matcher = CredentialsMatchers.always();
+        }
         return CredentialsMatchers.firstOrDefault(
                 available,
-                CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsID)),
+                matcher,
                 available.get(0)
         );
     }

@@ -1,7 +1,10 @@
 {
   "result": {
     "123": {
-      "hello": "world"
+      "sourceControlBaseRevision": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "hello": "world",
+      "authorName": "aiden",
+      "authorEmail": "sc@ndella.com"
     }
   }
 }
