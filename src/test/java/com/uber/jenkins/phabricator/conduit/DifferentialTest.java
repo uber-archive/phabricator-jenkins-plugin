@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.EnvVars;
 import junit.framework.TestCase;
@@ -87,10 +88,11 @@ public class DifferentialTest extends TestCase {
     }
 
     @Test
-    public  void testGetSummaryMessage() throws Exception {
-        String message = differential.getSummaryMessage("http://example.com");
-        assertTrue(message.contains("ai@uber.com"));
-        assertTrue(message.contains("http://example.com"));
-        assertTrue(message.contains("aiden"));
+    public void testGetSummaryMessage() throws Exception {
+        PhabricatorPostbuildSummaryAction summary = differential.createSummary("http://example.com");
+        assertEquals("http://example.com/Dnot-a-real-id", summary.getUrl());
+        assertEquals("Dnot-a-real-id", summary.getRevisionID());
+        assertEquals("aiden", summary.getAuthorName());
+        assertEquals("ai@uber.com", summary.getAuthorEmail());
     }
 }

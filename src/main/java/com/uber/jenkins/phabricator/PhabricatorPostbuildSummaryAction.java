@@ -30,10 +30,17 @@ import org.kohsuke.stapler.export.ExportedBean;
 @ExportedBean(defaultVisibility = 2)
 public class PhabricatorPostbuildSummaryAction implements Action {
     private final String iconPath;
-    private final StringBuilder textBuilder = new StringBuilder();
+    private final String url;
+    private final String revisionID;
+    private final String authorName;
+    private final String authorEmail;
 
-    public PhabricatorPostbuildSummaryAction(String iconPath) {
-        this.iconPath = PhabricatorPlugin.getIconPath(iconPath);
+    public PhabricatorPostbuildSummaryAction(String iconPath, String phabricatorLink, String revisionID, String authorName, String authorEmail) {
+        this.iconPath = iconPath;
+        this.url = phabricatorLink;
+        this.revisionID = revisionID;
+        this.authorName = authorName;
+        this.authorEmail = authorEmail;
     }
 
     /* Action methods */
@@ -50,14 +57,22 @@ public class PhabricatorPostbuildSummaryAction implements Action {
     }
 
     @Exported public String getIconPath() {
-        return iconPath;
+        return PhabricatorPlugin.getIconPath(iconPath);
     }
 
-    @Exported public String getText() {
-        return textBuilder.toString();
+    @Exported public String getUrl() {
+        return url;
     }
 
-    public void appendText(String text) {
-        textBuilder.append(text);
+    @Exported public String getRevisionID() {
+        return revisionID;
+    }
+
+    @Exported public String getAuthorName() {
+        return authorName;
+    }
+
+    @Exported public String getAuthorEmail() {
+        return authorEmail;
     }
 }
