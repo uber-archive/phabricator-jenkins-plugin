@@ -48,18 +48,6 @@ public class Differential {
         return rawRevisionId;
     }
 
-    /**
-     * Get the summary message
-     * @param phabricatorURL the root of the Phabricator URL for hyperlinks
-     * @return the summary message to display
-     */
-    public String getSummaryMessage(String phabricatorURL) {
-        return String.format("This was a build of <a href=\"%s\">%s</a> by %s &lt;%s&gt;",
-                this.getPhabricatorLink(phabricatorURL),
-                this.getRevisionID(true),
-                this.rawJSON.get("authorName"), this.rawJSON.get("authorEmail"));
-    }
-
     public String getPhabricatorLink(String phabricatorURL) {
         String revisionID = this.getRevisionID(true);
         try {
@@ -76,13 +64,19 @@ public class Differential {
                 this.getRevisionID(true),
                 this.getPhabricatorLink(phabricatorURL)));
         // Add some long-form text
-        this.createSummary(build).appendText(this.getSummaryMessage(phabricatorURL));
+        PhabricatorPostbuildSummaryAction summary = createSummary(phabricatorURL);
+        build.addAction(summary);
+
     }
 
-    private PhabricatorPostbuildSummaryAction createSummary(final AbstractBuild build) {
-        PhabricatorPostbuildSummaryAction action = new PhabricatorPostbuildSummaryAction("phabricator.png");
-        build.addAction(action);
-        return action;
+    public PhabricatorPostbuildSummaryAction createSummary(String phabricatorURL) {
+        return new PhabricatorPostbuildSummaryAction(
+                "phabricator.png",
+                getPhabricatorLink(phabricatorURL),
+                getRevisionID(true),
+                rawJSON.getString("authorName"),
+                rawJSON.getString("authorEmail")
+        );
     }
 
     /**
