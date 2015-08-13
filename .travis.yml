@@ -1,10 +1,18 @@
 ---
 language: java
 
-jdk:
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
+matrix:
+  fast_finish: true
+  include:
+    - jdk: openjdk7
+      env: MAIN_ARGS="test"
+    - jdk: oraclejdk7
+      env: MAIN_ARGS="test" COVERALLS_ARGS="mvn clean cobertura:cobertura coveralls:report"
+    - jdk: oraclejdk8
+      env: MAIN_ARGS="test"
+
+script:
+  - mvn clean $MAIN_ARGS
 
 after_success:
-  - mvn clean cobertura:cobertura coveralls:report javadoc:javadoc
+  - $COVERALLS_ARGS
