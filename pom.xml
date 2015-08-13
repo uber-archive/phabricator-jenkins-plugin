@@ -9,7 +9,7 @@
   <artifactId>phabricator-plugin</artifactId>
   <name>Phabricator Differential Plugin</name>
   <description>Integrate Jenkins with Phabricator Differentials and Uberalls</description>
-  <version>1.7.1</version>
+  <version>1.7.2-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Differential+Plugin</url>
 
@@ -160,6 +160,6 @@
     <connection>scm:git:ssh://github.com/jenkinsci/phabricator-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/phabricator-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/phabricator-plugin</url>
-    <tag>phabricator-plugin-1.7.1</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
