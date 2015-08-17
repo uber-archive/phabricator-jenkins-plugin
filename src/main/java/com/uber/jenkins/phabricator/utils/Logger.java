@@ -26,7 +26,7 @@ import java.io.PrintStream;
  * Logger utility.
  */
 public class Logger {
-    private static final String LOG_FORMAT = "[%s] %s";
+    private static final String LOG_FORMAT = "[phabricator:%s] %s";
 
     private final PrintStream stream;
 
