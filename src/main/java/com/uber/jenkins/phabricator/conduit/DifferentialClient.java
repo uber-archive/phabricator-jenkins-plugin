@@ -121,4 +121,8 @@ public class DifferentialClient {
     protected JSONObject callConduit(String methodName, Map<String, String> params) throws ConduitAPIException, IOException {
         return conduit.perform(methodName, params);
     }
+
+    protected JSONObject callConduit(String methodName, JSONObject params) throws ConduitAPIException, IOException {
+        return conduit.perform(methodName, params);
+    }
 }
