@@ -8,8 +8,6 @@ matrix:
       env: MAIN_ARGS="test"
     - jdk: oraclejdk7
       env: MAIN_ARGS="test" COVERALLS_ARGS="mvn clean cobertura:cobertura coveralls:report"
-    - jdk: oraclejdk8
-      env: MAIN_ARGS="test"
 
 script:
   - mvn clean $MAIN_ARGS
