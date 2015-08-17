@@ -64,8 +64,22 @@ public class ConduitAPIClient {
      * @throws ConduitAPIException If there was an error calling conduit
      */
     public JSONObject perform(String action, Map<String, String> data) throws IOException, ConduitAPIException {
+        JSONObject params = new JSONObject();
+        params.putAll(data);
+        return perform(action, params);
+    }
+
+    /**
+     * Call the conduit API of Phabricator
+     * @param action Name of the API call
+     * @param params The data to send to Harbormaster
+     * @return The result as a JSONObject
+     * @throws IOException If there was a problem reading the response
+     * @throws ConduitAPIException If there was an error calling conduit
+     */
+    public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
         CloseableHttpClient client = HttpClientBuilder.create().build();
-        HttpUriRequest request = createRequest(action, data);
+        HttpUriRequest request = createRequest(action, params);
 
         HttpResponse response;
         try {
@@ -93,6 +107,20 @@ public class ConduitAPIClient {
      * @throws ConduitAPIException when the conduit URL is misconfigured
      */
     public HttpUriRequest createRequest(String action, Map<String, String> data) throws UnsupportedEncodingException, ConduitAPIException {
+        JSONObject params = new JSONObject();
+        params.putAll(data);
+        return createRequest(action, params);
+    }
+
+    /**
+     * Post a URL-encoded "params" key with a JSON-encoded body as per the Conduit API
+     * @param action The name of the Conduit method
+     * @param params The data to be sent to the Conduit method
+     * @return The request to perform
+     * @throws UnsupportedEncodingException when the POST data can't be encoded
+     * @throws ConduitAPIException when the conduit URL is misconfigured
+     */
+    public HttpUriRequest createRequest(String action, JSONObject params) throws UnsupportedEncodingException, ConduitAPIException {
         HttpPost post;
         try {
             post = new HttpPost(
@@ -103,9 +131,6 @@ public class ConduitAPIClient {
         } catch (URISyntaxException e) {
             throw new ConduitAPIException(e.getMessage());
         }
-
-        JSONObject params = new JSONObject();
-        params.putAll(data);
 
         JSONObject conduitParams = new JSONObject();
         conduitParams.put(API_TOKEN_KEY, conduitToken);

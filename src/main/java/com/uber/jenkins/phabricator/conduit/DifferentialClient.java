@@ -107,6 +107,27 @@ public class DifferentialClient {
     }
 
     /**
+     * Uploads a uri as an 'artifact' for Harbormaster to display
+     * @param phid Phabricator object ID
+     * @param buildUri Uri to display, presumably the jenkins builds
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
+     */
+    public JSONObject sendHarbormasterUri(String phid, String buildUri) throws ConduitAPIException, IOException {
+        Map params = new HashMap<String, String>();
+        params.put("buildTargetPHID", phid);
+        params.put("artifactKey", "jenkins.uri");
+        params.put("artifactType", "uri");
+        JSONObject artifactData = new JSONObject();
+        artifactData = artifactData.element("uri", buildUri)
+            .element("name", "Jenkins")
+            .element("ui.external", true);
+        params.put("artifactData", artifactData);
+        return this.callConduit("harbormaster.createartifact", params);
+    }
+
+    /**
      * Post a comment on the differential
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
      * @param message the string message to post
@@ -119,6 +140,10 @@ public class DifferentialClient {
     }
 
     protected JSONObject callConduit(String methodName, Map<String, String> params) throws ConduitAPIException, IOException {
+        return conduit.perform(methodName, params);
+    }
+
+    protected JSONObject callConduit(String methodName, JSONObject params) throws ConduitAPIException, IOException {
         return conduit.perform(methodName, params);
     }
 }

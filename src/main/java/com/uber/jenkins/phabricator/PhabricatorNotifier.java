@@ -28,6 +28,7 @@ import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
+import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
@@ -140,7 +141,8 @@ public class PhabricatorNotifier extends Notifier {
         Result buildResult = build.getResult();
         boolean harbormasterSuccess = buildResult.isBetterOrEqualTo(Result.SUCCESS);
 
-        CommentBuilder commenter = new CommentBuilder(logger, buildResult, coverage, environment.get("BUILD_URL"));
+        final String buildUrl = environment.get("BUILD_URL");
+        CommentBuilder commenter = new CommentBuilder(logger, buildResult, coverage, buildUrl);
 
         // First add in info about the change in coverage, if applicable
         if (commenter.hasCoverageAvailable()) {
@@ -158,10 +160,14 @@ public class PhabricatorNotifier extends Notifier {
 
         String commentAction = "none";
         if (runHarbormaster) {
+            logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
+            Task.Result sendUriResult = new SendHarbormasterUriTask(logger, diffClient, phid, buildUrl).run();
+            if (sendUriResult != Task.Result.SUCCESS) {
+                logger.info(CONDUIT_TAG, "Unable to send BUILD_URL to Harbormaster");
+            }
+
             logger.info("harbormaster", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
-
             Task.Result result = new SendHarbormasterResultTask(logger, diffClient, phid, harbormasterSuccess).run();
-
             if (result != Task.Result.SUCCESS) {
                 logger.info(CONDUIT_TAG, "Unable to post to harbormaster");
                 return false;
