@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class ConduitAPIClientTest {
     private LocalTestServer server;
     private ConduitAPIClient client;
-    private final Map<String, String> emptyParams = new HashMap<String, String>();
+    private final JSONObject emptyParams = new JSONObject();
 
     @Before
     public void setUp() throws Exception {

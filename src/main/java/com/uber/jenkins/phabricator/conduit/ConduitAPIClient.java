@@ -58,20 +58,6 @@ public class ConduitAPIClient {
     /**
      * Call the conduit API of Phabricator
      * @param action Name of the API call
-     * @param data The data to send to Harbormaster
-     * @return The result as a JSONObject
-     * @throws IOException If there was a problem reading the response
-     * @throws ConduitAPIException If there was an error calling conduit
-     */
-    public JSONObject perform(String action, Map<String, String> data) throws IOException, ConduitAPIException {
-        JSONObject params = new JSONObject();
-        params.putAll(data);
-        return perform(action, params);
-    }
-
-    /**
-     * Call the conduit API of Phabricator
-     * @param action Name of the API call
      * @param params The data to send to Harbormaster
      * @return The result as a JSONObject
      * @throws IOException If there was a problem reading the response
