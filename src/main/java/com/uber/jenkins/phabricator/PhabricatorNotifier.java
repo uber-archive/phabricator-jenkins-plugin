@@ -216,10 +216,10 @@ public class PhabricatorNotifier extends Notifier {
             return null;
         }
 
-        PrintStream logger = listener.getLogger();
+        Logger logger = new Logger(listener.getLogger());
 
         if (Jenkins.getInstance().getPlugin("cobertura") == null) {
-            logger.println("[uberalls] Cobertura plugin not installed, skipping.");
+            logger.info(UBERALLS_TAG, "Cobertura plugin not installed, skipping.");
             return null;
         }
 
@@ -227,13 +227,13 @@ public class PhabricatorNotifier extends Notifier {
         try {
             provider = (CoverageProvider) getClass().getClassLoader().loadClass("com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider").newInstance();
         } catch (InstantiationException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
             return null;
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
             return null;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
             return null;
         }
 
@@ -241,7 +241,7 @@ public class PhabricatorNotifier extends Notifier {
         if (provider.hasCoverage()) {
             return provider;
         } else {
-            logger.println("[uberalls] No cobertura results found");
+            logger.info(UBERALLS_TAG, "No cobertura results found");
             return null;
         }
     }
