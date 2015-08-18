@@ -87,20 +87,6 @@ public class ConduitAPIClient {
     /**
      * Post a URL-encoded "params" key with a JSON-encoded body as per the Conduit API
      * @param action The name of the Conduit method
-     * @param data The data to be sent to the Conduit method
-     * @return The request to perform
-     * @throws UnsupportedEncodingException when the POST data can't be encoded
-     * @throws ConduitAPIException when the conduit URL is misconfigured
-     */
-    public HttpUriRequest createRequest(String action, Map<String, String> data) throws UnsupportedEncodingException, ConduitAPIException {
-        JSONObject params = new JSONObject();
-        params.putAll(data);
-        return createRequest(action, params);
-    }
-
-    /**
-     * Post a URL-encoded "params" key with a JSON-encoded body as per the Conduit API
-     * @param action The name of the Conduit method
      * @param params The data to be sent to the Conduit method
      * @return The request to perform
      * @throws UnsupportedEncodingException when the POST data can't be encoded
