@@ -50,9 +50,9 @@ public class DifferentialClient {
     public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException, ConduitAPIException {
         JSONObject params = new JSONObject();
         params.element("revision_id", revisionID)
-            .element("action", action)
-            .element("message", message)
-            .element("silent", silent);
+                .element("action", action)
+                .element("message", message)
+                .element("silent", silent);
 
         return this.callConduit("differential.createcomment", params);
     }
