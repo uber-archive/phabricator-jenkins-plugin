@@ -20,22 +20,20 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.model.Result;
-import hudson.plugins.cobertura.Ratio;
-import hudson.plugins.cobertura.targets.CoverageMetric;
-import hudson.plugins.cobertura.targets.CoverageResult;
 
 class CommentBuilder {
     private static final String UBERALLS_TAG = "uberalls";
     private final Logger logger;
-    private final CoverageResult currentCoverage;
+    private final CodeCoverageMetrics currentCoverage;
     private final StringBuilder comment;
     private final String buildURL;
     private final Result result;
 
-    public CommentBuilder(Logger logger, Result result, CoverageResult currentCoverage, String buildURL) {
+    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL) {
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
@@ -56,22 +54,22 @@ class CommentBuilder {
      * @return
      */
     public boolean hasCoverageAvailable() {
-        return currentCoverage != null && currentCoverage.getCoverage(CoverageMetric.LINE) != null;
+        return currentCoverage != null && currentCoverage.getLineCoveragePercent() > 0.0f;
     }
 
     /**
      * Query uberalls for parent coverage and add appropriate comment
      * @param parentCoverage the parent coverage returned from uberalls
+     * @param baseCommit
      * @param branchName the name of the current branch
      */
-    public void processParentCoverage(CodeCoverageMetrics parentCoverage, String branchName) {
+    public void processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
         if (parentCoverage == null) {
             logger.info(UBERALLS_TAG, "unable to find coverage for parent commit");
             return;
         }
 
-        Ratio lineCoverage = currentCoverage.getCoverage(CoverageMetric.LINE);
-        Float lineCoveragePercent = lineCoverage.getPercentageFloat();
+        Float lineCoveragePercent = currentCoverage.getLineCoveragePercent();
 
         logger.info(UBERALLS_TAG, "line coverage: " + lineCoveragePercent);
         logger.info(UBERALLS_TAG, "found parent coverage as " + parentCoverage.getLineCoveragePercent());
@@ -90,7 +88,7 @@ class CommentBuilder {
         }
 
         comment.append(" when pulling **" + branchName + "** into ");
-        comment.append(parentCoverage.getSha1().substring(0, 7));
+        comment.append(baseCommit.substring(0, 7));
         comment.append(". See " + buildURL + "cobertura for the coverage report");
     }
 

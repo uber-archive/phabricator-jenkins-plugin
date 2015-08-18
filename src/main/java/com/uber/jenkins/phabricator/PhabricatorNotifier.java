@@ -24,12 +24,10 @@ import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
-import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
-import com.uber.jenkins.phabricator.tasks.PostCommentTask;
-import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
-import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
-import com.uber.jenkins.phabricator.tasks.Task;
+import com.uber.jenkins.phabricator.tasks.*;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -40,10 +38,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Job;
 import hudson.model.Result;
-import hudson.plugins.cobertura.CoberturaBuildAction;
-import hudson.plugins.cobertura.targets.CoverageResult;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -80,9 +77,10 @@ public class PhabricatorNotifier extends Notifier {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
-        CoverageResult coverage = getUberallsCoverage(build, listener);
+        CoverageProvider coverage = getUberallsCoverage(build, listener);
+        CodeCoverageMetrics coverageResult = null;
         if (coverage != null) {
-            coverage.setOwner(build);
+            coverageResult = coverage.getMetrics();
         }
 
         final String branch = environment.get("GIT_BRANCH");
@@ -100,7 +98,7 @@ public class PhabricatorNotifier extends Notifier {
             }
 
             NonDifferentialBuildTask nonDifferentialBuildTask = new NonDifferentialBuildTask(logger, uberalls,
-                    new CodeCoverageMetrics(coverage), uberallsEnabled,
+                    coverageResult, uberallsEnabled,
                     environment.get("GIT_COMMIT"));
 
             // Ignore the result.
@@ -142,12 +140,12 @@ public class PhabricatorNotifier extends Notifier {
         boolean harbormasterSuccess = buildResult.isBetterOrEqualTo(Result.SUCCESS);
 
         final String buildUrl = environment.get("BUILD_URL");
-        CommentBuilder commenter = new CommentBuilder(logger, buildResult, coverage, buildUrl);
+        CommentBuilder commenter = new CommentBuilder(logger, buildResult, coverageResult, buildUrl);
 
         // First add in info about the change in coverage, if applicable
         if (commenter.hasCoverageAvailable()) {
             if (uberallsConfigured) {
-                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBranch());
+                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBaseCommit(), diff.getBranch());
             } else {
                 logger.info(UBERALLS_TAG, "no backend configured, skipping...");
             }
@@ -213,18 +211,39 @@ public class PhabricatorNotifier extends Notifier {
         return new ConduitAPIClient(credentials.getUrl(), credentials.getToken().getPlainText());
     }
 
-    private CoverageResult getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) {
+    private CoverageProvider getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) {
         if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE) || !uberallsEnabled) {
             return null;
         }
 
         PrintStream logger = listener.getLogger();
-        CoberturaBuildAction coberturaAction = build.getAction(CoberturaBuildAction.class);
-        if (coberturaAction == null) {
-            logger.println("[uberalls] no cobertura results found");
+
+        if (Jenkins.getInstance().getPlugin("cobertura") == null) {
+            logger.println("[uberalls] Cobertura plugin not installed, skipping.");
             return null;
         }
-        return coberturaAction.getResult();
+
+        CoverageProvider provider;
+        try {
+            provider = (CoverageProvider) getClass().getClassLoader().loadClass("com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider").newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        provider.setBuild(build);
+        if (provider.hasCoverage()) {
+            return provider;
+        } else {
+            logger.println("[uberalls] No cobertura results found");
+            return null;
+        }
     }
 
     private boolean ignoreBuild(PrintStream logger, String message) {

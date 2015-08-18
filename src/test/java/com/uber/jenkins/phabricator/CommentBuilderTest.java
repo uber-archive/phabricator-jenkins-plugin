@@ -20,16 +20,18 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.Result;
-import hudson.plugins.cobertura.targets.CoverageResult;
 import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
 public class CommentBuilderTest {
     private static final Logger logger = TestUtils.getDefaultLogger();
@@ -40,7 +42,7 @@ public class CommentBuilderTest {
 
     @Before
     public void setUp() {
-        commenter = createCommenter(Result.SUCCESS, TestUtils.getDefaultCoverageResult());
+        commenter = createCommenter(Result.SUCCESS, TestUtils.getDefaultCodeCoverageMetrics());
     }
 
     @Test
@@ -56,19 +58,19 @@ public class CommentBuilderTest {
 
     @Test
     public void testHasNoLineCoverage() {
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, TestUtils.getEmptyCoverageResult());
+        CommentBuilder commenter = createCommenter(Result.SUCCESS, TestUtils.getEmptyCoverageMetrics());
         assertFalse(commenter.hasCoverageAvailable());
     }
 
     @Test
     public void testProcessParentWithNullResult() {
-        commenter.processParentCoverage(null, FAKE_BRANCH_NAME);
+        commenter.processParentCoverage(null,  TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         assertFalse(commenter.hasComment());
     }
 
     @Test
     public void testProcessParentWithMatchingCoverage() {
-        commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(), FAKE_BRANCH_NAME);
+        commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(), TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
 
         assertTrue(comment.contains("remained the same"));
@@ -77,7 +79,6 @@ public class CommentBuilderTest {
     @Test
     public void testProcessParentWithIncreasedCoverage() {
         CodeCoverageMetrics parent = TestUtils.getCodeCoverageMetrics(
-                TestUtils.TEST_SHA,
                 100.0f,
                 100.0f,
                 100.0f,
@@ -85,7 +86,7 @@ public class CommentBuilderTest {
                 90.0f,
                 90.0f
         );
-        commenter.processParentCoverage(parent, FAKE_BRANCH_NAME);
+        commenter.processParentCoverage(parent, TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
 
         assertTrue(comment.contains("increased (+10.000%)"));
@@ -97,12 +98,12 @@ public class CommentBuilderTest {
 
     @Test
     public void testProcessWithDecrease() {
-        CoverageResult fiftyPercentDrop = TestUtils.getCoverageResult(1.0f, 1.0f, 1.0f, 1.0f, 0.5f);
+        CodeCoverageMetrics fiftyPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f);
         CommentBuilder commenter = createCommenter(Result.SUCCESS, fiftyPercentDrop);
-        commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(), FAKE_BRANCH_NAME);
+        commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),  TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
 
-        assertTrue(comment.contains("decreased (-50.000%)"));
+        assertThat(comment, containsString("decreased (-50.000%)"));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class CommentBuilderTest {
         assertTrue(comment.contains("Link to build"));
     }
 
-    private CommentBuilder createCommenter(Result result, CoverageResult coverage) {
+    private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage) {
         return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL);
     }
 }

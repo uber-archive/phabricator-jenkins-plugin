@@ -20,16 +20,13 @@
 
 package com.uber.jenkins.phabricator.utils;
 
-import com.uber.jenkins.phabricator.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.plugins.cobertura.Ratio;
-import hudson.plugins.cobertura.targets.CoverageMetric;
-import hudson.plugins.cobertura.targets.CoverageResult;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.apache.http.HttpException;
@@ -45,7 +42,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 public class TestUtils {
 
@@ -57,7 +55,6 @@ public class TestUtils {
     public static final String TEST_DIFFERENTIAL_ID = "123";
     public static final String TEST_CONDUIT_TOKEN = "notarealtoken";
     public static final String TEST_PHID = "PHID-not-real";
-    private static final String TEST_ARC_PATH = "echo";
 
     public static Logger getDefaultLogger() {
         return new Logger(new PrintStream(new ByteArrayOutputStream()));
@@ -90,42 +87,36 @@ public class TestUtils {
         );
     }
 
-    public static CodeCoverageMetrics getCodeCoverageMetrics(String sha1,
-                                                             float packagesCoveragePercent,
+    public static CodeCoverageMetrics getCodeCoverageMetrics(float packagesCoveragePercent,
                                                              float filesCoveragePercent,
                                                              float classesCoveragePercent,
                                                              float methodCoveragePercent,
                                                              float lineCoveragePercent,
                                                              float conditionalCoveragePercent) {
-        return spy(new CodeCoverageMetrics(sha1, packagesCoveragePercent, filesCoveragePercent,
+        return spy(new CodeCoverageMetrics(packagesCoveragePercent, filesCoveragePercent,
                 classesCoveragePercent, methodCoveragePercent, lineCoveragePercent,
                 conditionalCoveragePercent));
     }
 
     public static CodeCoverageMetrics getDefaultCodeCoverageMetrics() {
-        return getCodeCoverageMetrics(TEST_SHA, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
+        return getCodeCoverageMetrics(100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
     }
 
-    public static CoverageResult getCoverageResult(Float packageCoverage, Float filesCoverage,
+    public static CodeCoverageMetrics getCoverageResult(Float packageCoverage, Float filesCoverage,
                                                    Float classesCoverage, Float methodCoverage,
                                                    Float linesCoverage) {
-        CoverageResult coverageResult = mock(CoverageResult.class);
-        setCoverage(coverageResult, CoverageMetric.PACKAGES, packageCoverage);
-        setCoverage(coverageResult, CoverageMetric.FILES, filesCoverage);
-        setCoverage(coverageResult, CoverageMetric.CLASSES, classesCoverage);
-        setCoverage(coverageResult, CoverageMetric.METHOD, methodCoverage);
-        setCoverage(coverageResult, CoverageMetric.LINE, linesCoverage);
-        return coverageResult;
+        return new CodeCoverageMetrics(
+                packageCoverage,
+                filesCoverage,
+                classesCoverage,
+                methodCoverage,
+                linesCoverage,
+                0.0f
+        );
     }
 
-    public static CoverageResult getDefaultCoverageResult() {
-        return getCoverageResult(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
-    public static CoverageResult getEmptyCoverageResult() {
-        CoverageResult coverageResult = mock(CoverageResult.class);
-        setCoverage(coverageResult, CoverageMetric.LINE, null);
-        return coverageResult;
+    public static CodeCoverageMetrics getEmptyCoverageMetrics() {
+        return new CodeCoverageMetrics(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     public static JSONObject getJSONFromFile(Class klass, String filename) throws IOException {
@@ -135,14 +126,6 @@ public class TestUtils {
 
     private static JSONObject slurpFromInputStream(InputStream in) throws IOException {
         return (JSONObject) new JsonSlurper().parse(in);
-    }
-
-    private static void setCoverage(CoverageResult coverageResult, CoverageMetric coverageMetric,
-                                    Float value) {
-        if (value != null) {
-            Ratio ratio = Ratio.create(value * 100.0f, 100.0f);
-            when(coverageResult.getCoverage(coverageMetric)).thenReturn(ratio);
-        }
     }
 
     public static HttpRequestHandler makeHttpHandler(final int statusCode, final String body) {

@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.uberalls;
 
-import com.uber.jenkins.phabricator.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
@@ -80,7 +80,6 @@ public class UberallsClient {
             JSONObject coverage = (JSONObject) responseJSON;
 
             return new CodeCoverageMetrics(
-                    coverage.getString("sha"),
                     ((Double) coverage.getDouble(PACKAGE_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(FILES_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(CLASSES_COVERAGE_KEY)).floatValue(),
