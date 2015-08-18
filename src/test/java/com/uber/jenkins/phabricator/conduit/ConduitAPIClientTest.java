@@ -29,15 +29,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class ConduitAPIClientTest {
     private LocalTestServer server;
     private ConduitAPIClient client;
-    private final Map<String, String> emptyParams = new HashMap<String, String>();
+    private final JSONObject emptyParams = new JSONObject();
 
     @Before
     public void setUp() throws Exception {
@@ -76,7 +74,7 @@ public class ConduitAPIClientTest {
     @Test
     public void testWithParams() throws UnsupportedEncodingException, ConduitAPIException {
         client = new ConduitAPIClient("http://foo.bar", TestUtils.TEST_CONDUIT_TOKEN);
-        Map<String, String> params = new HashMap<String, String>();
+        JSONObject params = new JSONObject().element("hello", "world");
         params.put("hello", "world");
         client.createRequest("action", params);
     }

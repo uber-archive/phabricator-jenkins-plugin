@@ -24,8 +24,6 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * DifferentialClient handles all interaction with conduit/arc for differentials
@@ -50,11 +48,11 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException, ConduitAPIException {
-        Map params = new HashMap<String, String>();
-        params.put("revision_id", revisionID);
-        params.put("action", action);
-        params.put("message", message);
-        params.put("silent", silent);
+        JSONObject params = new JSONObject();
+        params.element("revision_id", revisionID)
+                .element("action", action)
+                .element("message", message)
+                .element("silent", silent);
 
         return this.callConduit("differential.createcomment", params);
     }
@@ -66,8 +64,7 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject fetchDiff() throws IOException, ConduitAPIException {
-        Map params = new HashMap<String, String>();
-        params.put("ids", new String[]{diffID});
+        JSONObject params = new JSONObject().element("ids", new String[]{diffID});
         JSONObject query = this.callConduit("differential.querydiffs", params);
         JSONObject response;
         try {
@@ -99,10 +96,9 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(String phid, boolean pass) throws ConduitAPIException, IOException {
-        Map params = new HashMap<String, String>();
-        params.put("type", pass ? "pass" : "fail");
-        params.put("buildTargetPHID", phid);
-
+        JSONObject params = new JSONObject();
+        params.element("type", pass ? "pass" : "fail")
+                .element("buildTargetPHID", phid);
         return this.callConduit("harbormaster.sendmessage", params);
     }
 
@@ -115,15 +111,17 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterUri(String phid, String buildUri) throws ConduitAPIException, IOException {
-        Map params = new HashMap<String, String>();
-        params.put("buildTargetPHID", phid);
-        params.put("artifactKey", "jenkins.uri");
-        params.put("artifactType", "uri");
         JSONObject artifactData = new JSONObject();
         artifactData = artifactData.element("uri", buildUri)
-            .element("name", "Jenkins")
-            .element("ui.external", true);
-        params.put("artifactData", artifactData);
+                .element("name", "Jenkins")
+                .element("ui.external", true);
+
+        JSONObject params = new JSONObject();
+        params.element("buildTargetPHID", phid)
+                .element("artifactKey", "jenkins.uri")
+                .element("artifactType", "uri")
+                .element("artifactData", artifactData);
+
         return this.callConduit("harbormaster.createartifact", params);
     }
 
@@ -137,10 +135,6 @@ public class DifferentialClient {
      */
     public JSONObject postComment(String revisionID, String message) throws ConduitAPIException, IOException {
         return postComment(revisionID, message, true, "none");
-    }
-
-    protected JSONObject callConduit(String methodName, Map<String, String> params) throws ConduitAPIException, IOException {
-        return conduit.perform(methodName, params);
     }
 
     protected JSONObject callConduit(String methodName, JSONObject params) throws ConduitAPIException, IOException {

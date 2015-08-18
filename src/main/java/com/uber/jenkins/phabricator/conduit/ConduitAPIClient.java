@@ -41,7 +41,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ConduitAPIClient {
     private static final String API_TOKEN_KEY = "token";
@@ -53,20 +52,6 @@ public class ConduitAPIClient {
     public ConduitAPIClient(String conduitURL, String conduitToken) {
         this.conduitURL = conduitURL;
         this.conduitToken = conduitToken;
-    }
-
-    /**
-     * Call the conduit API of Phabricator
-     * @param action Name of the API call
-     * @param data The data to send to Harbormaster
-     * @return The result as a JSONObject
-     * @throws IOException If there was a problem reading the response
-     * @throws ConduitAPIException If there was an error calling conduit
-     */
-    public JSONObject perform(String action, Map<String, String> data) throws IOException, ConduitAPIException {
-        JSONObject params = new JSONObject();
-        params.putAll(data);
-        return perform(action, params);
     }
 
     /**
@@ -96,20 +81,6 @@ public class ConduitAPIClient {
 
         JsonSlurper jsonParser = new JsonSlurper();
         return (JSONObject)jsonParser.parse(responseBody);
-    }
-
-    /**
-     * Post a URL-encoded "params" key with a JSON-encoded body as per the Conduit API
-     * @param action The name of the Conduit method
-     * @param data The data to be sent to the Conduit method
-     * @return The request to perform
-     * @throws UnsupportedEncodingException when the POST data can't be encoded
-     * @throws ConduitAPIException when the conduit URL is misconfigured
-     */
-    public HttpUriRequest createRequest(String action, Map<String, String> data) throws UnsupportedEncodingException, ConduitAPIException {
-        JSONObject params = new JSONObject();
-        params.putAll(data);
-        return createRequest(action, params);
     }
 
     /**
