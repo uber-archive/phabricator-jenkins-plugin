@@ -34,10 +34,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     @Override
     public boolean hasCoverage() {
         CoverageResult result = getCoverageResult();
-        if (result == null) {
-            return false;
-        }
-        return result.getCoverage(CoverageMetric.LINE) != null;
+        return result != null && result.getCoverage(CoverageMetric.LINE) != null;
     }
 
     @Override
