@@ -33,7 +33,7 @@ public class CoberturaCoverageProviderTest {
     @Test
     public void testConvertCobertura() {
         CoverageResult result = getMockResult();
-        CodeCoverageMetrics metrics = provider.convertCobertura(result);
+        CodeCoverageMetrics metrics = CoberturaCoverageProvider.convertCobertura(result);
         assertEquals(75.0f, metrics.getLineCoveragePercent(), 0.0f);
         assertEquals(0.0f, metrics.getPackageCoveragePercent(), 0.0f);
     }
@@ -41,7 +41,7 @@ public class CoberturaCoverageProviderTest {
     @WithoutJenkins
     @Test
     public void testConvertNullCobertura() {
-        assertNull(provider.convertCobertura(null));
+        assertNull(CoberturaCoverageProvider.convertCobertura(null));
     }
 
     @WithoutJenkins

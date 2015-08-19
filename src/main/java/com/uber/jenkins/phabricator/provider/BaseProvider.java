@@ -48,7 +48,6 @@ public class BaseProvider<T> extends Provider<T> {
             return (T) getClass().getClassLoader().loadClass(implementationName).newInstance();
         } catch (ClassNotFoundException e) {
             e.printStackTrace(logger.getStream());
-            return null;
         } catch (InstantiationException e) {
             e.printStackTrace(logger.getStream());
         } catch (IllegalAccessException e) {

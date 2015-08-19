@@ -80,7 +80,7 @@ public class PhabricatorNotifier extends Notifier {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
-        CoverageProvider coverageProvider = getCoverageProvider(build, listener);
+        CoverageProvider coverageProvider = getUberallsCoverage(build, listener);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
@@ -220,7 +220,7 @@ public class PhabricatorNotifier extends Notifier {
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
-    private CoverageProvider getCoverageProvider(AbstractBuild build, BuildListener listener) {
+    private CoverageProvider getUberallsCoverage(AbstractBuild build, BuildListener listener) {
         if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE) || !uberallsEnabled) {
             return null;
         }
