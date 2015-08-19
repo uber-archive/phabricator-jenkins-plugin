@@ -40,9 +40,7 @@ public class BaseProvider<T> extends Provider<T> {
     }
 
     /**
-     * Instantiate a new instance of the class given the implementation class name
-     * @param implementationName The fully-qualified name of the class
-     * @return An instance of the class
+     * {@inheritDoc}
      */
     @Override
     public T getInstance(final String implementationName) {

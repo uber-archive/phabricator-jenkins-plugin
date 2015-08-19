@@ -37,5 +37,11 @@ public abstract class Provider<T> {
      */
     public abstract boolean isAvailable();
 
+
+    /**
+     * Instantiate a new instance of the class given the implementation class name
+     * @param implementationName The fully-qualified name of the class
+     * @return An instance of the class
+     */
     public abstract T getInstance(final String implementationName);
 }
