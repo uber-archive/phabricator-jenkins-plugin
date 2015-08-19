@@ -43,9 +43,9 @@ public class BaseProvider<T> extends Provider<T> {
      * {@inheritDoc}
      */
     @Override
-    public T getInstance(final String implementationName) {
+    public T getInstance(final String className) {
         try {
-            return (T) getClass().getClassLoader().loadClass(implementationName).newInstance();
+            return (T) getClass().getClassLoader().loadClass(className).newInstance();
         } catch (ClassNotFoundException e) {
             e.printStackTrace(logger.getStream());
         } catch (InstantiationException e) {
