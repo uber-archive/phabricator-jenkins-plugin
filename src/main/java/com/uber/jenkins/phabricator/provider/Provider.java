@@ -21,15 +21,12 @@
 package com.uber.jenkins.phabricator.provider;
 
 import com.uber.jenkins.phabricator.utils.Logger;
-import jenkins.model.Jenkins;
 
 public abstract class Provider<T> {
     protected final Logger logger;
-    private final Jenkins jenkins;
-    private final String pluginName;
+    protected final String pluginName;
 
-    public Provider(final Jenkins jenkins, final String pluginName, final Logger logger) {
-        this.jenkins = jenkins;
+    public Provider(final String pluginName, final Logger logger) {
         this.pluginName = pluginName;
         this.logger = logger;
     }
@@ -38,9 +35,7 @@ public abstract class Provider<T> {
      * Determine if the provider is available for the plugin
      * @return Whether the plugin is available
      */
-    public boolean isAvailable() {
-        return jenkins.getPlugin(pluginName) != null;
-    }
+    public abstract boolean isAvailable();
 
     public abstract T getInstance(final String implementationName);
 }

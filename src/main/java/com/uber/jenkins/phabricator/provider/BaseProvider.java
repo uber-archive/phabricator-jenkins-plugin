@@ -24,8 +24,19 @@ import com.uber.jenkins.phabricator.utils.Logger;
 import jenkins.model.Jenkins;
 
 public class BaseProvider<T> extends Provider<T> {
+    private final Jenkins jenkins;
+
     public BaseProvider(Jenkins jenkins, String pluginName, Logger logger) {
-        super(jenkins, pluginName, logger);
+        super(pluginName, logger);
+        this.jenkins = jenkins;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isAvailable() {
+        return jenkins.getPlugin(pluginName) != null;
     }
 
     /**
