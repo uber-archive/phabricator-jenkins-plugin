@@ -27,6 +27,7 @@ import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
+import com.uber.jenkins.phabricator.provider.BaseProvider;
 import com.uber.jenkins.phabricator.tasks.*;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 public class PhabricatorNotifier extends Notifier {
+    public static final String COBERTURA_CLASS = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
     // Post a comment on success. Useful for lengthy builds.
@@ -218,28 +220,26 @@ public class PhabricatorNotifier extends Notifier {
 
         Logger logger = new Logger(listener.getLogger());
 
-        if (Jenkins.getInstance().getPlugin("cobertura") == null) {
+        BaseProvider<CoverageProvider> provider = new BaseProvider<CoverageProvider>(
+                Jenkins.getInstance(),
+                "cobertura",
+                logger
+        );
+
+        if (!provider.isAvailable()) {
             logger.info(UBERALLS_TAG, "Cobertura plugin not installed, skipping.");
             return null;
         }
 
-        CoverageProvider provider;
-        try {
-            provider = (CoverageProvider) getClass().getClassLoader().loadClass("com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider").newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace(logger.getStream());
-            return null;
-        } catch (IllegalAccessException e) {
-            e.printStackTrace(logger.getStream());
-            return null;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace(logger.getStream());
+        CoverageProvider coverage = provider.getInstance(COBERTURA_CLASS);
+        if (coverage == null) {
+            logger.warn(UBERALLS_TAG, "Unable to load Cobertura coverage provider. Something is really wrong.");
             return null;
         }
 
-        provider.setBuild(build);
-        if (provider.hasCoverage()) {
-            return provider;
+        coverage.setBuild(build);
+        if (coverage.hasCoverage()) {
+            return coverage;
         } else {
             logger.info(UBERALLS_TAG, "No cobertura results found");
             return null;
