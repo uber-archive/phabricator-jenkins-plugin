@@ -103,8 +103,8 @@ public class TestUtils {
     }
 
     public static CodeCoverageMetrics getCoverageResult(Float packageCoverage, Float filesCoverage,
-                                                   Float classesCoverage, Float methodCoverage,
-                                                   Float linesCoverage) {
+                                                        Float classesCoverage, Float methodCoverage,
+                                                        Float linesCoverage) {
         return new CodeCoverageMetrics(
                 packageCoverage,
                 filesCoverage,
