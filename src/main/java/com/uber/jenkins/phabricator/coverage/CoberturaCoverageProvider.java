@@ -67,7 +67,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
      * @param result The cobertura report
      * @return The internal representation of coverage
      */
-    public CodeCoverageMetrics convertCobertura(CoverageResult result) {
+    public static CodeCoverageMetrics convertCobertura(CoverageResult result) {
         if (result == null) {
             return null;
         }
@@ -89,7 +89,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         );
     }
 
-    private float getCoveragePercentage(CoverageResult result, CoverageMetric metric) {
+    private static float getCoveragePercentage(CoverageResult result, CoverageMetric metric) {
         Ratio ratio = result.getCoverage(metric);
         if (ratio == null) {
             return 0.0f;
