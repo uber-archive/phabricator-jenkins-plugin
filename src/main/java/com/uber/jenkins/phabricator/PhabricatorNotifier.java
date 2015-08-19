@@ -28,6 +28,7 @@ import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.provider.BaseProvider;
+import com.uber.jenkins.phabricator.provider.Provider;
 import com.uber.jenkins.phabricator.tasks.*;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
@@ -220,7 +221,7 @@ public class PhabricatorNotifier extends Notifier {
 
         Logger logger = new Logger(listener.getLogger());
 
-        BaseProvider<CoverageProvider> provider = new BaseProvider<CoverageProvider>(
+        Provider<CoverageProvider> provider = new BaseProvider<CoverageProvider>(
                 Jenkins.getInstance(),
                 "cobertura",
                 logger
