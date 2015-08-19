@@ -23,7 +23,7 @@ public class BaseProviderTest {
     @Test
     public void testGetValidProvider() {
         Provider<CoverageProvider> provider = getProvider();
-        assertNotNull(provider.getInstance(PhabricatorNotifier.COBERTURA_CLASS));
+        assertNotNull(provider.getInstance(PhabricatorNotifier.COBERTURA_CLASS_NAME));
     }
 
     private Provider<CoverageProvider> getProvider() {

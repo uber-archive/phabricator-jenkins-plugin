@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 public class PhabricatorNotifier extends Notifier {
-    public static final String COBERTURA_CLASS = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
+    public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
     // Post a comment on success. Useful for lengthy builds.
@@ -80,10 +80,10 @@ public class PhabricatorNotifier extends Notifier {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
-        CoverageProvider coverage = getUberallsCoverage(build, listener);
+        CoverageProvider coverageProvider = getCoverageProvider(build, listener);
         CodeCoverageMetrics coverageResult = null;
-        if (coverage != null) {
-            coverageResult = coverage.getMetrics();
+        if (coverageProvider != null) {
+            coverageResult = coverageProvider.getMetrics();
         }
 
         final String branch = environment.get("GIT_BRANCH");
@@ -214,7 +214,13 @@ public class PhabricatorNotifier extends Notifier {
         return new ConduitAPIClient(credentials.getUrl(), credentials.getToken().getPlainText());
     }
 
-    private CoverageProvider getUberallsCoverage(AbstractBuild<?, ?> build, BuildListener listener) {
+    /**
+     * Get the cobertura coverage for the build
+     * @param build The current build
+     * @param listener The build listener
+     * @return The current cobertura coverage, if any
+     */
+    private CoverageProvider getCoverageProvider(AbstractBuild build, BuildListener listener) {
         if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE) || !uberallsEnabled) {
             return null;
         }
@@ -232,7 +238,7 @@ public class PhabricatorNotifier extends Notifier {
             return null;
         }
 
-        CoverageProvider coverage = provider.getInstance(COBERTURA_CLASS);
+        CoverageProvider coverage = provider.getInstance(COBERTURA_CLASS_NAME);
         if (coverage == null) {
             logger.warn(UBERALLS_TAG, "Unable to load Cobertura coverage provider. Something is really wrong.");
             return null;
