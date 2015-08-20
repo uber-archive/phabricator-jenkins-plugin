@@ -25,6 +25,10 @@ import hudson.model.AbstractBuild;
 public abstract class CoverageProvider {
     private AbstractBuild<?, ?> build;
 
+    /**
+     * Set the owning build for this provider
+     * @param build The build that is associated with the current run
+     */
     public void setBuild(AbstractBuild<?, ?> build) {
         this.build = build;
     }
@@ -35,5 +39,16 @@ public abstract class CoverageProvider {
 
     public abstract boolean hasCoverage();
 
-    public abstract CodeCoverageMetrics getMetrics();
+    /**
+     * Get the coverage metrics for the provider
+     * @return The metrics, if any are available
+     */
+    public CodeCoverageMetrics getMetrics() {
+        if (!hasCoverage()) {
+            return null;
+        }
+        return getCoverageMetrics();
+    }
+
+    protected abstract CodeCoverageMetrics getCoverageMetrics();
 }

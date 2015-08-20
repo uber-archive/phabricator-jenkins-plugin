@@ -38,12 +38,8 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     }
 
     @Override
-    public CodeCoverageMetrics getMetrics() {
-        CoverageResult result = getCoverageResult();
-        if (result == null) {
-            return null;
-        }
-        return convertCobertura(result);
+    protected CodeCoverageMetrics getCoverageMetrics() {
+        return convertCobertura(getCoverageResult());
     }
 
     private CoverageResult getCoverageResult() {
