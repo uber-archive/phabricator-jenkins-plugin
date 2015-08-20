@@ -18,15 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.uber.jenkins.phabricator;
-
-import hudson.plugins.cobertura.Ratio;
-import hudson.plugins.cobertura.targets.CoverageMetric;
-import hudson.plugins.cobertura.targets.CoverageResult;
+package com.uber.jenkins.phabricator.coverage;
 
 public class CodeCoverageMetrics {
-    private String sha1;
-
     private float packagesCoveragePercent = -1;
     private float filesCoveragePercent = -1;
     private float classesCoveragePercent = -1;
@@ -34,44 +28,9 @@ public class CodeCoverageMetrics {
     private float lineCoveragePercent = -1;
     private float conditionalCoveragePercent = -1;
 
-    public CodeCoverageMetrics(CoverageResult coverageResult) {
-        if (coverageResult != null) {
-            Ratio packagesCoverage = coverageResult.getCoverage(CoverageMetric.PACKAGES);
-            if (packagesCoverage != null) {
-                packagesCoveragePercent = packagesCoverage.getPercentageFloat();
-            }
-
-            Ratio filesCoverage = coverageResult.getCoverage(CoverageMetric.FILES);
-            if (filesCoverage != null) {
-                filesCoveragePercent = filesCoverage.getPercentageFloat();
-            }
-
-            Ratio classesCoverage = coverageResult.getCoverage(CoverageMetric.CLASSES);
-            if (classesCoverage != null) {
-                classesCoveragePercent = classesCoverage.getPercentageFloat();
-            }
-
-            Ratio methodCoverage = coverageResult.getCoverage(CoverageMetric.METHOD);
-            if (methodCoverage != null) {
-                methodCoveragePercent = methodCoverage.getPercentageFloat();
-            }
-
-            Ratio lineCoverage = coverageResult.getCoverage(CoverageMetric.LINE);
-            if (lineCoverage != null) {
-                lineCoveragePercent = lineCoverage.getPercentageFloat();
-            }
-
-            Ratio conditionalCoverage = coverageResult.getCoverage(CoverageMetric.CONDITIONAL);
-            if (conditionalCoverage != null) {
-                conditionalCoveragePercent = conditionalCoverage.getPercentageFloat();
-            }
-        }
-    }
-
-    public CodeCoverageMetrics(String sha1, float packagesCoveragePercent, float filesCoveragePercent,
+    public CodeCoverageMetrics(float packagesCoveragePercent, float filesCoveragePercent,
                                float classesCoveragePercent, float methodCoveragePercent, float lineCoveragePercent,
                                float conditionalCoveragePercent) {
-        this.sha1 = sha1;
         this.packagesCoveragePercent = packagesCoveragePercent;
         this.filesCoveragePercent = filesCoveragePercent;
         this.classesCoveragePercent = classesCoveragePercent;
@@ -82,10 +41,6 @@ public class CodeCoverageMetrics {
 
     public boolean isValid() {
         return lineCoveragePercent != -1;
-    }
-
-    public String getSha1() {
-        return sha1;
     }
 
     public float getPackageCoveragePercent() {

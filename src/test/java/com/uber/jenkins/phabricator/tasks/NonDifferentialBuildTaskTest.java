@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-import com.uber.jenkins.phabricator.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import org.junit.Before;
@@ -105,8 +105,8 @@ public class NonDifferentialBuildTaskTest {
 
     @Test
     public void testInvalidCodeCoverageMetrics() {
-        codeCoverageMetrics = TestUtils.getCodeCoverageMetrics(TestUtils.TEST_SHA, 50.0f, 50.0f,
-                50.0f, 50.0f, -1.0f, 50.0f);
+        codeCoverageMetrics = TestUtils.getCodeCoverageMetrics(
+                50.0f, 50.0f, 50.0f, 50.0f, -1.0f, 50.0f);
         assertEquals(Task.Result.IGNORED,
                 new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, TestUtils.TEST_SHA).run());

@@ -1,6 +1,6 @@
 package com.uber.jenkins.phabricator.uberalls;
 
-import com.uber.jenkins.phabricator.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.HttpStatus;
@@ -75,7 +75,6 @@ public class UberallsClientTest {
         server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, validJSON.toString()));
         CodeCoverageMetrics metrics = client.getParentCoverage(TestUtils.TEST_SHA);
         assertEquals(42.0f, metrics.getLineCoveragePercent(), 0.01f);
-        assertEquals("deadbeef", metrics.getSha1());
     }
 
     @Test
