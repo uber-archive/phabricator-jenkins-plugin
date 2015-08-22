@@ -30,6 +30,8 @@ import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
+import com.uber.jenkins.phabricator.unit.UnitResults;
+import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.FilePath;
@@ -53,6 +55,7 @@ public class BuildResultProcessor {
     private final FilePath workspace;
     private String commentAction;
     private final CommentBuilder commenter;
+    private UnitResults unitResults;
     private Map<String, String> harbormasterCoverage;
 
     public BuildResultProcessor(Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
@@ -148,6 +151,12 @@ public class BuildResultProcessor {
                 logger.info(LOGGING_TAG, "Unable to send BUILD_URL to Harbormaster");
             }
 
+            if (unitResults != null) {
+                logger.info(
+                        LOGGING_TAG,
+                        String.format("Publishing unit results to Harbormaster for %d tests.", unitResults.getResults().size())
+                );
+            }
             if (harbormasterCoverage != null) {
                 logger.info(
                         LOGGING_TAG,
@@ -163,7 +172,14 @@ public class BuildResultProcessor {
                     )
             );
 
-            Task.Result result = new SendHarbormasterResultTask(logger, diffClient, phid, harbormasterSuccess, getCoverage()).run();
+            Task.Result result = new SendHarbormasterResultTask(
+                    logger,
+                    diffClient,
+                    phid,
+                    harbormasterSuccess,
+                    unitResults,
+                    harbormasterCoverage
+            ).run();
             if (result != Task.Result.SUCCESS) {
                 return false;
             }
@@ -176,6 +192,22 @@ public class BuildResultProcessor {
             }
         }
         return true;
+    }
+
+    /**
+     * Process unit test results from the test run
+     * @param unitProvider a provider for unit test results
+     */
+    public void processUnitResults(UnitTestProvider unitProvider) {
+        if (unitProvider == null) {
+            logger.info(LOGGING_TAG, "No unit provider available.");
+            return;
+        }
+        if (!unitProvider.resultsAvailable()) {
+            logger.info(LOGGING_TAG, "No unit results available.");
+            return;
+        }
+        unitResults = unitProvider.getResults();
     }
 
     /**

@@ -27,10 +27,10 @@ import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
-import com.uber.jenkins.phabricator.provider.BaseProvider;
-import com.uber.jenkins.phabricator.provider.Provider;
+import com.uber.jenkins.phabricator.provider.InstanceProvider;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
+import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
@@ -48,8 +48,11 @@ import java.io.IOException;
 
 public class PhabricatorNotifier extends Notifier {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
+    private static final String JUNIT_CLASS_NAME = "com.uber.jenkins.phabricator.unit.JUnitTestProvider";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
+    private static final String JUNIT_PLUGIN_NAME = "junit";
+    private static final String UNIT_TAG = "unit-results";
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -154,6 +157,10 @@ public class PhabricatorNotifier extends Notifier {
         // Add in comments about the build result
         resultProcessor.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure);
 
+        // Process unit tests results to send to Harbormaster
+        resultProcessor.processUnitResults(getUnitProvider(build, listener));
+
+        // Read coverage data to send to Harbormaster
         resultProcessor.processCoverage(coverageProvider);
 
         // Fail the build if we can't report to Harbormaster
@@ -188,21 +195,15 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         Logger logger = new Logger(listener.getLogger());
-
-        Provider<CoverageProvider> provider = new BaseProvider<CoverageProvider>(
+        InstanceProvider<CoverageProvider> provider = new InstanceProvider<CoverageProvider>(
                 Jenkins.getInstance(),
                 "cobertura",
+                COBERTURA_CLASS_NAME,
                 logger
         );
+        CoverageProvider coverage = provider.getInstance();
 
-        if (!provider.isAvailable()) {
-            logger.info(UBERALLS_TAG, "Cobertura plugin not installed, skipping.");
-            return null;
-        }
-
-        CoverageProvider coverage = provider.getInstance(COBERTURA_CLASS_NAME);
         if (coverage == null) {
-            logger.warn(UBERALLS_TAG, "Unable to load Cobertura coverage provider. Something is really wrong.");
             return null;
         }
 
@@ -213,6 +214,24 @@ public class PhabricatorNotifier extends Notifier {
             logger.info(UBERALLS_TAG, "No cobertura results found");
             return null;
         }
+    }
+
+    private UnitTestProvider getUnitProvider(AbstractBuild build, BuildListener listener) {
+        Logger logger = new Logger(listener.getLogger());
+
+        InstanceProvider<UnitTestProvider> provider = new InstanceProvider<UnitTestProvider>(
+                Jenkins.getInstance(),
+                JUNIT_PLUGIN_NAME,
+                JUNIT_CLASS_NAME,
+                logger
+        );
+
+        UnitTestProvider unitProvider = provider.getInstance();
+        if (unitProvider == null) {
+            return null;
+        }
+        unitProvider.setBuild(build);
+        return unitProvider;
     }
 
     @SuppressWarnings("UnusedDeclaration")

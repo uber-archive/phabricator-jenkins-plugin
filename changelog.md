@@ -10,7 +10,8 @@
 * Increase unit test coverage to >85%
 * Gracefully ignore missing author names/emails from conduit for summary badge
 * Report Cobertura coverage data to Harbormaster API
-* Add option to preserve formatting in additional comments
+* Add option to preserve formatting in additional comments (Gautam Korlam)
+* Report XUnit results to Harbormaster
 
 ### 1.7.2 (2015/08/13)
 
