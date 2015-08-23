@@ -1,4 +1,4 @@
-# Phabricator-Jenkins Plugin [![Build Status](https://travis-ci.org/uber/phabricator-jenkins-plugin.svg?branch=master)](https://travis-ci.org/uber/phabricator-jenkins-plugin)
+# Phabricator-Jenkins Plugin [![Build Status](https://travis-ci.org/uber/phabricator-jenkins-plugin.svg?branch=master)](https://travis-ci.org/uber/phabricator-jenkins-plugin) [![Coverage Status](https://coveralls.io/repos/uber/phabricator-jenkins-plugin/badge.svg?branch=master&service=github)](https://coveralls.io/github/uber/phabricator-jenkins-plugin?branch=master)
 
 This plugin provides [Phabricator][] integration with [Jenkins][]. It allows Jenkins to
 report build status and coverage information over Harbormaster (or via comments
