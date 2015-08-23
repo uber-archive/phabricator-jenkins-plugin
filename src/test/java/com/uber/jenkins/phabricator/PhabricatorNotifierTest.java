@@ -54,12 +54,16 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testRoundTripConfiguration() throws Exception {
-        p.getPublishersList().add(notifier);
-
+        addBuildStep();
         j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
 
         PhabricatorNotifier after = p.getPublishersList().get(PhabricatorNotifier.class);
         j.assertEqualBeans(notifier, after,
                 "commentOnSuccess,uberallsEnabled,commentWithConsoleLinkOnFailure,commentFile");
+    }
+
+    @Override
+    protected void addBuildStep() {
+        p.getPublishersList().add(notifier);
     }
 }

@@ -25,19 +25,15 @@ import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import net.sf.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
 public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     private PhabricatorBuildWrapper wrapper;
-    private FakeConduit conduit;
 
     @Before
     public void setUp() throws Exception {
@@ -50,13 +46,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         wrapper.getDescriptor().setArcPath("echo");
     }
 
-    @After
-    public void tearDown() throws Exception {
-        if (conduit != null) {
-            conduit.stop();
-        }
-    }
-
     @Test
     public void testGetters() {
         assertFalse(wrapper.isCreateCommit());
@@ -66,7 +55,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
     @Test
     public void testRoundTripConfiguration() throws Exception {
-        p.getBuildWrappersList().add(wrapper);
+        addBuildStep();
 
         j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
 
@@ -77,7 +66,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
     @Test
     public void testNoParameterBuild() throws Exception {
-        p.getBuildWrappersList().add(wrapper);
+        addBuildStep();
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
         Result result = build.getResult();
@@ -86,7 +75,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
     @Test
     public void testBuildNoConduit() throws Exception {
-        p.getBuildWrappersList().add(wrapper);
+        addBuildStep();
         TestUtils.setDefaultBuildEnvironment(j);
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
@@ -96,7 +85,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     @Test
     public void testBuildInvalidConduit() throws Exception {
         TestUtils.addInvalidCredentials();
-        p.getBuildWrappersList().add(wrapper);
+        addBuildStep();
         TestUtils.setDefaultBuildEnvironment(j);
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
@@ -141,22 +130,9 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "validFetchDiffResponse");
     }
 
-    private FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse) throws Exception {
-        Map<String, JSONObject> responses = new HashMap<String, JSONObject>();
-        if (queryDiffsResponse != null) {
-            responses.put("differential.querydiffs", queryDiffsResponse);
-        }
-        if (postCommentResponse != null) {
-            responses.put("differential.createcomment", postCommentResponse);
-        }
-        conduit = new FakeConduit(responses);
 
-        TestUtils.addValidCredentials(conduit);
-
+    @Override
+    protected void addBuildStep() {
         p.getBuildWrappersList().add(wrapper);
-        TestUtils.setDefaultBuildEnvironment(j);
-
-        return p.scheduleBuild2(0).get();
     }
-
 }
