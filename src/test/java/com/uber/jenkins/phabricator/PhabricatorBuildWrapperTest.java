@@ -20,29 +20,50 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
+import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
+import static org.junit.Assert.*;
 
 public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     private PhabricatorBuildWrapper wrapper;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         p = createProject();
         wrapper = new PhabricatorBuildWrapper(
                 false,
                 false,
                 true
         );
+        wrapper.getDescriptor().setArcPath("echo");
+    }
+
+    @Test
+    public void testGetters() {
+        assertFalse(wrapper.isCreateCommit());
+        assertFalse(wrapper.isApplyToMaster());
+        assertTrue(wrapper.isShowBuildStartedMessage());
+    }
+
+    @Test
+    public void testRoundTripConfiguration() throws Exception {
+        addBuildStep();
+
+        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
+
+        PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
+        j.assertEqualBeans(wrapper, after,
+                "createCommit,applyToMaster,showBuildStartedMessage");
     }
 
     @Test
     public void testNoParameterBuild() throws Exception {
-        p.getBuildWrappersList().add(wrapper);
+        addBuildStep();
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
         Result result = build.getResult();
@@ -50,13 +71,60 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testRoundTripConfiguration() throws Exception {
+    public void testBuildNoConduit() throws Exception {
+        addBuildStep();
+        TestUtils.setDefaultBuildEnvironment(j);
+
+        FreeStyleBuild build = p.scheduleBuild2(0).get();
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testBuildInvalidConduit() throws Exception {
+        TestUtils.addInvalidCredentials();
+        addBuildStep();
+        TestUtils.setDefaultBuildEnvironment(j);
+
+        FreeStyleBuild build = p.scheduleBuild2(0).get();
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testBuildValidConduitEmptyResponse() throws Exception {
+        FreeStyleBuild build = buildWithConduit(null, null, null);
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testBuildValidErrorCommenting() throws Exception {
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testBuildValidSuccess() throws Exception {
+        JSONObject commentResponse = new JSONObject();
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
+
+        assertEquals(Result.SUCCESS, build.getResult());
+        PhabricatorPostbuildSummaryAction action = build.getAction(PhabricatorPostbuildSummaryAction.class);
+        assertNotNull(action);
+        assertEquals("sc@ndella.com", action.getAuthorEmail());
+        assertEquals("aiden", action.getAuthorName());
+        assertNotNull(action.getIconPath());
+    }
+
+    @Test
+    public void testBuildWithErrorOnArcanist() throws Exception {
+        wrapper.getDescriptor().setArcPath("false");
+        JSONObject commentResponse = new JSONObject();
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
+
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Override
+    protected void addBuildStep() {
         p.getBuildWrappersList().add(wrapper);
-
-        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
-
-        PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
-        j.assertEqualBeans(wrapper, after,
-                "createCommit,applyToMaster,showBuildStartedMessage");
     }
 }

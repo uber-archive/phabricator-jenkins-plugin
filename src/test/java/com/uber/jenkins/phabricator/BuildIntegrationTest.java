@@ -20,20 +20,36 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClientTest;
+import com.uber.jenkins.phabricator.utils.TestUtils;
+import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import net.sf.json.JSONObject;
+import org.junit.After;
 import org.junit.Rule;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
-public class BuildIntegrationTest {
+public abstract class BuildIntegrationTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
+    protected FakeConduit conduit;
+
     FreeStyleProject p;
+
+    @After
+    public void tearDown() throws Exception {
+        if (conduit != null) {
+            conduit.stop();
+        }
+    }
 
     void assertSuccessfulBuild(Result result) {
         assertTrue(result.isCompleteBuild());
@@ -42,5 +58,33 @@ public class BuildIntegrationTest {
 
     FreeStyleProject createProject() throws IOException {
         return j.createFreeStyleProject();
+    }
+
+    protected abstract void addBuildStep();
+
+    protected JSONObject getFetchDiffResponse() throws IOException {
+        return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "validFetchDiffResponse");
+    }
+
+    protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse) throws Exception {
+        Map<String, JSONObject> responses = new HashMap<String, JSONObject>();
+        if (queryDiffsResponse != null) {
+            responses.put("differential.querydiffs", queryDiffsResponse);
+        }
+        if (postCommentResponse != null) {
+            responses.put("differential.createcomment", postCommentResponse);
+        }
+        if (sendMessageResponse != null) {
+            responses.put("harbormaster.sendmessage", sendMessageResponse);
+        }
+        conduit = new FakeConduit(responses);
+
+        TestUtils.addValidCredentials(conduit);
+
+        addBuildStep();
+
+        TestUtils.setDefaultBuildEnvironment(j);
+
+        return p.scheduleBuild2(0).get();
     }
 }

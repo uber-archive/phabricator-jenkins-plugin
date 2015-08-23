@@ -20,12 +20,16 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
+import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.junit.Assert.*;
 
 public class PhabricatorNotifierTest extends BuildIntegrationTest {
     private PhabricatorNotifier notifier;
@@ -43,9 +47,26 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testNoParametersBuild() throws Exception {
-        p.getPublishersList().add(notifier);
+    public void testGetters() {
+        assertFalse(notifier.isCommentOnSuccess());
+        assertTrue(notifier.isUberallsEnabled());
+        assertEquals(".phabricator-comment", notifier.getCommentFile());
+        assertFalse(notifier.isCommentWithConsoleLinkOnFailure());
+    }
 
+    @Test
+    public void testRoundTripConfiguration() throws Exception {
+        addBuildStep();
+        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
+
+        PhabricatorNotifier after = p.getPublishersList().get(PhabricatorNotifier.class);
+        j.assertEqualBeans(notifier, after,
+                "commentOnSuccess,uberallsEnabled,commentWithConsoleLinkOnFailure,commentFile");
+    }
+
+    @Test
+    public void testNoParametersBuild() throws Exception {
+        addBuildStep();
         FreeStyleBuild build = p.scheduleBuild2(0).get();
         Result result = build.getResult();
 
@@ -53,13 +74,36 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testRoundTripConfiguration() throws Exception {
+    public void testNoCredentials() throws Exception {
+        addBuildStep();
+        TestUtils.setDefaultBuildEnvironment(j);
+
+        FreeStyleBuild build = p.scheduleBuild2(0).get();
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testWithCredentialsIgnoresMissingConduit() throws Exception {
+        FreeStyleBuild build = buildWithConduit(null, null, null);
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
+    public void testUnableToPostToHarbormaster() throws Exception {
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
+
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testPostToHarbormaster() throws Exception {
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Override
+    protected void addBuildStep() {
         p.getPublishersList().add(notifier);
-
-        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
-
-        PhabricatorNotifier after = p.getPublishersList().get(PhabricatorNotifier.class);
-        j.assertEqualBeans(notifier, after,
-                "commentOnSuccess,uberallsEnabled,commentWithConsoleLinkOnFailure,commentFile");
     }
 }

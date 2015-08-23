@@ -80,10 +80,6 @@ public class ConduitAPIClientTest {
     }
 
     private String getTestServerAddress() {
-        return String.format(
-                "http://%s:%s",
-                server.getServiceAddress().getHostName(),
-                server.getServiceAddress().getPort()
-        );
+        return TestUtils.getTestServerAddress(server);
     }
 }
