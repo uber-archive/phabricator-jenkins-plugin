@@ -131,11 +131,6 @@ public class PhabricatorNotifier extends Notifier {
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
         }
 
-        String revisionID = diff.getRevisionID(true);
-        if (CommonUtils.isBlank(revisionID)) {
-            return this.ignoreBuild(logger.getStream(), "Unable to load revisionID from conduit for diff ID " + diffID);
-        }
-
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
 
         boolean runHarbormaster = !CommonUtils.isBlank(phid);
@@ -251,12 +246,6 @@ public class PhabricatorNotifier extends Notifier {
             logger.info(UBERALLS_TAG, "No cobertura results found");
             return null;
         }
-    }
-
-    private boolean ignoreBuild(PrintStream logger, String message) {
-        logger.println(message);
-        logger.println("Skipping Phabricator notification.");
-        return true;
     }
 
     @SuppressWarnings("UnusedDeclaration")
