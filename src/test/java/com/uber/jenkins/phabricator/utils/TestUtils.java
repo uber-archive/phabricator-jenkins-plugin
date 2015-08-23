@@ -188,7 +188,7 @@ public class TestUtils {
     }
 
     public static void addValidCredentials(FakeConduit conduit) throws IOException {
-        addCredentials(TestUtils.getConduitCredentials(conduit.URI()));
+        addCredentials(TestUtils.getConduitCredentials(conduit.uri()));
     }
 
     public static String getTestServerAddress(LocalTestServer server) {

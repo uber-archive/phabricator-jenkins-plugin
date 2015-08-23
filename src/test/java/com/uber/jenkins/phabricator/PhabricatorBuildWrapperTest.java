@@ -20,15 +20,12 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.uber.jenkins.phabricator.conduit.ConduitAPIClientTest;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -94,20 +91,20 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
     @Test
     public void testBuildValidConduitEmptyResponse() throws Exception {
-        FreeStyleBuild build = buildWithConduit(null, null);
+        FreeStyleBuild build = buildWithConduit(null, null, null);
         assertEquals(Result.FAILURE, build.getResult());
     }
 
     @Test
     public void testBuildValidErrorCommenting() throws Exception {
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
         assertEquals(Result.FAILURE, build.getResult());
     }
 
     @Test
     public void testBuildValidSuccess() throws Exception {
         JSONObject commentResponse = new JSONObject();
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
 
         assertEquals(Result.SUCCESS, build.getResult());
         PhabricatorPostbuildSummaryAction action = build.getAction(PhabricatorPostbuildSummaryAction.class);
@@ -121,15 +118,10 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     public void testBuildWithErrorOnArcanist() throws Exception {
         wrapper.getDescriptor().setArcPath("false");
         JSONObject commentResponse = new JSONObject();
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
 
         assertEquals(Result.FAILURE, build.getResult());
     }
-
-    private JSONObject getFetchDiffResponse() throws IOException {
-        return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "validFetchDiffResponse");
-    }
-
 
     @Override
     protected void addBuildStep() {

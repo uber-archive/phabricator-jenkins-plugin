@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClientTest;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -61,7 +62,11 @@ public abstract class BuildIntegrationTest {
 
     protected abstract void addBuildStep();
 
-    protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse) throws Exception {
+    protected JSONObject getFetchDiffResponse() throws IOException {
+        return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "validFetchDiffResponse");
+    }
+
+    protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse) throws Exception {
         Map<String, JSONObject> responses = new HashMap<String, JSONObject>();
         if (queryDiffsResponse != null) {
             responses.put("differential.querydiffs", queryDiffsResponse);
@@ -69,11 +74,15 @@ public abstract class BuildIntegrationTest {
         if (postCommentResponse != null) {
             responses.put("differential.createcomment", postCommentResponse);
         }
+        if (sendMessageResponse != null) {
+            responses.put("harbormaster.sendmessage", sendMessageResponse);
+        }
         conduit = new FakeConduit(responses);
 
         TestUtils.addValidCredentials(conduit);
 
         addBuildStep();
+
         TestUtils.setDefaultBuildEnvironment(j);
 
         return p.scheduleBuild2(0).get();

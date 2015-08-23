@@ -42,7 +42,7 @@ public class FakeConduit {
         server.stop();
     }
 
-    public String URI() {
+    public String uri() {
         return TestUtils.getTestServerAddress(server);
     }
 
