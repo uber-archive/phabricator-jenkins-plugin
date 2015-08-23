@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClientTest;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -32,8 +33,12 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public abstract class BuildIntegrationTest {
@@ -86,5 +91,19 @@ public abstract class BuildIntegrationTest {
         TestUtils.setDefaultBuildEnvironment(j);
 
         return p.scheduleBuild2(0).get();
+    }
+
+    protected void assertLogContains(String needle, AbstractBuild build) throws IOException {
+        StringBuilder log = new StringBuilder();
+        List<String> logLines = build.getLog(1000);
+        for (String s : logLines) {
+            log.append(s);
+        }
+        assertThat(log.toString(), containsString(needle));
+    }
+
+    protected void assertFailureWithMessage(String message, AbstractBuild build) throws IOException {
+        assertEquals(Result.FAILURE, build.getResult());
+        assertLogContains(message, build);
     }
 }
