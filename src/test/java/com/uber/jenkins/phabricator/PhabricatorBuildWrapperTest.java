@@ -76,7 +76,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         TestUtils.setDefaultBuildEnvironment(j);
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
-        assertEquals(Result.FAILURE, build.getResult());
+        assertFailureWithMessage("No credentials configured", build);
     }
 
     @Test
@@ -86,19 +86,21 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         TestUtils.setDefaultBuildEnvironment(j);
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
-        assertEquals(Result.FAILURE, build.getResult());
+        assertFailureWithMessage("UnknownHostException", build);
     }
 
     @Test
     public void testBuildValidConduitEmptyResponse() throws Exception {
         FreeStyleBuild build = buildWithConduit(null, null, null);
-        assertEquals(Result.FAILURE, build.getResult());
+
+        assertFailureWithMessage("Unable to fetch differential", build);
     }
 
     @Test
     public void testBuildValidErrorCommenting() throws Exception {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
-        assertEquals(Result.FAILURE, build.getResult());
+
+        assertFailureWithMessage("Unable to fetch differential", build);
     }
 
     @Test
@@ -120,7 +122,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         JSONObject commentResponse = new JSONObject();
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
 
-        assertEquals(Result.FAILURE, build.getResult());
+        assertFailureWithMessage("Error applying arc patch", build);
     }
 
     @Override

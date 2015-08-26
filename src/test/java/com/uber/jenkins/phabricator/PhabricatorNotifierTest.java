@@ -79,20 +79,21 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         TestUtils.setDefaultBuildEnvironment(j);
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
-        assertEquals(Result.FAILURE, build.getResult());
+        assertFailureWithMessage("No credentials configured for conduit", build);
     }
 
     @Test
     public void testWithCredentialsIgnoresMissingConduit() throws Exception {
         FreeStyleBuild build = buildWithConduit(null, null, null);
         assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("Unable to fetch differential", build);
     }
 
     @Test
     public void testUnableToPostToHarbormaster() throws Exception {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
 
-        assertEquals(Result.FAILURE, build.getResult());
+        assertFailureWithMessage("Unable to post to harbormaster", build);
     }
 
     @Test
