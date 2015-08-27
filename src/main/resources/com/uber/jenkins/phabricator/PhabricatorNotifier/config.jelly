@@ -12,7 +12,7 @@
   -->
   <f:entry title="Comment on Success" field="commentOnSuccess"
            description="Post a differential comment on successful builds">
-    <f:checkbox />
+    <f:checkbox default="false" />
   </f:entry>
   <f:entry title="Enable Uberalls" field="uberallsEnabled"
            description="Enable code coverage reporting">
