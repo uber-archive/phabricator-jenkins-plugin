@@ -8,6 +8,7 @@
 * Make the Cobertura plugin an optional dependency (only used for Uberalls)
 * Consistently set defaults for notifiers (Chris Burroughs)
 * Increase unit test coverage to >85%
+* Gracefully ignore missing author names/emails from conduit for summary badge
 
 ### 1.7.2 (2015/08/13)
 
