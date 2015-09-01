@@ -31,6 +31,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Differential {
+    private static final String UNKNOWN_AUTHOR = "unknown";
+    private static final String UNKNOWN_EMAIL = "unknown";
+
     private final JSONObject rawJSON;
 
     public Differential(JSONObject rawJSON) {
@@ -74,9 +77,24 @@ public class Differential {
                 "phabricator.png",
                 getPhabricatorLink(phabricatorURL),
                 getRevisionID(true),
-                rawJSON.getString("authorName"),
-                rawJSON.getString("authorEmail")
+                getAuthorName(),
+                getAuthorEmail()
         );
+    }
+
+    private String getAuthorName() {
+        return getOrElse(rawJSON, "authorName", UNKNOWN_AUTHOR);
+    }
+
+    private String getAuthorEmail() {
+        return getOrElse(rawJSON, "authorEmail", UNKNOWN_EMAIL);
+    }
+
+    private String getOrElse(JSONObject json, String key, String orElse) {
+        if (json.has(key)) {
+            return json.getString(key);
+        }
+        return orElse;
     }
 
     /**
