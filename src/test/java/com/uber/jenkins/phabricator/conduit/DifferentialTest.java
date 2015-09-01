@@ -95,4 +95,14 @@ public class DifferentialTest extends TestCase {
         assertEquals("aiden", summary.getAuthorName());
         assertEquals("ai@uber.com", summary.getAuthorEmail());
     }
+
+    @Test
+    public void testGetMissingAuthorship() throws Exception {
+        JSONObject response = TestUtils.getJSONFromFile(getClass(), "missingAuthorResponse");
+        differential = new Differential(response);
+        PhabricatorPostbuildSummaryAction summary = differential.createSummary("http://example.com");
+
+        assertEquals("unknown", summary.getAuthorName());
+        assertEquals("unknown", summary.getAuthorEmail());
+    }
 }
