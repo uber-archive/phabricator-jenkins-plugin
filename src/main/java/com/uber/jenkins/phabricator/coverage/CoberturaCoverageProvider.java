@@ -20,11 +20,19 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provide Cobertura coverage data
@@ -40,6 +48,37 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     @Override
     protected CodeCoverageMetrics getCoverageMetrics() {
         return convertCobertura(getCoverageResult());
+    }
+
+    @Override
+    public Map<String, List<Integer>> readLineCoverage() {
+        String basePath = "";
+        FilePath workspace = getBuild().getWorkspace();
+        if (workspace != null) {
+            basePath = workspace.getRemote();
+        }
+        File[] reports = getCoberturaReports(getBuild());
+        CoberturaXMLParser parser = new CoberturaXMLParser(basePath);
+        return parseReports(parser, reports);
+    }
+
+    public Map<String, List<Integer>> parseReports(CoberturaXMLParser parser, File[] reports) {
+        if (reports == null) {
+            return null;
+        }
+        for (File coberturaXmlReport : reports) {
+            try {
+                // TODO support merging multiple coverage results
+                return parser.parse(coberturaXmlReport);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            } catch (SAXException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     private CoverageResult getCoverageResult() {
@@ -88,5 +127,9 @@ public class CoberturaCoverageProvider extends CoverageProvider {
             return 0.0f;
         }
         return ratio.getPercentageFloat();
+    }
+
+    private File[] getCoberturaReports(AbstractBuild build) {
+        return build.getRootDir().listFiles(hudson.plugins.cobertura.CoberturaPublisher.COBERTURA_FILENAME_FILTER);
     }
 }

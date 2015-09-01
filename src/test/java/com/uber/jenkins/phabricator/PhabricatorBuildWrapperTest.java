@@ -91,14 +91,14 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
     @Test
     public void testBuildValidConduitEmptyResponse() throws Exception {
-        FreeStyleBuild build = buildWithConduit(null, null, null);
+        FreeStyleBuild build = buildWithConduit(null, null, null, true);
 
         assertFailureWithMessage("Unable to fetch differential", build);
     }
 
     @Test
     public void testBuildValidErrorCommenting() throws Exception {
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null, true);
 
         assertFailureWithMessage("Unable to fetch differential", build);
     }
@@ -106,7 +106,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     @Test
     public void testBuildValidSuccess() throws Exception {
         JSONObject commentResponse = new JSONObject();
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null, true);
 
         assertEquals(Result.SUCCESS, build.getResult());
         PhabricatorPostbuildSummaryAction action = build.getAction(PhabricatorPostbuildSummaryAction.class);
@@ -117,10 +117,18 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testBuildValidWithoutHarbormaster() throws Exception {
+        JSONObject commentResponse = new JSONObject();
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null, false);
+
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
     public void testBuildWithErrorOnArcanist() throws Exception {
         wrapper.getDescriptor().setArcPath("false");
         JSONObject commentResponse = new JSONObject();
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null, true);
 
         assertFailureWithMessage("Error applying arc patch", build);
     }

@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -24,40 +26,57 @@ public class SendHarbormasterResultTaskTest {
 
     @Test
     public void testSuccessfulHarbormaster() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false)).thenReturn(validResponse);
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null)).thenReturn(validResponse);
 
         assertEquals(Task.Result.SUCCESS, getResult());
     }
 
     @Test
     public void testErrorInfoResponse() throws IOException, ConduitAPIException {
-        JSONObject errorResponse = new JSONObject();
-        errorResponse.put("error_info", "i'm having a bad day");
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false)).thenReturn(errorResponse);
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null)).thenReturn(getErrorResponse());
 
         assertEquals(Task.Result.FAILURE, getResult());
     }
 
     @Test
+    public void testRetryOnUnitError() throws Exception {
+        Map<String, String> coverage = new HashMap<String, String>();
+        coverage.put("filename", "NNNUC");
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, coverage)).thenReturn(getErrorResponse());
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null)).thenReturn(validResponse);
+
+        assertEquals(Task.Result.SUCCESS, getResult(coverage));
+    }
+
+    @Test
     public void testConduitAPIFailure() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false)).thenThrow(ConduitAPIException.class);
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null)).thenThrow(ConduitAPIException.class);
 
         assertEquals(Task.Result.FAILURE, getResult());
     }
 
     @Test
     public void testIOExceptionFailure() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false)).thenThrow(IOException.class);
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null)).thenThrow(IOException.class);
 
         assertEquals(Task.Result.FAILURE, getResult());
     }
 
-    private Task.Result getResult() {
+    private Task.Result getResult(Map<String, String> coverage) {
         return new SendHarbormasterResultTask(
                 TestUtils.getDefaultLogger(),
                 diffClient,
                 TestUtils.TEST_PHID,
-                false
+                false,
+                coverage
         ).run();
+    }
+
+    private Task.Result getResult() {
+        return getResult(null);
+    }
+
+    private JSONObject getErrorResponse() {
+        return new JSONObject().element("error_info", "i'm having a bad day");
     }
 }

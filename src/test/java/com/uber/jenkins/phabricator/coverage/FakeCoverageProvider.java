@@ -20,40 +20,27 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import hudson.model.AbstractBuild;
+import java.util.*;
 
-import java.util.List;
-import java.util.Map;
+public class FakeCoverageProvider extends CoverageProvider {
+    private final Map<String, List<Integer>> coverage;
 
-public abstract class CoverageProvider {
-    private AbstractBuild<?, ?> build;
-
-    /**
-     * Set the owning build for this provider
-     * @param build The build that is associated with the current run
-     */
-    public void setBuild(AbstractBuild<?, ?> build) {
-        this.build = build;
+    public FakeCoverageProvider(Map<String, List<Integer>> coverage) {
+        this.coverage = coverage;
     }
 
-    protected AbstractBuild getBuild() {
-        return build;
+    @Override
+    public Map<String, List<Integer>> readLineCoverage() {
+        return coverage;
     }
 
-    public abstract Map<String, List<Integer>> readLineCoverage();
-
-    public abstract boolean hasCoverage();
-
-    /**
-     * Get the coverage metrics for the provider
-     * @return The metrics, if any are available
-     */
-    public CodeCoverageMetrics getMetrics() {
-        if (!hasCoverage()) {
-            return null;
-        }
-        return getCoverageMetrics();
+    @Override
+    public boolean hasCoverage() {
+        return true;
     }
 
-    protected abstract CodeCoverageMetrics getCoverageMetrics();
+    @Override
+    protected CodeCoverageMetrics getCoverageMetrics() {
+        return null;
+    }
 }

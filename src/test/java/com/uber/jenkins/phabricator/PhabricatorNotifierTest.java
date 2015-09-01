@@ -20,12 +20,17 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.coverage.CoberturaXMLParserTest;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
 
@@ -101,6 +106,22 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
 
         assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
+    public void testPostCoverage() throws Exception {
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild build, Launcher launcher, BuildListener buildListener) throws InterruptedException, IOException {
+                build.getWorkspace().child(TestUtils.COBERTURA_XML).copyFrom(CoberturaXMLParserTest.class.getResourceAsStream("go-torch-coverage.xml"));
+                return true;
+            }
+        });
+        p.getPublishersList().add(TestUtils.getDefaultCoberturaPublisher());
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("Publishing coverage data to Harbormaster for 3 files", build);
     }
 
     @Override

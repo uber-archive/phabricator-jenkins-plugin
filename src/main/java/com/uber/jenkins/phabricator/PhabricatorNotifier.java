@@ -29,13 +29,12 @@ import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.provider.BaseProvider;
 import com.uber.jenkins.phabricator.provider.Provider;
-import com.uber.jenkins.phabricator.tasks.*;
+import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Job;
@@ -46,7 +45,6 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 public class PhabricatorNotifier extends Notifier {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
@@ -80,18 +78,21 @@ public class PhabricatorNotifier extends Notifier {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
-        CoverageProvider coverageProvider = getUberallsCoverage(build, listener);
+        final CoverageProvider coverageProvider = getUberallsCoverage(build, listener);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
         }
 
         final String branch = environment.get("GIT_BRANCH");
-        final UberallsClient uberalls = new UberallsClient(getDescriptor().getUberallsURL(), logger,
-                environment.get("GIT_URL"), branch);
+        final UberallsClient uberallsClient = new UberallsClient(
+                getDescriptor().getUberallsURL(),
+                logger,
+                environment.get("GIT_URL"),
+                branch
+        );
         final boolean needsDecoration = build.getActions(PhabricatorPostbuildAction.class).size() == 0;
 
-        final boolean uberallsConfigured = !CommonUtils.isBlank(uberalls.getBaseURL());
         final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
 
         // Handle non-differential build invocations.
@@ -100,9 +101,13 @@ public class PhabricatorNotifier extends Notifier {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            NonDifferentialBuildTask nonDifferentialBuildTask = new NonDifferentialBuildTask(logger, uberalls,
-                    coverageResult, uberallsEnabled,
-                    environment.get("GIT_COMMIT"));
+            NonDifferentialBuildTask nonDifferentialBuildTask = new NonDifferentialBuildTask(
+                    logger,
+                    uberallsClient,
+                    coverageResult,
+                    uberallsEnabled,
+                    environment.get("GIT_COMMIT")
+            );
 
             // Ignore the result.
             nonDifferentialBuildTask.run();
@@ -131,72 +136,31 @@ public class PhabricatorNotifier extends Notifier {
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
         }
 
-        String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
+        BuildResultProcessor resultProcessor = new BuildResultProcessor(
+                logger,
+                build,
+                diff,
+                diffClient,
+                environment.get(PhabricatorPlugin.PHID_FIELD),
+                coverageResult,
+                environment.get("BUILD_URL")
+        );
 
-        boolean runHarbormaster = !CommonUtils.isBlank(phid);
-        Result buildResult = build.getResult();
-        boolean harbormasterSuccess = buildResult.isBetterOrEqualTo(Result.SUCCESS);
-
-        final String buildUrl = environment.get("BUILD_URL");
-        CommentBuilder commenter = new CommentBuilder(logger, buildResult, coverageResult, buildUrl);
-
-        // First add in info about the change in coverage, if applicable
-        if (commenter.hasCoverageAvailable()) {
-            if (uberallsConfigured) {
-                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBaseCommit(), diff.getBranch());
-            } else {
-                logger.info(UBERALLS_TAG, "no backend configured, skipping...");
-            }
-        } else {
-            logger.info(UBERALLS_TAG, "no line coverage found, skipping...");
-        }
+        resultProcessor.processParentCoverage(uberallsClient);
 
         // Add in comments about the build result
-        commenter.processBuildResult(this.commentOnSuccess, this.commentWithConsoleLinkOnFailure, runHarbormaster);
+        resultProcessor.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure);
 
-        String commentAction = "none";
-        if (runHarbormaster) {
-            logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
-            Task.Result sendUriResult = new SendHarbormasterUriTask(logger, diffClient, phid, buildUrl).run();
-            if (sendUriResult != Task.Result.SUCCESS) {
-                logger.info(CONDUIT_TAG, "Unable to send BUILD_URL to Harbormaster");
-            }
+        resultProcessor.processCoverage(coverageProvider);
 
-            logger.info("harbormaster", "Sending build result to Harbormaster with PHID '" + phid + "', success: " + harbormasterSuccess);
-            Task.Result result = new SendHarbormasterResultTask(logger, diffClient, phid, harbormasterSuccess).run();
-            if (result != Task.Result.SUCCESS) {
-                logger.info(CONDUIT_TAG, "Unable to post to harbormaster");
-                return false;
-            }
-        } else {
-            logger.info("uberalls", "Harbormaster integration not enabled for this build.");
-            if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
-                commentAction = "resign";
-            } else if (build.getResult().isWorseOrEqualTo(Result.UNSTABLE)) {
-                commentAction = "reject";
-            }
+        // Fail the build if we can't report to Harbormaster
+        if (!resultProcessor.processHarbormaster()) {
+            return false;
         }
 
-        RemoteCommentFetcher commentFetcher = new RemoteCommentFetcher(build.getWorkspace(), logger, this.commentFile, this.commentSize);
-        try {
-            String customComment = commentFetcher.getRemoteComment();
-            commenter.addUserComment(customComment);
-        } catch (InterruptedException e) {
-            e.printStackTrace(logger.getStream());
-        } catch (IOException e) {
-            Util.displayIOException(e, listener);
-        }
+        resultProcessor.processRemoteComment(commentFile, commentSize);
 
-        if (commenter.hasComment()) {
-            if (commentWithConsoleLinkOnFailure &&
-                    buildResult.isWorseOrEqualTo(hudson.model.Result.UNSTABLE)) {
-                commenter.addBuildFailureMessage();
-            } else {
-                commenter.addBuildLink();
-            }
-
-            new PostCommentTask(logger, diffClient, diff.getRevisionID(false), commenter.getComment(), commentAction).run();
-        }
+        resultProcessor.sendComment(commentWithConsoleLinkOnFailure);
 
         return true;
     }

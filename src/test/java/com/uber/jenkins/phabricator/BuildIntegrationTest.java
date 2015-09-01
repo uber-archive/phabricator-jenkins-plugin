@@ -72,6 +72,10 @@ public abstract class BuildIntegrationTest {
     }
 
     protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse) throws Exception {
+        return buildWithConduit(queryDiffsResponse, postCommentResponse, sendMessageResponse, true);
+    }
+
+    protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse, boolean harbormaster) throws Exception {
         Map<String, JSONObject> responses = new HashMap<String, JSONObject>();
         if (queryDiffsResponse != null) {
             responses.put("differential.querydiffs", queryDiffsResponse);
@@ -88,7 +92,7 @@ public abstract class BuildIntegrationTest {
 
         addBuildStep();
 
-        TestUtils.setDefaultBuildEnvironment(j);
+        TestUtils.setDefaultBuildEnvironment(j, harbormaster);
 
         return p.scheduleBuild2(0).get();
     }

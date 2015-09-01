@@ -117,7 +117,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         if (result != Task.Result.SUCCESS) {
             logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
-            Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false).run();
+            Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false, null).run();
             if (failureResult != Task.Result.SUCCESS) {
                 // such failure, very broke
                 logger.warn("arcanist", "Unable to notify harbormaster of patch failure");
