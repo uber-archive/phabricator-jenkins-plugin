@@ -170,6 +170,6 @@ public class UberallsClient {
     }
 
     public boolean isConfigured() {
-        return !CommonUtils.isBlank(getBaseURL());
+        return !CommonUtils.isBlank(baseURL);
     }
 }

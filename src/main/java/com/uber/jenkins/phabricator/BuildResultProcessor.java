@@ -71,6 +71,10 @@ public class BuildResultProcessor {
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
+    /**
+     * Fetch parent coverage data from Uberalls, if available
+     * @param uberalls the client to the Uberalls instance
+     */
     public void processParentCoverage(UberallsClient uberalls) {
         // First add in info about the change in coverage, if applicable
         if (commenter.hasCoverageAvailable()) {
@@ -85,10 +89,20 @@ public class BuildResultProcessor {
 
     }
 
+    /**
+     * Add build result data into the commenter
+     * @param commentOnSuccess whether a "success" should trigger a comment
+     * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
+     */
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure) {
         commenter.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure, runHarbormaster);
     }
 
+    /**
+     * Fetch a remote comment from the build workspace
+     * @param commentFile the path pattern of the file
+     * @param commentSize the maximum number of bytes to read from the remote file
+     */
     public void processRemoteComment(String commentFile, String commentSize) {
         RemoteCommentFetcher commentFetcher = new RemoteCommentFetcher(workspace, logger, commentFile, commentSize);
         try {
@@ -101,6 +115,10 @@ public class BuildResultProcessor {
         }
     }
 
+    /**
+     * Send a comment to the differential, if present
+     * @param commentWithConsoleLinkOnFailure whether we should provide a console link on failure
+     */
     public void sendComment(boolean commentWithConsoleLinkOnFailure) {
         if (!commenter.hasComment()) {
             return;
