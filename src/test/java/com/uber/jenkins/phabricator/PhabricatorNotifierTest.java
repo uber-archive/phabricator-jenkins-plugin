@@ -124,6 +124,21 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertLogContains("Publishing coverage data to Harbormaster for 3 files", build);
     }
 
+    @Test
+    public void testDescriptor() {
+        PhabricatorNotifierDescriptor descriptor = notifier.getDescriptor();
+
+        assertNull(descriptor.getCredentialsID());
+        assertNull(descriptor.getUberallsURL());
+        assertNull(descriptor.getCommentSize());
+        assertNull(descriptor.getCommentFile());
+
+        descriptor.setCommentFile("hello.world");
+        descriptor.setCommentSize("1000");
+        descriptor.setCredentialsID("not-a-real-uuid");
+        descriptor.setUberallsURL("http://uber.alls");
+    }
+
     @Override
     protected void addBuildStep() {
         p.getPublishersList().add(notifier);
