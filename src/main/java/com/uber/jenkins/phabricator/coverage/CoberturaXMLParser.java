@@ -109,7 +109,7 @@ public class CoberturaXMLParser {
         return Integer.parseInt(node.getAttributes().getNamedItem(attributeName).getTextContent());
     }
 
-    public Map<String,List<Integer>> parse(File file) throws ParserConfigurationException, SAXException, IOException {
+    public Map<String, List<Integer>> parse(File file) throws ParserConfigurationException, SAXException, IOException {
         InputStream is = null;
         try {
             is = new FileInputStream(file);

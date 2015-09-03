@@ -98,7 +98,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testUnableToPostToHarbormaster() throws Exception {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null);
 
-        assertFailureWithMessage("Unable to post to harbormaster", build);
+        assertFailureWithMessage("Unable to post to Harbormaster", build);
     }
 
     @Test

@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
@@ -36,7 +37,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,6 +115,10 @@ public class BuildResultProcessor {
         new PostCommentTask(logger, diffClient, diff.getRevisionID(false), commenter.getComment(), commentAction).run();
     }
 
+    /**
+     * Send Harbormaster result to Phabricator
+     * @return whether we were able to successfully send the result
+     */
     public boolean processHarbormaster() {
         final boolean harbormasterSuccess = buildResult.isBetterOrEqualTo(Result.SUCCESS);
 
@@ -126,10 +130,10 @@ public class BuildResultProcessor {
                 logger.info(LOGGING_TAG, "Unable to send BUILD_URL to Harbormaster");
             }
 
-            if (getCoverage() != null) {
+            if (harbormasterCoverage != null) {
                 logger.info(
                         LOGGING_TAG,
-                        String.format("Publishing coverage data to Harbormaster for %d files.", getCoverage().size())
+                        String.format("Publishing coverage data to Harbormaster for %d files.", harbormasterCoverage.size())
                 );
             }
 
@@ -143,7 +147,6 @@ public class BuildResultProcessor {
 
             Task.Result result = new SendHarbormasterResultTask(logger, diffClient, phid, harbormasterSuccess, getCoverage()).run();
             if (result != Task.Result.SUCCESS) {
-                logger.info(LOGGING_TAG, "Unable to post to harbormaster");
                 return false;
             }
         } else {
@@ -157,6 +160,10 @@ public class BuildResultProcessor {
         return true;
     }
 
+    /**
+     * Process available coverage data into the Harbormaster coverage format
+     * @param coverageProvider a provider for the coverage data
+     */
     public void processCoverage(CoverageProvider coverageProvider) {
         if (coverageProvider == null) {
             logger.info(LOGGING_TAG, "No coverage provider available.");
@@ -168,35 +175,7 @@ public class BuildResultProcessor {
             return;
         }
 
-        harbormasterCoverage = convertCoverage(lineCoverage);
-    }
-
-    /**
-     * Convert line coverage to the Harbormaster coverage format
-     * @return The Harbormaster-formatted coverage
-     */
-    public Map<String, String> convertCoverage(Map<String, List<Integer>> lineCoverage) {
-        Map<String, String> results = new HashMap<String, String>();
-        for (Map.Entry<String, List<Integer>> entry : lineCoverage.entrySet()) {
-            results.put(entry.getKey(), convertFileCoverage(entry.getValue()));
-        }
-
-        return results;
-    }
-
-    private String convertFileCoverage(List<Integer> lineCoverage) {
-        StringBuilder sb = new StringBuilder();
-        for (Integer line : lineCoverage) {
-            // Can't use a case statement because NULL
-            if (line == null) {
-                sb.append('N');
-            } else if (line == 0) {
-                sb.append('U');
-            } else {
-                sb.append('C');
-            }
-        }
-        return sb.toString();
+        harbormasterCoverage = new CoverageConverter().convert(lineCoverage);
     }
 
     public Map<String,String> getCoverage() {

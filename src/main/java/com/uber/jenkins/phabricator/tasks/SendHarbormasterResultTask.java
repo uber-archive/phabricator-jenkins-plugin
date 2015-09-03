@@ -52,10 +52,10 @@ public class SendHarbormasterResultTask extends Task {
             }
         } catch (ConduitAPIException e) {
             e.printStackTrace();
-            this.result = Result.FAILURE;
+            failTask();
         } catch (IOException e) {
             e.printStackTrace();
-            this.result = Result.FAILURE;
+            failTask();
         }
     }
 
@@ -68,12 +68,17 @@ public class SendHarbormasterResultTask extends Task {
 
         if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {
             info(String.format("Error from Harbormaster: %s", result.getString("error_info")));
-            this.result = Result.FAILURE;
+            failTask();
             return false;
         } else {
             this.result = Result.SUCCESS;
         }
         return true;
+    }
+
+    private void failTask() {
+        info("Unable to post to Harbormaster");
+        result = result.FAILURE;
     }
 
     /**
