@@ -28,8 +28,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class CoberturaXMLParser {
@@ -108,5 +107,15 @@ public class CoberturaXMLParser {
 
     private int getIntValue(Node node, String attributeName) {
         return Integer.parseInt(node.getAttributes().getNamedItem(attributeName).getTextContent());
+    }
+
+    public Map<String, List<Integer>> parse(File file) throws ParserConfigurationException, SAXException, IOException {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(file);
+            return parse(is);
+        } finally {
+            is.close();
+        }
     }
 }

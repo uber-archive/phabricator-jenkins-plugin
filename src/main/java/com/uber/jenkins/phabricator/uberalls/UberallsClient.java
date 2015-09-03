@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.uberalls;
 
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
+import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
@@ -166,5 +167,9 @@ public class UberallsClient {
 
     private URIBuilder getBuilder() throws URISyntaxException {
         return new URIBuilder(baseURL);
+    }
+
+    public boolean isConfigured() {
+        return !CommonUtils.isBlank(baseURL);
     }
 }

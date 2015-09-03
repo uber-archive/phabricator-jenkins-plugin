@@ -34,6 +34,8 @@ import com.uber.jenkins.phabricator.credentials.ConduitCredentialsImpl;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.plugins.cobertura.CoberturaPublisher;
+import hudson.plugins.cobertura.renderers.SourceEncoding;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
@@ -50,8 +52,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -62,6 +63,7 @@ public class TestUtils {
     public static final String TEST_REPOSITORY = "test-repository";
     public static final String TEST_BRANCH = "test-branch";
     public static final String TEST_SHA = "test-sha";
+    public static final String COBERTURA_XML = "cobertura.xml";
 
     public static final String TEST_DIFFERENTIAL_ID = "123";
     public static final String TEST_CONDUIT_TOKEN = "notarealtoken";
@@ -159,15 +161,21 @@ public class TestUtils {
         j.jenkins.getGlobalNodeProperties().add(prop);
     }
 
-    public static Map<String, String> getValidBuildEnvironment() {
+    public static Map<String, String> getValidBuildEnvironment(boolean harbormaster) {
         Map<String, String> params = new HashMap<String, String>();
         params.put(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD, TEST_DIFFERENTIAL_ID);
-        params.put(PhabricatorPlugin.PHID_FIELD, TEST_PHID);
+        if (harbormaster) {
+            params.put(PhabricatorPlugin.PHID_FIELD, TEST_PHID);
+        }
         return params;
     }
 
     public static void setDefaultBuildEnvironment(JenkinsRule j) throws IOException {
-        setEnvironmentVariables(j, getValidBuildEnvironment());
+        setDefaultBuildEnvironment(j, true);
+    }
+
+    public static void setDefaultBuildEnvironment(JenkinsRule j, boolean harbormaster) throws IOException {
+        setEnvironmentVariables(j, getValidBuildEnvironment(harbormaster));
     }
 
     public static ConduitCredentials getConduitCredentials(String conduitURI) {
@@ -196,6 +204,33 @@ public class TestUtils {
                 "http://%s:%s",
                 server.getServiceAddress().getHostName(),
                 server.getServiceAddress().getPort()
+        );
+    }
+
+    public static Map<String, List<Integer>> getDefaultLineCoverage() {
+        Map<String, List<Integer>> coverage = new HashMap<String, List<Integer>>();
+        List<Integer> lineCoverage = new ArrayList<Integer>(Arrays.asList(
+                null,
+                2,
+                0,
+                1
+        ));
+        coverage.put("file.go", lineCoverage);
+        return coverage;
+    }
+
+    public static CoberturaPublisher getDefaultCoberturaPublisher() {
+        return new CoberturaPublisher(
+                COBERTURA_XML,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                SourceEncoding.UTF_8,
+                1
         );
     }
 }

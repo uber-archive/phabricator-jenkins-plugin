@@ -24,6 +24,8 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * DifferentialClient handles all interaction with conduit/arc for differentials
@@ -91,14 +93,22 @@ public class DifferentialClient {
      * Sets a sendHarbormasterMessage build status
      * @param phid Phabricator object ID
      * @param pass whether or not the build passed
+     * @param coverage
      * @return the Conduit API response
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass) throws ConduitAPIException, IOException {
+    public JSONObject sendHarbormasterMessage(String phid, boolean pass, Map<String, String> coverage) throws ConduitAPIException, IOException {
         JSONObject params = new JSONObject();
         params.element("type", pass ? "pass" : "fail")
                 .element("buildTargetPHID", phid);
+        if (coverage != null) {
+            JSONObject unit = new JSONObject()
+                    .element("result", "pass")
+                    .element("name", "Coverage Data")
+                    .element("coverage", coverage);
+            params.element("unit", Arrays.asList(unit));
+        }
         return this.callConduit("harbormaster.sendmessage", params);
     }
 

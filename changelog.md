@@ -9,6 +9,7 @@
 * Consistently set defaults for notifiers (Chris Burroughs)
 * Increase unit test coverage to >85%
 * Gracefully ignore missing author names/emails from conduit for summary badge
+* Report Cobertura coverage data to Harbormaster API
 
 ### 1.7.2 (2015/08/13)
 
