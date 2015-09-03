@@ -170,7 +170,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         if (credentials != null) {
             return credentials.getUrl();
         }
-        return getDescriptor().getConduitURL();
+        return null;
     }
 
     private String getConduitToken(Job owner, Logger logger) {
@@ -178,8 +178,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         if (credentials != null) {
             return credentials.getToken().getPlainText();
         }
-        logger.warn("credentials", "No credentials configured. Falling back to deprecated configuration.");
-        return getDescriptor().getConduitToken();
+        logger.warn("credentials", "No credentials configured.");
+        return null;
     }
 
     /**

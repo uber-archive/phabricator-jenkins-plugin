@@ -22,15 +22,6 @@
         <c:select />
       </f:entry>
 
-      <f:entry title="Phabricator URL (deprecated)" field="conduitURL"
-               description="Use credentials instead. Location of the Phabricator instance">
-        <f:textbox />
-      </f:entry>
-      <f:entry title="Conduit Token (deprecated)" field="conduitToken"
-               description="Use credentials instead. Conduit token for Phabricator API. If left blank, reads from ~/.arcrc">
-        <f:textbox />
-      </f:entry>
-
       <f:entry title="Location of arcanist" field="arcPath"
                description="location of `arc` binary, if not in path">
         <f:textbox default="arc" />
