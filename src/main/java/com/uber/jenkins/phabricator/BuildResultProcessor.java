@@ -56,7 +56,7 @@ public class BuildResultProcessor {
     private Map<String, String> harbormasterCoverage;
 
     public BuildResultProcessor(Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
-                                String phid, CodeCoverageMetrics coverageResult, String buildUrl) {
+                                String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -67,7 +67,7 @@ public class BuildResultProcessor {
         this.workspace = build.getWorkspace();
 
         this.commentAction = "none";
-        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl);
+        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 

@@ -163,6 +163,13 @@ public class CommentBuilderTest {
     }
 
     @Test
+    public void testAddUserCommentWithPreservingFormatting() {
+        commenter = createCommenter(Result.SUCCESS, TestUtils.getDefaultCodeCoverageMetrics(), true);
+        commenter.addUserComment("hello, world");
+        assertEquals("hello, world\n", commenter.getComment());
+    }
+
+    @Test
     public void testAddUserCommentWithStatus() {
         commenter.processBuildResult(false, false, false);
         commenter.addUserComment("hello, world");
@@ -192,6 +199,10 @@ public class CommentBuilderTest {
     }
 
     private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage) {
-        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL);
+        return createCommenter(result, coverage, false);
+    }
+
+    private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage, boolean preserveFormatting) {
+        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL, preserveFormatting);
     }
 }

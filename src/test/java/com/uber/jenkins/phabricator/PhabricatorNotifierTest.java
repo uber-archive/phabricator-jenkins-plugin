@@ -45,6 +45,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         notifier = new PhabricatorNotifier(
                 false,
                 true,
+                true,
                 ".phabricator-comment",
                 "1000",
                 false
@@ -55,6 +56,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testGetters() {
         assertFalse(notifier.isCommentOnSuccess());
         assertTrue(notifier.isUberallsEnabled());
+        assertTrue(notifier.isPreserveFormatting());
         assertEquals(".phabricator-comment", notifier.getCommentFile());
         assertFalse(notifier.isCommentWithConsoleLinkOnFailure());
     }
