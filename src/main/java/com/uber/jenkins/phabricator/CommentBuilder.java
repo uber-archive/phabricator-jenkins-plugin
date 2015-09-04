@@ -32,12 +32,14 @@ class CommentBuilder {
     private final StringBuilder comment;
     private final String buildURL;
     private final Result result;
+    private final boolean preserveFormatting;
 
-    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL) {
+    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL, boolean preserveFormatting) {
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
         this.buildURL = buildURL;
+        this.preserveFormatting = preserveFormatting;
         this.comment = new StringBuilder();
     }
 
@@ -123,7 +125,11 @@ class CommentBuilder {
         if (hasComment()) {
             comment.append("\n\n");
         }
-        comment.append(String.format("```\n%s\n```\n\n", customComment));
+        if (preserveFormatting) {
+            comment.append(String.format("%s\n", customComment));
+        } else {
+            comment.append(String.format("```\n%s\n```\n\n", customComment));
+        }
     }
 
     /**

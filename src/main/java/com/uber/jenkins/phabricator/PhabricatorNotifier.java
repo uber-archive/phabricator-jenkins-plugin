@@ -54,17 +54,19 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
     private final boolean commentWithConsoleLinkOnFailure;
+    private final boolean preserveFormatting;
     private final String commentFile;
     private final String commentSize;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled,
+    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean preserveFormatting,
                                String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
+        this.preserveFormatting = preserveFormatting;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
     }
 
@@ -143,7 +145,8 @@ public class PhabricatorNotifier extends Notifier {
                 diffClient,
                 environment.get(PhabricatorPlugin.PHID_FIELD),
                 coverageResult,
-                environment.get("BUILD_URL")
+                environment.get("BUILD_URL"),
+                preserveFormatting
         );
 
         resultProcessor.processParentCoverage(uberallsClient);
@@ -230,6 +233,11 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public String getCommentFile() {
         return commentFile;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean isPreserveFormatting() {
+        return preserveFormatting;
     }
 
     private ConduitCredentials getConduitCredentials(Job owner) {

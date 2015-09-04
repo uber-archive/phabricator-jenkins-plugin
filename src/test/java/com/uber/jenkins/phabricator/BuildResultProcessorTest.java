@@ -47,7 +47,8 @@ public class BuildResultProcessorTest {
                 mock(DifferentialClient.class),
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
-                TestUtils.TEST_BASE_URL
+                TestUtils.TEST_BASE_URL,
+                true
         );
     }
 
