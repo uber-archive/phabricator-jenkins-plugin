@@ -27,7 +27,7 @@ public class UnitResult {
     private static final String SKIP = "skip";
     private static final String PASS = "pass";
     private static final String UNSOUND = "unsound";
-    private static final String ENGINE_NAME = "Jenkins Unit";
+    private static final String ENGINE_NAME = "Jenkins";
     private final String className;
     private final String name;
     private final float duration;
