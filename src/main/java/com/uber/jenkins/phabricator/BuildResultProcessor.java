@@ -231,4 +231,8 @@ public class BuildResultProcessor {
     public Map<String,String> getCoverage() {
         return harbormasterCoverage;
     }
+
+    public UnitResults getUnitResults() {
+        return unitResults;
+    }
 }
