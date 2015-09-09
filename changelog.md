@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.8.0 (unreleased)
+### 1.8.0 (2015/09/09)
 
 * Qualify log statements with "phabricator:"
 * Send a Harbormaster URI Artifacts for the Jenkins build  (Chris Burroughs)
