@@ -30,8 +30,15 @@ public class InstanceProvider<T> {
     private final Logger logger;
     private final String pluginName;
 
-    public InstanceProvider (Jenkins jenkins, String pluginName, String className, Logger logger) {
-        provider = new BaseProvider<T>(
+    /**
+     * Encapsulate lazilly loading a concrete implementation when a plugin is available
+     * @param jenkins the instance of Jenkins
+     * @param pluginName the name of the plugin, e.g. "cobertura" or "junit" (maven name)
+     * @param className the concrete class name (com.uber.phabricator...)
+     * @param logger the logger to use
+     */
+    public InstanceProvider(Jenkins jenkins, String pluginName, String className, Logger logger) {
+        this.provider = new BaseProvider<T>(
                 jenkins,
                 pluginName,
                 logger
@@ -41,6 +48,10 @@ public class InstanceProvider<T> {
         this.logger = logger;
     }
 
+    /**
+     * Get an instance of the desired implementation, if available
+     * @return the class desired
+     */
     public T getInstance() {
         if (!provider.isAvailable()) {
             logger.info(LOGGER_TAG, String.format("'%s' plugin not installed.", pluginName));

@@ -66,6 +66,8 @@ public class SendHarbormasterResultTask extends Task {
 
     /**
      * Try to send a message to harbormaster
+     * @param unitResults the unit testing results to send
+     * @param coverage the coverage data to send
      * @return false if an error was encountered
      */
     private boolean sendMessage(UnitResults unitResults, Map<String, String> coverage) throws IOException, ConduitAPIException {

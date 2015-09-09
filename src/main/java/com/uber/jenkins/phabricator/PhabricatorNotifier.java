@@ -48,11 +48,12 @@ import java.io.IOException;
 
 public class PhabricatorNotifier extends Notifier {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
+
+    private static final String JUNIT_PLUGIN_NAME = "junit";
     private static final String JUNIT_CLASS_NAME = "com.uber.jenkins.phabricator.unit.JUnitTestProvider";
+    private static final String COBERTURA_PLUGIN_NAME = "cobertura";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
-    private static final String JUNIT_PLUGIN_NAME = "junit";
-    private static final String UNIT_TAG = "unit-results";
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -197,7 +198,7 @@ public class PhabricatorNotifier extends Notifier {
         Logger logger = new Logger(listener.getLogger());
         InstanceProvider<CoverageProvider> provider = new InstanceProvider<CoverageProvider>(
                 Jenkins.getInstance(),
-                "cobertura",
+                COBERTURA_PLUGIN_NAME,
                 COBERTURA_CLASS_NAME,
                 logger
         );

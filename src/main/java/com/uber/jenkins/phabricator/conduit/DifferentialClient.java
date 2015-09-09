@@ -95,15 +95,13 @@ public class DifferentialClient {
      * Sets a sendHarbormasterMessage build status
      * @param phid Phabricator object ID
      * @param pass whether or not the build passed
-     * @param coverage
+     * @param unitResults the results from the unit tests
+     * @param coverage the results from the coverage provider
      * @return the Conduit API response
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
-        JSONObject params = new JSONObject();
-        params.element("type", pass ? "pass" : "fail")
-                .element("buildTargetPHID", phid);
 
         List<JSONObject> unit = new ArrayList<JSONObject>();
 
@@ -118,6 +116,10 @@ public class DifferentialClient {
                     .element("coverage", coverage);
             unit.add(coverageUnit);
         }
+
+        JSONObject params = new JSONObject();
+        params.element("type", pass ? "pass" : "fail")
+                .element("buildTargetPHID", phid);
 
         if (!unit.isEmpty()) {
             params.element("unit", unit);
