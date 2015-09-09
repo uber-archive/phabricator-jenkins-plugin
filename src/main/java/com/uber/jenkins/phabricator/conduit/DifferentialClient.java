@@ -20,11 +20,13 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.unit.UnitResults;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -93,22 +95,36 @@ public class DifferentialClient {
      * Sets a sendHarbormasterMessage build status
      * @param phid Phabricator object ID
      * @param pass whether or not the build passed
-     * @param coverage
+     * @param unitResults the results from the unit tests
+     * @param coverage the results from the coverage provider
      * @return the Conduit API response
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass, Map<String, String> coverage) throws ConduitAPIException, IOException {
-        JSONObject params = new JSONObject();
-        params.element("type", pass ? "pass" : "fail")
-                .element("buildTargetPHID", phid);
+    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
+
+        List<JSONObject> unit = new ArrayList<JSONObject>();
+
+        if (unitResults != null) {
+            unit.addAll(unitResults.toHarbormaster());
+        }
+
         if (coverage != null) {
-            JSONObject unit = new JSONObject()
+            JSONObject coverageUnit = new JSONObject()
                     .element("result", "pass")
                     .element("name", "Coverage Data")
                     .element("coverage", coverage);
-            params.element("unit", Arrays.asList(unit));
+            unit.add(coverageUnit);
         }
+
+        JSONObject params = new JSONObject();
+        params.element("type", pass ? "pass" : "fail")
+                .element("buildTargetPHID", phid);
+
+        if (!unit.isEmpty()) {
+            params.element("unit", unit);
+        }
+
         return this.callConduit("harbormaster.sendmessage", params);
     }
 

@@ -2,6 +2,7 @@ package com.uber.jenkins.phabricator.tasks;
 
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
@@ -14,13 +15,17 @@ public class SendHarbormasterResultTask extends Task {
     private final DifferentialClient diffClient;
     private final String phid;
     private final boolean harbormasterSuccess;
+    private UnitResults unitResults;
     private final Map<String, String> coverage;
 
-    public SendHarbormasterResultTask(Logger logger, DifferentialClient diffClient, String phid, boolean harbormasterSuccess, Map<String, String> harbormasterCoverage) {
+    public SendHarbormasterResultTask(Logger logger, DifferentialClient diffClient, String phid,
+                                      boolean harbormasterSuccess, UnitResults unitResults,
+                                      Map<String, String> harbormasterCoverage) {
         super(logger);
         this.diffClient = diffClient;
         this.phid = phid;
         this.harbormasterSuccess = harbormasterSuccess;
+        this.unitResults = unitResults;
         this.coverage = harbormasterCoverage;
     }
 
@@ -46,9 +51,9 @@ public class SendHarbormasterResultTask extends Task {
     @Override
     protected void execute() {
         try {
-            if (!sendMessage(coverage)) {
+            if (!sendMessage(unitResults, coverage)) {
                 info("Error sending Harbormaster unit results, trying again without unit data (you may have an old Phabricator?).");
-                sendMessage(null);
+                sendMessage(null, null);
             }
         } catch (ConduitAPIException e) {
             e.printStackTrace();
@@ -61,10 +66,12 @@ public class SendHarbormasterResultTask extends Task {
 
     /**
      * Try to send a message to harbormaster
+     * @param unitResults the unit testing results to send
+     * @param coverage the coverage data to send
      * @return false if an error was encountered
      */
-    private boolean sendMessage( Map<String, String> coverage) throws IOException, ConduitAPIException {
-        JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess, coverage);
+    private boolean sendMessage(UnitResults unitResults, Map<String, String> coverage) throws IOException, ConduitAPIException {
+        JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess, unitResults, coverage);
 
         if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {
             info(String.format("Error from Harbormaster: %s", result.getString("error_info")));

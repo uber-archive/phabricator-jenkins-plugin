@@ -73,4 +73,10 @@ public class BuildResultProcessorTest {
         processor.processCoverage(null);
         assertNull(processor.getCoverage());
     }
+
+    @Test
+    public void testProcessNullUnitProvider() {
+        processor.processUnitResults(null);
+        assertNull(processor.getUnitResults());
+    }
 }

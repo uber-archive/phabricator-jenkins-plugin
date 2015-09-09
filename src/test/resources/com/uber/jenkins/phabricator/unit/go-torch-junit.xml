@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite tests="12" failures="0" time="0.019" name="github.com/uber/go-torch">
+		<properties>
+			<property name="go.version" value="go1.5"></property>
+		</properties>
+		<testcase classname="go-torch" name="TestCreateAndRunApp" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestCreateAndRunAppDefaultValues" time="0.010"></testcase>
+		<testcase classname="go-torch" name="TestGoTorchCommand" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestGoTorchCommandRawOutput" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestGoTorchCommandBinaryInput" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestValidateArgumentFail" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestValidateArgumentPass" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestRunPprofCommand" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestRunPprofCommandUnderlyingError" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestRunPprofCommandHandlePprofErrorBug" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestNewTorcher" time="0.000"></testcase>
+		<testcase classname="go-torch" name="TestNewCommander" time="0.000"></testcase>
+	</testsuite>
+	<testsuite tests="15" failures="0" time="0.014" name="github.com/uber/go-torch/graph">
+		<properties>
+			<property name="go.version" value="go1.5"></property>
+		</properties>
+		<testcase classname="graph" name="TestPathAsString" time="0.000"></testcase>
+		<testcase classname="graph" name="TestPathAsStringWithEmptyPath" time="0.000"></testcase>
+		<testcase classname="graph" name="TestPathAsStringWithNoWeightEdges" time="0.000"></testcase>
+		<testcase classname="graph" name="TestDFS" time="0.000"></testcase>
+		<testcase classname="graph" name="TestDFSAlmostEmptyGraph" time="0.000"></testcase>
+		<testcase classname="graph" name="TestDFSMultipleRootsLeaves" time="0.000"></testcase>
+		<testcase classname="graph" name="TestDFSCyclicGraph" time="0.000"></testcase>
+		<testcase classname="graph" name="TestGetInDegreeZeroNodes" time="0.000"></testcase>
+		<testcase classname="graph" name="TestGetInDegreeZeroNodesEmptyGraph" time="0.000"></testcase>
+		<testcase classname="graph" name="TestGetInDegreeZeroNodesIgnoreClusterNodes" time="0.000"></testcase>
+		<testcase classname="graph" name="TestGenerateNodeToOutEdges" time="0.000"></testcase>
+		<testcase classname="graph" name="TestGenerateNodeToOutEdgesEmptyGraph" time="0.000"></testcase>
+		<testcase classname="graph" name="TestGraphAsText" time="0.000"></testcase>
+		<testcase classname="graph" name="TestNewGrapher" time="0.000"></testcase>
+		<testcase classname="graph" name="TestNewSearcher" time="0.000"></testcase>
+	</testsuite>
+	<testsuite tests="8" failures="0" time="0.014" name="github.com/uber/go-torch/visualization">
+		<properties>
+			<property name="go.version" value="go1.5"></property>
+		</properties>
+		<testcase classname="visualization" name="TestCreateFile" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestCreateFileOverwriteExisting" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestGenerateFlameGraph" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestGenerateFlameGraphPrintsToStdout" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestGenerateFlameGraphExecError" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestRunPerlScriptDoesExist" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestRunPerlScriptDoesNotExist" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestNewVisualizer" time="0.000"></testcase>
+	</testsuite>
+</testsuites>

@@ -32,11 +32,18 @@ import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentialsImpl;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
+import com.uber.jenkins.phabricator.unit.UnitResult;
 import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
 import hudson.plugins.cobertura.CoberturaPublisher;
 import hudson.plugins.cobertura.renderers.SourceEncoding;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
+import hudson.tasks.Publisher;
+import hudson.tasks.junit.JUnitResultArchiver;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.apache.http.HttpException;
@@ -47,6 +54,7 @@ import org.apache.http.localserver.LocalTestServer;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -64,12 +72,15 @@ public class TestUtils {
     public static final String TEST_BRANCH = "test-branch";
     public static final String TEST_SHA = "test-sha";
     public static final String COBERTURA_XML = "cobertura.xml";
+    public static final String JUNIT_XML = "junit-test.xml";
 
     public static final String TEST_DIFFERENTIAL_ID = "123";
     public static final String TEST_CONDUIT_TOKEN = "notarealtoken";
     public static final String TEST_PHID = "PHID-not-real";
     private static final String TEST_CREDENTIALS_ID = "not-a-real-uuid-for-credentials";
     private static final String TEST_CONDUIT_URL = "http://example.gophers";
+    private static final String TEST_UNIT_NAMESPACE = "unit namespace";
+    private static final String TEST_UNIT_NAME = "fake test name";
 
     public static Logger getDefaultLogger() {
         return new Logger(new PrintStream(new ByteArrayOutputStream()));
@@ -232,5 +243,32 @@ public class TestUtils {
                 SourceEncoding.UTF_8,
                 1
         );
+    }
+
+    public static UnitResult getDefaultUnitResult() {
+        return new UnitResult(
+                TEST_UNIT_NAMESPACE,
+                TEST_UNIT_NAME,
+                1.0f,
+                0,
+                0,
+                1
+        );
+    }
+
+    public static Publisher getDefaultXUnitPublisher() {
+        return new JUnitResultArchiver(
+                JUNIT_XML
+        );
+    }
+
+    public static void addCopyBuildStep(FreeStyleProject p, final String fileName, final Class resourceClass, final String resourceName) {
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild build, Launcher launcher, BuildListener buildListener) throws InterruptedException, IOException {
+                build.getWorkspace().child(fileName).copyFrom(resourceClass.getResourceAsStream(resourceName));
+                return true;
+            }
+        });
     }
 }
