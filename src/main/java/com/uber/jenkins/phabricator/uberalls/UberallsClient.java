@@ -108,7 +108,7 @@ public class UberallsClient {
             params.put(CONDITIONAL_COVERAGE_KEY, codeCoverageMetrics.getConditionalCoveragePercent());
 
             try {
-                HttpClient client = new HttpClient();
+                HttpClient client = getClient();
                 PostMethod request = new PostMethod(getBuilder().build().toString());
                 request.addRequestHeader("Content-Type", "application/json");
                 StringRequestEntity requestEntity = new StringRequestEntity(
@@ -123,7 +123,6 @@ public class UberallsClient {
                     return false;
                 }
                 return true;
-
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             } catch (HttpResponseException e) {
@@ -146,7 +145,7 @@ public class UberallsClient {
                 .setParameter("sha", sha)
                 .setParameter("repository", repository);
 
-            HttpClient client = new HttpClient();
+            HttpClient client = getClient();
             HttpMethod request = new GetMethod(builder.build().toString());
             int statusCode = client.executeMethod(request);
 
@@ -167,6 +166,10 @@ public class UberallsClient {
 
     private URIBuilder getBuilder() throws URISyntaxException {
         return new URIBuilder(baseURL);
+    }
+
+    public HttpClient getClient() {
+        return new HttpClient();
     }
 
     public boolean isConfigured() {

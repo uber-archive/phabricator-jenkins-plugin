@@ -3,15 +3,21 @@ package com.uber.jenkins.phabricator.uberalls;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import net.sf.json.JSONObject;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.localserver.LocalTestServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class UberallsClientTest {
     private LocalTestServer server;
@@ -94,13 +100,68 @@ public class UberallsClientTest {
         assertTrue(client.recordCoverage(TestUtils.TEST_SHA, TestUtils.getDefaultCodeCoverageMetrics()));
     }
 
+    @Test
+    public void testRecordCoverageURISyntaxException() throws Exception {
+        assertRecordCoverageException(URISyntaxException.class);
+    }
+
+    @Test
+    public void testRecordCoverageHttpResponseException() throws Exception {
+        assertRecordCoverageException(HttpResponseException.class);
+    }
+
+    @Test
+    public void testRecordCoverageClientProtocolException() throws Exception {
+        assertRecordCoverageException(ClientProtocolException.class);
+    }
+
+    @Test
+    public void testRecordCoverageIOException() throws Exception {
+        assertRecordCoverageException(IOException.class);
+    }
+
+    @Test
+    public void testGetCoverageHttpResponseException() throws Exception {
+        assertGetCoverageException(HttpResponseException.class);
+    }
+
+    @Test
+    public void testGetCoverageRandomException() throws Exception {
+        assertGetCoverageException(IOException.class);
+    }
+
+    private void assertRecordCoverageException(Class<? extends Exception> exceptionClass) throws Exception {
+        HttpClient mockClient = mockClient();
+
+        doThrow(exceptionClass).when(mockClient).executeMethod(any(HttpMethod.class));
+        assertFalse(client.recordCoverage(TestUtils.TEST_SHA, TestUtils.getDefaultCodeCoverageMetrics()));
+    }
+
+    private void assertGetCoverageException(Class<? extends Exception> exceptionClass) throws IOException {
+        HttpClient mockClient = mockClient();
+
+        doThrow(exceptionClass).when(mockClient).executeMethod(any(HttpMethod.class));
+        assertNull(client.getCoverage(TestUtils.TEST_SHA));
+    }
+
     private UberallsClient getDefaultClient() {
-        return new UberallsClient(
+        return spy(new UberallsClient(
                 getTestServerAddress(),
                 TestUtils.getDefaultLogger(),
                 TestUtils.TEST_REPOSITORY,
                 TestUtils.TEST_BRANCH
-        );
+        ));
+    }
+
+    private HttpClient getMockHttpClient() {
+        return mock(HttpClient.class);
+    }
+
+    private HttpClient mockClient() {
+        HttpClient mockClient = getMockHttpClient();
+        doReturn(mockClient).when(client).getClient();
+
+        return mockClient;
     }
 
     private String getTestServerAddress() {
