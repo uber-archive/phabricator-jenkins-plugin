@@ -52,5 +52,4 @@ public class InstanceProviderTest {
                 TestUtils.getDefaultLogger()
         );
     }
-
 }
