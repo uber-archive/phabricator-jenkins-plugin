@@ -128,6 +128,19 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testPostCoverageUberallsDisabled() throws Exception {
+        notifier = new PhabricatorNotifier(
+                false,
+                false,
+                true,
+                ".phabricator-comment",
+                "1000",
+                false
+        );
+        testPostCoverage();
+    }
+
+    @Test
     public void testDescriptor() {
         PhabricatorNotifierDescriptor descriptor = notifier.getDescriptor();
 

@@ -84,7 +84,7 @@ public class PhabricatorNotifier extends Notifier {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
-        final CoverageProvider coverageProvider = getUberallsCoverage(build, listener);
+        final CoverageProvider coverageProvider = getCoverageProvider(build, listener);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
@@ -153,7 +153,9 @@ public class PhabricatorNotifier extends Notifier {
                 preserveFormatting
         );
 
-        resultProcessor.processParentCoverage(uberallsClient);
+        if (uberallsEnabled) {
+            resultProcessor.processParentCoverage(uberallsClient);
+        }
 
         // Add in comments about the build result
         resultProcessor.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure);
@@ -190,8 +192,8 @@ public class PhabricatorNotifier extends Notifier {
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
-    private CoverageProvider getUberallsCoverage(AbstractBuild build, BuildListener listener) {
-        if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE) || !uberallsEnabled) {
+    private CoverageProvider getCoverageProvider(AbstractBuild build, BuildListener listener) {
+        if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE)) {
             return null;
         }
 
