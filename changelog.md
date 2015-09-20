@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.8.1 (unreleased)
+
+* Don't require Uberalls to be enabled to post coverage data to Harbormaster
+
 ### 1.8.0 (2015/09/09)
 
 * Qualify log statements with "phabricator:"
