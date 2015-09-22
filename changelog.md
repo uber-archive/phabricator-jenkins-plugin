@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.8.1 (unreleased)
+### 1.8.1 (2015/09/22)
 
 * Don't require Uberalls to be enabled to post coverage data to Harbormaster
 * Handle UTF-8 strings properly in comment file
