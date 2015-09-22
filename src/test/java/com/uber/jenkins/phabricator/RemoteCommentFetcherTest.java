@@ -76,8 +76,16 @@ public class RemoteCommentFetcherTest {
 
     @Test
     public void testSingleFile() throws Exception {
+        testWithContent("hello, world");
+    }
+
+    @Test
+    public void testUTF8File() throws Exception {
+        testWithContent("こんにちは世界");
+    }
+
+    private void testWithContent(String content) throws Exception {
         final String fileName = "just-a-test.txt";
-        final String content = "hello, world";
         project.getBuildersList().add(echoBuilder(fileName, content));
         FreeStyleBuild build = getBuild();
 

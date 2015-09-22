@@ -110,7 +110,7 @@ public class ConduitAPIClient {
         List<NameValuePair> formData = new ArrayList<NameValuePair>();
         formData.add(new BasicNameValuePair("params", params.toString()));
 
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData);
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formData, "UTF-8");
         post.setEntity(entity);
 
         return post;
