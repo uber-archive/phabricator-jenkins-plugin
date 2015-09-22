@@ -160,7 +160,6 @@ public class TestUtils {
             public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
                 response.setStatusCode(statusCode);
                 response.setEntity(new StringEntity(body));
-
             }
         };
     }

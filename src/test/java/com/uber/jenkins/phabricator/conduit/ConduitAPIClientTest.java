@@ -79,6 +79,15 @@ public class ConduitAPIClientTest {
         client.createRequest("action", params);
     }
 
+    @Test
+    public void testWithUTF8() throws Exception {
+        server.register("/api/utf8", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+
+        client = new ConduitAPIClient(getTestServerAddress(), TestUtils.TEST_CONDUIT_TOKEN);
+        JSONObject utf8Params = new JSONObject().element("message", "こんにちは世界");
+        client.perform("utf8", utf8Params);
+    }
+
     private String getTestServerAddress() {
         return TestUtils.getTestServerAddress(server);
     }
