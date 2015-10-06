@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.8.2 (unreleased)
+
+* Fix "comment size" option not being saved
+
 ### 1.8.1 (2015/09/22)
 
 * Don't require Uberalls to be enabled to post coverage data to Harbormaster
