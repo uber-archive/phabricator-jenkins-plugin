@@ -258,6 +258,11 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
+    public String getCommentSize() {
+        return commentSize;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
     public boolean isPreserveFormatting() {
         return preserveFormatting;
     }

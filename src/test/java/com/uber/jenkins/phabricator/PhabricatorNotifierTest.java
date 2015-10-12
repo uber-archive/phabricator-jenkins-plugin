@@ -44,7 +44,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 true,
                 ".phabricator-comment",
-                "1000",
+                "1001",
                 false
         );
     }
@@ -55,6 +55,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertTrue(notifier.isUberallsEnabled());
         assertTrue(notifier.isPreserveFormatting());
         assertEquals(".phabricator-comment", notifier.getCommentFile());
+        assertEquals("1001", notifier.getCommentSize());
         assertFalse(notifier.isCommentWithConsoleLinkOnFailure());
     }
 
@@ -65,7 +66,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         PhabricatorNotifier after = p.getPublishersList().get(PhabricatorNotifier.class);
         j.assertEqualBeans(notifier, after,
-                "commentOnSuccess,uberallsEnabled,commentWithConsoleLinkOnFailure,commentFile");
+                "commentOnSuccess,uberallsEnabled,commentWithConsoleLinkOnFailure,commentFile,commentSize");
     }
 
     @Test
