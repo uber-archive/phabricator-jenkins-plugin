@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-03.dtd">
+<coverage line-rate="0" branch-rate="0" version="" timestamp="1440875217716">
+	<sources>
+		<source>/usr/local/Cellar/go/1.5/libexec/src</source>
+		<source>/Users/aiden/src/gocode/src</source>
+	</sources>
+	<packages>
+		<package name="github.com/uber/go-torch/visualization" line-rate="0" branch-rate="0" complexity="0">
+			<classes>
+				<class name="-" filename="github.com/uber/go-torch/visualization/visualization.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="newExecutor" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="67" hits="1"></line>
+							</lines>
+						</method>
+						<method name="NewVisualizer" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="74" hits="1"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="67" hits="1"></line>
+						<line number="74" hits="1"></line>
+					</lines>
+				</class>
+				<class name="defaultVisualizer" filename="github.com/uber/go-torch/visualization/visualization.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="GenerateFlameGraph" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="81" hits="1"></line>
+								<line number="82" hits="1"></line>
+								<line number="83" hits="1"></line>
+								<line number="85" hits="1"></line>
+								<line number="86" hits="1"></line>
+								<line number="87" hits="1"></line>
+								<line number="88" hits="1"></line>
+								<line number="90" hits="1"></line>
+								<line number="91" hits="0"></line>
+								<line number="93" hits="1"></line>
+								<line number="95" hits="1"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="81" hits="1"></line>
+						<line number="82" hits="1"></line>
+						<line number="83" hits="1"></line>
+						<line number="85" hits="1"></line>
+						<line number="86" hits="1"></line>
+						<line number="87" hits="1"></line>
+						<line number="88" hits="1"></line>
+						<line number="90" hits="1"></line>
+						<line number="91" hits="0"></line>
+						<line number="93" hits="1"></line>
+						<line number="95" hits="1"></line>
+					</lines>
+				</class>
+				<class name="defaultExecutor" filename="github.com/uber/go-torch/visualization/visualization.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="runPerlScript" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="101" hits="1"></line>
+								<line number="102" hits="1"></line>
+								<line number="103" hits="0"></line>
+								<line number="105" hits="1"></line>
+								<line number="106" hits="1"></line>
+								<line number="107" hits="1"></line>
+								<line number="108" hits="1"></line>
+								<line number="110" hits="1"></line>
+								<line number="111" hits="1"></line>
+								<line number="114" hits="1"></line>
+								<line number="115" hits="1"></line>
+								<line number="117" hits="1"></line>
+								<line number="118" hits="1"></line>
+								<line number="119" hits="1"></line>
+								<line number="120" hits="1"></line>
+							</lines>
+						</method>
+						<method name="createFile" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="136" hits="1"></line>
+								<line number="137" hits="1"></line>
+								<line number="138" hits="1"></line>
+								<line number="139" hits="0"></line>
+								<line number="141" hits="1"></line>
+								<line number="143" hits="1"></line>
+								<line number="144" hits="1"></line>
+								<line number="145" hits="0"></line>
+								<line number="147" hits="1"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="101" hits="1"></line>
+						<line number="102" hits="1"></line>
+						<line number="103" hits="0"></line>
+						<line number="105" hits="1"></line>
+						<line number="106" hits="1"></line>
+						<line number="107" hits="1"></line>
+						<line number="108" hits="1"></line>
+						<line number="110" hits="1"></line>
+						<line number="111" hits="1"></line>
+						<line number="114" hits="1"></line>
+						<line number="115" hits="1"></line>
+						<line number="117" hits="1"></line>
+						<line number="118" hits="1"></line>
+						<line number="119" hits="1"></line>
+						<line number="120" hits="1"></line>
+						<line number="136" hits="1"></line>
+						<line number="137" hits="1"></line>
+						<line number="138" hits="1"></line>
+						<line number="139" hits="0"></line>
+						<line number="141" hits="1"></line>
+						<line number="143" hits="1"></line>
+						<line number="144" hits="1"></line>
+						<line number="145" hits="0"></line>
+						<line number="147" hits="1"></line>
+					</lines>
+				</class>
+				<class name="defaultOSWrapper" filename="github.com/uber/go-torch/visualization/visualization.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="execLookPath" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="125" hits="0"></line>
+							</lines>
+						</method>
+						<method name="cmdOutput" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="130" hits="0"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="125" hits="0"></line>
+						<line number="130" hits="0"></line>
+					</lines>
+				</class>
+			</classes>
+		</package>
+	</packages>
+</coverage>

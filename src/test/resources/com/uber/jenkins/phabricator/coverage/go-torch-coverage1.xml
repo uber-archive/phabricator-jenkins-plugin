@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-03.dtd">
+<coverage line-rate="0" branch-rate="0" version="" timestamp="1440875217716">
+	<sources>
+		<source>/usr/local/Cellar/go/1.5/libexec/src</source>
+		<source>/Users/aiden/src/gocode/src</source>
+	</sources>
+	<packages>
+		<package name="github.com/uber/go-torch" line-rate="0" branch-rate="0" complexity="0">
+			<classes>
+				<class name="defaultPprofer" filename="github.com/uber/go-torch/main.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="runPprofCommand" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="212" hits="1"></line>
+								<line number="213" hits="1"></line>
+								<line number="215" hits="1"></line>
+								<line number="216" hits="1"></line>
+								<line number="217" hits="1"></line>
+								<line number="218" hits="1"></line>
+								<line number="219" hits="1"></line>
+								<line number="220" hits="1"></line>
+								<line number="226" hits="1"></line>
+								<line number="227" hits="1"></line>
+								<line number="228" hits="1"></line>
+								<line number="231" hits="1"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="212" hits="1"></line>
+						<line number="213" hits="1"></line>
+						<line number="215" hits="1"></line>
+						<line number="216" hits="1"></line>
+						<line number="217" hits="1"></line>
+						<line number="218" hits="1"></line>
+						<line number="219" hits="1"></line>
+						<line number="220" hits="1"></line>
+						<line number="226" hits="1"></line>
+						<line number="227" hits="1"></line>
+						<line number="228" hits="1"></line>
+						<line number="231" hits="1"></line>
+					</lines>
+				</class>
+				<class name="defaultOSWrapper" filename="github.com/uber/go-torch/main.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="cmdOutput" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="236" hits="0"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="236" hits="0"></line>
+					</lines>
+				</class>
+				<class name="defaultValidator" filename="github.com/uber/go-torch/main.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="validateArgument" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="242" hits="1"></line>
+								<line number="243" hits="1"></line>
+								<line number="244" hits="1"></line>
+								<line number="246" hits="1"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="242" hits="1"></line>
+						<line number="243" hits="1"></line>
+						<line number="244" hits="1"></line>
+						<line number="246" hits="1"></line>
+					</lines>
+				</class>
+				<class name="-" filename="github.com/uber/go-torch/main.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="newTorcher" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="79" hits="1"></line>
+							</lines>
+						</method>
+						<method name="newCommander" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="86" hits="1"></line>
+							</lines>
+						</method>
+						<method name="newPprofer" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="95" hits="1"></line>
+							</lines>
+						</method>
+						<method name="main" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="102" hits="0"></line>
+								<line number="103" hits="0"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="79" hits="1"></line>
+						<line number="86" hits="1"></line>
+						<line number="95" hits="1"></line>
+						<line number="102" hits="0"></line>
+						<line number="103" hits="0"></line>
+					</lines>
+				</class>
+				<class name="torcher" filename="github.com/uber/go-torch/main.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="createAndRunApp" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="108" hits="1"></line>
+								<line number="109" hits="1"></line>
+								<line number="110" hits="1"></line>
+								<line number="111" hits="1"></line>
+								<line number="112" hits="1"></line>
+								<line number="113" hits="1"></line>
+								<line number="155" hits="1"></line>
+								<line number="156" hits="1"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="108" hits="1"></line>
+						<line number="109" hits="1"></line>
+						<line number="110" hits="1"></line>
+						<line number="111" hits="1"></line>
+						<line number="112" hits="1"></line>
+						<line number="113" hits="1"></line>
+						<line number="155" hits="1"></line>
+						<line number="156" hits="1"></line>
+					</lines>
+				</class>
+				<class name="defaultCommander" filename="github.com/uber/go-torch/main.go" line-rate="0" branch-rate="0" complexity="0">
+					<methods>
+						<method name="goTorchCommand" signature="" line-rate="0" branch-rate="0">
+							<lines>
+								<line number="161" hits="1"></line>
+								<line number="162" hits="1"></line>
+								<line number="163" hits="1"></line>
+								<line number="164" hits="1"></line>
+								<line number="165" hits="1"></line>
+								<line number="166" hits="1"></line>
+								<line number="168" hits="1"></line>
+								<line number="169" hits="1"></line>
+								<line number="170" hits="0"></line>
+								<line number="173" hits="1"></line>
+								<line number="175" hits="1"></line>
+								<line number="176" hits="1"></line>
+								<line number="177" hits="1"></line>
+								<line number="178" hits="1"></line>
+								<line number="180" hits="1"></line>
+								<line number="182" hits="1"></line>
+								<line number="183" hits="1"></line>
+								<line number="184" hits="0"></line>
+								<line number="186" hits="1"></line>
+								<line number="187" hits="1"></line>
+								<line number="190" hits="1"></line>
+								<line number="191" hits="1"></line>
+								<line number="192" hits="0"></line>
+								<line number="194" hits="1"></line>
+								<line number="195" hits="1"></line>
+								<line number="196" hits="0"></line>
+								<line number="198" hits="1"></line>
+								<line number="199" hits="1"></line>
+								<line number="200" hits="1"></line>
+								<line number="201" hits="1"></line>
+								<line number="202" hits="1"></line>
+								<line number="204" hits="1"></line>
+								<line number="205" hits="0"></line>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="161" hits="1"></line>
+						<line number="162" hits="1"></line>
+						<line number="163" hits="1"></line>
+						<line number="164" hits="1"></line>
+						<line number="165" hits="1"></line>
+						<line number="166" hits="1"></line>
+						<line number="168" hits="1"></line>
+						<line number="169" hits="1"></line>
+						<line number="170" hits="0"></line>
+						<line number="173" hits="1"></line>
+						<line number="175" hits="1"></line>
+						<line number="176" hits="1"></line>
+						<line number="177" hits="1"></line>
+						<line number="178" hits="1"></line>
+						<line number="180" hits="1"></line>
+						<line number="182" hits="1"></line>
+						<line number="183" hits="1"></line>
+						<line number="184" hits="0"></line>
+						<line number="186" hits="1"></line>
+						<line number="187" hits="1"></line>
+						<line number="190" hits="1"></line>
+						<line number="191" hits="1"></line>
+						<line number="192" hits="0"></line>
+						<line number="194" hits="1"></line>
+						<line number="195" hits="1"></line>
+						<line number="196" hits="0"></line>
+						<line number="198" hits="1"></line>
+						<line number="199" hits="1"></line>
+						<line number="200" hits="1"></line>
+						<line number="201" hits="1"></line>
+						<line number="202" hits="1"></line>
+						<line number="204" hits="1"></line>
+						<line number="205" hits="0"></line>
+					</lines>
+				</class>
+			</classes>
+		</package>
+	</packages>
+</coverage>
