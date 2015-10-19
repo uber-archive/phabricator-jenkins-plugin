@@ -21,24 +21,45 @@
 package com.uber.jenkins.phabricator.coverage;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+@RunWith(Parameterized.class)
 public class CoberturaXMLParserTest {
-    private static final String TEST_COVERAGE_FILE = "go-torch-coverage.xml";
+
+    private static final String TEST_COVERAGE_FILE_1 = "go-torch-coverage1.xml";
+    private static final String TEST_COVERAGE_FILE_2 = "go-torch-coverage2.xml";
+    private static final String TEST_COVERAGE_FILE_3 = "go-torch-coverage3.xml";
+
+    @Parameterized.Parameter
+    public String workspace;
 
     @Test
-    public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException {
-        CoberturaXMLParser parser = getParser();
+    public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException,
+        URISyntaxException {
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
 
-        Map<String, List<Integer>> lineCoverage = parser.parse(getClass().getResourceAsStream(TEST_COVERAGE_FILE));
+        Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE_1).toURI());
+        Path testCoverageFile2 = Paths.get(getClass().getResource(TEST_COVERAGE_FILE_2).toURI());
+        Path testCoverageFile3 = Paths.get(getClass().getResource(TEST_COVERAGE_FILE_3).toURI());
+
+        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile.toFile(), testCoverageFile2.toFile(),
+            testCoverageFile3.toFile());
         List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
         assertEquals(246, mainCoverage.size());
         assertNull(mainCoverage.get(0));
@@ -48,12 +69,16 @@ public class CoberturaXMLParserTest {
         assertEquals(1, mainCoverage.get(85).longValue());
         assertEquals(0, mainCoverage.get(102).longValue());
 
-        List<Integer> graphCoverage = lineCoverage.get("github.com/uber/go-torch/graph/graph.go");
+        List<Integer> graphCoverage = lineCoverage.get("main/github.com/uber/go-torch/graph/graph.go");
+        if (workspace.isEmpty()) {
+            graphCoverage = lineCoverage.get("github.com/uber/go-torch/graph/graph.go");
+        }
         assertEquals(1, graphCoverage.get(234).longValue());
         assertNull(graphCoverage.get(235));
     }
 
-    private CoberturaXMLParser getParser() {
-        return new CoberturaXMLParser("");
+    @Parameterized.Parameters
+    public static Collection<String> data() {
+        return Arrays.asList(new String[] {"", "/Users/aiden/src/gocode/src", "/usr/local/Cellar/go/1.5/libexec/src"});
     }
 }
