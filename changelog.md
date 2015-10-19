@@ -3,6 +3,8 @@
 ### 1.8.2 (unreleased)
 
 * Fix "comment size" option not being saved
+* Support merging multiple Cobertura coverage files, and fix source root
+  detection (Gautam Korlam)
 
 ### 1.8.1 (2015/09/22)
 
