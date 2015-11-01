@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.8.2 (unreleased)
+### 1.8.2 (2015/11/1)
 
 * Fix "comment size" option not being saved
 * Support merging multiple Cobertura coverage files, and fix source root
