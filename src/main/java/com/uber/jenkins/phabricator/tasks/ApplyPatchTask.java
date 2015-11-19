@@ -39,10 +39,11 @@ public class ApplyPatchTask extends Task {
     private final String arcPath;
     private final boolean createCommit;
     private final String gitPath;
+    private final boolean skipForcedClean;
 
     public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
                           String diffID, String conduitToken, String arcPath,
-                          String gitPath, boolean createCommit) {
+                          String gitPath, boolean createCommit, boolean skipForcedClean) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
@@ -51,6 +52,7 @@ public class ApplyPatchTask extends Task {
         this.arcPath = arcPath;
         this.gitPath = gitPath;
         this.createCommit = createCommit;
+        this.skipForcedClean = skipForcedClean;
 
         this.logStream = logger.getStream();
     }
@@ -86,11 +88,13 @@ public class ApplyPatchTask extends Task {
                 info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
             }
 
-            // Clean workspace, otherwise `arc patch` may fail
-            starter.launch()
+            if (!skipForcedClean) {
+                // Clean workspace, otherwise `arc patch` may fail
+                starter.launch()
                     .stdout(logStream)
                     .cmds(Arrays.asList(gitPath, "clean", "-fd", "-f"))
                     .join();
+            }
 
             // Update submodules recursively.
             starter.launch()

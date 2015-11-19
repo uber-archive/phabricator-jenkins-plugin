@@ -47,12 +47,15 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean createCommit;
     private final boolean applyToMaster;
     private final boolean showBuildStartedMessage;
+    private final boolean skipForcedClean;
 
     @DataBoundConstructor
-    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster, boolean showBuildStartedMessage) {
+    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
+                                   boolean showBuildStartedMessage, boolean skipForcedClean) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
         this.showBuildStartedMessage = showBuildStartedMessage;
+        this.skipForcedClean = skipForcedClean;
     }
 
     /** {@inheritDoc} */
@@ -112,7 +115,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         final String conduitToken = this.getConduitToken(build.getParent(), logger);
         Task.Result result = new ApplyPatchTask(
                 logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
-                DEFAULT_GIT_PATH, createCommit
+                DEFAULT_GIT_PATH, createCommit, skipForcedClean
         ).run();
 
         if (result != Task.Result.SUCCESS) {

@@ -38,7 +38,8 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         wrapper = new PhabricatorBuildWrapper(
                 false,
                 false,
-                true
+                true,
+                false
         );
         wrapper.getDescriptor().setArcPath("echo");
     }
