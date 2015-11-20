@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.8.3 (unreleased)
+
+* JENKINS-31335: Add checkbox to skip git clean step (Alexander Yerenkow)
+
 ### 1.8.2 (2015/11/01)
 
 * Fix "comment size" option not being saved
