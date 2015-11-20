@@ -60,7 +60,8 @@ public class ApplyPatchTaskTest {
                 TestUtils.TEST_CONDUIT_TOKEN,
                 arcPath,
                 gitPath, // git path
-                false // createCommit
+                false, // createCommit
+                false // skipForcedClean
         );
     }
 }
