@@ -50,4 +50,27 @@ public class HarbormasterClient {
 
         return conduit.perform("harbormaster.sendmessage", params);
     }
+
+    /**
+     * Uploads a uri as an 'artifact' for Harbormaster to display
+     * @param phid Phabricator object ID
+     * @param buildUri Uri to display, presumably the jenkins builds
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
+     */
+    public JSONObject sendHarbormasterUri(String phid, String buildUri) throws ConduitAPIException, IOException {
+        JSONObject artifactData = new JSONObject();
+        artifactData = artifactData.element("uri", buildUri)
+                .element("name", "Jenkins")
+                .element("ui.external", true);
+
+        JSONObject params = new JSONObject();
+        params.element("buildTargetPHID", phid)
+                .element("artifactKey", "jenkins.uri")
+                .element("artifactType", "uri")
+                .element("artifactData", artifactData);
+
+        return conduit.perform("harbormaster.createartifact", params);
+    }
 }

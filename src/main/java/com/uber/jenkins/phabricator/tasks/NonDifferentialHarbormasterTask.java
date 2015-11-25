@@ -31,18 +31,24 @@ public class NonDifferentialHarbormasterTask extends Task {
     private final String phid;
     private final ConduitAPIClient conduit;
     private final hudson.model.Result buildResult;
+    private final String buildUrl;
+    private final HarbormasterClient harbormaster;
 
     /**
      * Task constructor.
-     *  @param logger The logger where logs go to.
+     * @param logger The logger where logs go to.
      * @param conduitClient
      * @param result
+     * @param buildUrl
      */
-    public NonDifferentialHarbormasterTask(Logger logger, String phid, ConduitAPIClient conduitClient, hudson.model.Result result) {
+    public NonDifferentialHarbormasterTask(Logger logger, String phid, ConduitAPIClient conduitClient, hudson.model.Result result, String buildUrl) {
         super(logger);
         this.phid = phid;
         this.conduit = conduitClient;
         this.buildResult = result;
+        this.buildUrl = buildUrl;
+
+        this.harbormaster = new HarbormasterClient(conduit);
     }
 
     /**
@@ -68,8 +74,9 @@ public class NonDifferentialHarbormasterTask extends Task {
     protected void execute() {
         final boolean pass = buildResult.isBetterOrEqualTo(hudson.model.Result.SUCCESS);
         try {
+            harbormaster.sendHarbormasterUri(phid, buildUrl);
             // Only send pass/fail, since coverage and unit aren't viewable outside of differentials
-            new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, null, null);
+            harbormaster.sendHarbormasterMessage(phid, pass, null, null);
             result = Result.SUCCESS;
             return;
         } catch (ConduitAPIException e) {

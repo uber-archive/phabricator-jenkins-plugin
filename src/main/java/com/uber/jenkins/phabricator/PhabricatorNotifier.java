@@ -138,13 +138,16 @@ public class PhabricatorNotifier extends Notifier {
             return false;
         }
 
+        final String buildUrl = environment.get("BUILD_URL");
+
         if (!isDifferential) {
             // Process harbormaster for non-differential builds
             Task.Result result = new NonDifferentialHarbormasterTask(
                     logger,
                     phid,
                     conduitClient,
-                    build.getResult()
+                    build.getResult(),
+                    buildUrl
             ).run();
             return result == Task.Result.SUCCESS;
         }
@@ -171,7 +174,7 @@ public class PhabricatorNotifier extends Notifier {
                 diffClient,
                 environment.get(PhabricatorPlugin.PHID_FIELD),
                 coverageResult,
-                environment.get("BUILD_URL"),
+                buildUrl,
                 preserveFormatting
         );
 
