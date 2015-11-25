@@ -61,7 +61,8 @@ public class ApplyPatchTaskTest {
                 arcPath,
                 gitPath, // git path
                 false, // createCommit
-                false // skipForcedClean
+                false, // skipForcedClean
+                false // createBranch
         );
     }
 }

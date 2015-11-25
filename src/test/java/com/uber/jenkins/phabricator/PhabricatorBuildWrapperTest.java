@@ -39,6 +39,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
                 false,
                 false,
                 true,
+                false,
                 false
         );
         wrapper.getDescriptor().setArcPath("echo");
@@ -59,7 +60,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
         PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
         j.assertEqualBeans(wrapper, after,
-                "createCommit,applyToMaster,showBuildStartedMessage");
+                "createCommit,applyToMaster,showBuildStartedMessage,createBranch");
     }
 
     @Test
