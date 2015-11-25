@@ -102,30 +102,7 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
-
-        List<JSONObject> unit = new ArrayList<JSONObject>();
-
-        if (unitResults != null) {
-            unit.addAll(unitResults.toHarbormaster());
-        }
-
-        if (coverage != null) {
-            JSONObject coverageUnit = new JSONObject()
-                    .element("result", "pass")
-                    .element("name", "Coverage Data")
-                    .element("coverage", coverage);
-            unit.add(coverageUnit);
-        }
-
-        JSONObject params = new JSONObject();
-        params.element("type", pass ? "pass" : "fail")
-                .element("buildTargetPHID", phid);
-
-        if (!unit.isEmpty()) {
-            params.element("unit", unit);
-        }
-
-        return this.callConduit("harbormaster.sendmessage", params);
+        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage);
     }
 
     /**

@@ -29,6 +29,8 @@ import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.provider.InstanceProvider;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
+import com.uber.jenkins.phabricator.tasks.NonDifferentialHarbormasterTask;
+import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
@@ -102,9 +104,14 @@ public class PhabricatorNotifier extends Notifier {
         final boolean needsDecoration = build.getActions(PhabricatorPostbuildAction.class).size() == 0;
 
         final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
+        final String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
+        final boolean isDifferential = !CommonUtils.isBlank(diffID);
 
-        // Handle non-differential build invocations.
-        if (CommonUtils.isBlank(diffID)) {
+        // Handle non-differential build invocations. If PHID is present but DIFF_ID is not, it means somebody is doing
+        // a Harbormaster build on a commit rather than a differential, but still wants build status.
+        // If DIFF_ID is present but PHID is not, it means somebody is doing a Differential build without Harbormaster.
+        // So only skip build result processing if both are blank (e.g. master runs to update coverage data)
+        if (CommonUtils.isBlank(phid) && !isDifferential) {
             if (needsDecoration) {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
@@ -129,6 +136,17 @@ public class PhabricatorNotifier extends Notifier {
             e.printStackTrace(logger.getStream());
             logger.warn(CONDUIT_TAG, e.getMessage());
             return false;
+        }
+
+        if (!isDifferential) {
+            // Process harbormaster for non-differential builds
+            Task.Result result = new NonDifferentialHarbormasterTask(
+                    logger,
+                    phid,
+                    conduitClient,
+                    build.getResult()
+            ).run();
+            return result == Task.Result.SUCCESS;
         }
 
         DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
