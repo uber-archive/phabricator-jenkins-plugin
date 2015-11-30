@@ -3,6 +3,7 @@
 ### 1.8.3 (unreleased)
 
 * JENKINS-31335: Add checkbox to skip git clean step (Alexander Yerenkow)
+* Add option to create branch when applying diff (cellscape)
 
 ### 1.8.2 (2015/11/01)
 
