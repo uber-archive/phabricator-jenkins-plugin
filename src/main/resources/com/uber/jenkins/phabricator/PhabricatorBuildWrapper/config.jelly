@@ -16,4 +16,8 @@
            description="Skip 'git clean -fd -f' step.">
       <f:checkbox default="false" />
   </f:entry>
+  <f:entry title="Create git branch" field="createBranch"
+           description="Create a git branch with the patch">
+      <f:checkbox />
+  </f:entry>
 </j:jelly>

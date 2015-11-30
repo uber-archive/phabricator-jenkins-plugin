@@ -40,10 +40,12 @@ public class ApplyPatchTask extends Task {
     private final boolean createCommit;
     private final String gitPath;
     private final boolean skipForcedClean;
+    private final boolean createBranch;
 
     public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
                           String diffID, String conduitToken, String arcPath,
-                          String gitPath, boolean createCommit, boolean skipForcedClean) {
+                          String gitPath, boolean createCommit, boolean skipForcedClean,
+                          boolean createBranch) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
@@ -53,6 +55,7 @@ public class ApplyPatchTask extends Task {
         this.gitPath = gitPath;
         this.createCommit = createCommit;
         this.skipForcedClean = skipForcedClean;
+        this.createBranch = createBranch;
 
         this.logStream = logger.getStream();
     }
@@ -102,9 +105,13 @@ public class ApplyPatchTask extends Task {
                     .cmds(Arrays.asList(gitPath, "submodule", "update", "--init", "--recursive"))
                     .join();
 
-            List<String> arcPatchParams = new ArrayList<String>(Arrays.asList("--nobranch", "--diff", diffID));
+            List<String> arcPatchParams = new ArrayList<String>(Arrays.asList("--diff", diffID));
             if (!createCommit) {
                 arcPatchParams.add("--nocommit");
+            }
+
+            if (!createBranch) {
+                arcPatchParams.add("--nobranch");
             }
 
             ArcanistClient arc = new ArcanistClient(
