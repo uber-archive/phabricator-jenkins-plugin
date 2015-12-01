@@ -1,10 +1,11 @@
 # Changelog
 
-### 1.8.4 (unreleased)
+### 1.9.0 (unreleased)
 
 * Add more logging on differential fetch failure
 * Allow user to apply patch with force flag (Chaitanya Pramod)
 * Fix crash when missing cobertura plugin
+* Send Harbormaster status on non-Differential commits
 
 ### 1.8.3 (2015/12/09)
 
