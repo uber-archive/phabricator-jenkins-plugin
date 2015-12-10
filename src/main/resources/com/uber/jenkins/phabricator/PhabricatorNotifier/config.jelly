@@ -18,7 +18,11 @@
            description="Enable code coverage reporting">
     <f:checkbox default="true" />
   </f:entry>
-  <f:optionalBlock title="Add Custom Comment" checked="true">
+  <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
+           description="Post a differential comment on failed builds with a link to the raw Console Output">
+    <f:checkbox default="false" />
+  </f:entry>
+  <f:optionalBlock field="customComment" name="customComment" title="Add Custom Comment" inline="true" checked="${instance.isCustomComment()}">
     <f:entry title="Read comment from file" field="commentFile"
              description="Add additional context to Phabricator comment by outputting to this file">
       <f:textbox default=".phabricator-comment" />
@@ -31,9 +35,4 @@
       <f:textbox default="1000" />
     </f:entry>
   </f:optionalBlock>
-
-  <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
-           description="Post a differential comment on failed builds with a link to the raw Console Output">
-    <f:checkbox default="false" />
-  </f:entry>
 </j:jelly>

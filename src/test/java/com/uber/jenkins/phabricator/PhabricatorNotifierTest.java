@@ -45,7 +45,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 ".phabricator-comment",
                 "1001",
-                false
+                false,
+                true
         );
     }
 
@@ -136,7 +137,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 ".phabricator-comment",
                 "1000",
-                false
+                false,
+                true
         );
         testPostCoverage();
     }

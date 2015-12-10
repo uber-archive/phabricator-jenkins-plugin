@@ -61,17 +61,19 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean preserveFormatting;
     private final String commentFile;
     private final String commentSize;
+    private final boolean customComment;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean preserveFormatting,
-                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure) {
+                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure, boolean customComment) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
         this.preserveFormatting = preserveFormatting;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
+        this.customComment = customComment;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -240,6 +242,11 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public boolean isCommentOnSuccess() {
         return commentOnSuccess;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean isCustomComment() {
+        return customComment;
     }
 
     @SuppressWarnings("UnusedDeclaration")
