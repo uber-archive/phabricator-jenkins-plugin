@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.8.4 (unreleased)
+
+* Add more logging on differential fetch failure
+
 ### 1.8.3 (2015/12/09)
 
 * JENKINS-31335: Add checkbox to skip git clean step (Alexander Yerenkow)
