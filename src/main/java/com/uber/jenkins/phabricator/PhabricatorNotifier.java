@@ -136,7 +136,9 @@ public class PhabricatorNotifier extends Notifier {
         try {
             diff = new Differential(diffClient.fetchDiff());
         } catch (ConduitAPIException e) {
-            logger.info(CONDUIT_TAG, "Unable to fetch differential");
+            e.printStackTrace(logger.getStream());
+            logger.warn(CONDUIT_TAG, "Unable to fetch differential from Conduit API");
+            logger.warn(CONDUIT_TAG, e.getMessage());
             return true;
         }
 
