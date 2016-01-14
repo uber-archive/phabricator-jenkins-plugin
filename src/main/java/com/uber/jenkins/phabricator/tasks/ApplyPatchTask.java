@@ -41,11 +41,12 @@ public class ApplyPatchTask extends Task {
     private final String gitPath;
     private final boolean skipForcedClean;
     private final boolean createBranch;
+    private final boolean patchWithForceFlag;
 
     public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
                           String diffID, String conduitToken, String arcPath,
                           String gitPath, boolean createCommit, boolean skipForcedClean,
-                          boolean createBranch) {
+                          boolean createBranch, boolean patchWithForceFlag) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
@@ -56,6 +57,7 @@ public class ApplyPatchTask extends Task {
         this.createCommit = createCommit;
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
+        this.patchWithForceFlag = patchWithForceFlag;
 
         this.logStream = logger.getStream();
     }
@@ -112,6 +114,10 @@ public class ApplyPatchTask extends Task {
 
             if (!createBranch) {
                 arcPatchParams.add("--nobranch");
+            }
+
+            if (patchWithForceFlag) {
+                arcPatchParams.add("--force");
             }
 
             ArcanistClient arc = new ArcanistClient(

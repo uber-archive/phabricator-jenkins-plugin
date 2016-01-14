@@ -62,7 +62,8 @@ public class ApplyPatchTaskTest {
                 gitPath, // git path
                 false, // createCommit
                 false, // skipForcedClean
-                false // createBranch
+                false, // createBranch
+                false  // patchWithForceFlag
         );
     }
 }
