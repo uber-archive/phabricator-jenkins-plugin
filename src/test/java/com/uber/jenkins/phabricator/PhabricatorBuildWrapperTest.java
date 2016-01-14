@@ -40,6 +40,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
                 false,
                 true,
                 false,
+                false,
                 false
         );
         wrapper.getDescriptor().setArcPath("echo");
@@ -50,6 +51,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         assertFalse(wrapper.isCreateCommit());
         assertFalse(wrapper.isApplyToMaster());
         assertTrue(wrapper.isShowBuildStartedMessage());
+        assertFalse(wrapper.isPatchWithForceFlag());
     }
 
     @Test

@@ -49,16 +49,18 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean showBuildStartedMessage;
     private final boolean skipForcedClean;
     private final boolean createBranch;
+    private final boolean patchWithForceFlag;
 
     @DataBoundConstructor
     public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
                                    boolean showBuildStartedMessage, boolean skipForcedClean,
-                                   boolean createBranch) {
+                                   boolean createBranch, boolean patchWithForceFlag) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
         this.showBuildStartedMessage = showBuildStartedMessage;
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
+        this.patchWithForceFlag = patchWithForceFlag;
     }
 
     /** {@inheritDoc} */
@@ -118,7 +120,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         final String conduitToken = this.getConduitToken(build.getParent(), logger);
         Task.Result result = new ApplyPatchTask(
                 logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
-                DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch
+                DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch,
+                patchWithForceFlag
         ).run();
 
         if (result != Task.Result.SUCCESS) {
@@ -174,6 +177,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @SuppressWarnings("UnusedDeclaration")
     public boolean isCreateBranch() {
         return createBranch;
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isPatchWithForceFlag() {
+        return patchWithForceFlag;
     }
 
     private String getPhabricatorURL(Job owner) {
