@@ -3,6 +3,7 @@
 ### 1.8.4 (unreleased)
 
 * Add more logging on differential fetch failure
+* Allow user to apply patch with force flag (Chaitanya Pramod)
 
 ### 1.8.3 (2015/12/09)
 
