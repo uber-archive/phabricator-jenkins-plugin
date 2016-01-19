@@ -39,6 +39,12 @@ public class InstanceProviderTest {
     }
 
     @Test
+    public void testUnavailablePluginValidClass() {
+        InstanceProvider<UnitTestProvider> provider = makeProvider("weird-plugin-name", "com.uber.jenkins.phabricator.unit.JUnitTestProvider");
+        assertNull(provider.getInstance());
+    }
+
+    @Test
     public void testBadClassName() {
         InstanceProvider<UnitTestProvider> provider = makeProvider("junit", "com.nonexistent.class");
         assertNull(provider.getInstance());

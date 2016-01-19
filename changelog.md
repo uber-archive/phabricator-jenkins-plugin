@@ -4,6 +4,7 @@
 
 * Add more logging on differential fetch failure
 * Allow user to apply patch with force flag (Chaitanya Pramod)
+* Fix crash when missing cobertura plugin
 
 ### 1.8.3 (2015/12/09)
 

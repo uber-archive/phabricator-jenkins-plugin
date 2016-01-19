@@ -55,6 +55,7 @@ public class InstanceProvider<T> {
     public T getInstance() {
         if (!provider.isAvailable()) {
             logger.info(LOGGER_TAG, String.format("'%s' plugin not installed.", pluginName));
+            return null;
         }
         T instance = provider.getInstance(className);
         if (instance == null) {
