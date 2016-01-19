@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.0 (unreleased)
+### 1.9.0 (2016/01/19)
 
 * Add more logging on differential fetch failure
 * Allow user to apply patch with force flag (Chaitanya Pramod)
