@@ -75,6 +75,8 @@ public class NonDifferentialHarbormasterTask extends Task {
     @Override
     protected void execute() {
         final boolean pass = buildResult.isBetterOrEqualTo(hudson.model.Result.SUCCESS);
+        info(String.format("Sending diffusion result as: %s", buildResult.toString()));
+
         try {
             harbormaster.sendHarbormasterUri(phid, buildUrl);
             // Only send pass/fail, since coverage and unit aren't viewable outside of differentials

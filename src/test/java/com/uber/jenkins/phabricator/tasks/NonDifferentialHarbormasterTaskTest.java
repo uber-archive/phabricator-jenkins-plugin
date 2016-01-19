@@ -20,6 +20,56 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
-public class NonDifferentialHarbormasterTaskTest {
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
+import com.uber.jenkins.phabricator.utils.TestUtils;
+import hudson.model.Result;
+import net.sf.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class NonDifferentialHarbormasterTaskTest {
+    private ConduitAPIClient conduitClient;
+
+    @Before
+    public void setUp() {
+        conduitClient = mock(ConduitAPIClient.class);
+    }
+
+    @Test
+    public void testHappyPath() {
+        assertEquals(Task.Result.SUCCESS, getResult());
+    }
+
+    @Test
+    public void testConduitAPIException() throws Exception {
+        when(conduitClient.perform(anyString(), any(JSONObject.class))).thenThrow(ConduitAPIException.class);
+
+        assertEquals(Task.Result.FAILURE, getResult());
+    }
+
+    @Test
+    public void testIOException() throws Exception {
+        when(conduitClient.perform(anyString(), any(JSONObject.class))).thenThrow(IOException.class);
+
+        assertEquals(Task.Result.FAILURE, getResult());
+    }
+
+    private Task.Result getResult() {
+        return new NonDifferentialHarbormasterTask(
+                TestUtils.getDefaultLogger(),
+                TestUtils.TEST_PHID,
+                conduitClient,
+                Result.SUCCESS,
+                TestUtils.TEST_BASE_URL
+        ).run();
+    }
 }
