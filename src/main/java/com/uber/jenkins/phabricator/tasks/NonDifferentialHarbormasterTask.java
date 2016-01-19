@@ -33,6 +33,7 @@ public class NonDifferentialHarbormasterTask extends Task {
     private final hudson.model.Result buildResult;
     private final String buildUrl;
     private final HarbormasterClient harbormaster;
+    private final Logger logger;
 
     /**
      * Task constructor.
@@ -43,6 +44,7 @@ public class NonDifferentialHarbormasterTask extends Task {
      */
     public NonDifferentialHarbormasterTask(Logger logger, String phid, ConduitAPIClient conduitClient, hudson.model.Result result, String buildUrl) {
         super(logger);
+        this.logger = logger;
         this.phid = phid;
         this.conduit = conduitClient;
         this.buildResult = result;
@@ -80,9 +82,9 @@ public class NonDifferentialHarbormasterTask extends Task {
             result = Result.SUCCESS;
             return;
         } catch (ConduitAPIException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
         }
 
         result = Result.FAILURE;
