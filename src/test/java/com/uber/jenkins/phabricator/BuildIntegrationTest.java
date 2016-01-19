@@ -97,6 +97,21 @@ public abstract class BuildIntegrationTest {
         return p.scheduleBuild2(0).get();
     }
 
+    protected FreeStyleBuild buildWithCommit(JSONObject sendMessageResponse) throws Exception {
+        Map<String, JSONObject> responses = new HashMap<String, JSONObject>();
+        responses.put("harbormaster.sendmessage", sendMessageResponse);
+        responses.put("harbormaster.createartifact", new JSONObject());
+        conduit = new FakeConduit(responses);
+
+        TestUtils.addValidCredentials(conduit);
+
+        addBuildStep();
+
+        TestUtils.setDefaultBuildEnvironmentForCommits(j);
+
+        return p.scheduleBuild2(0).get();
+    }
+
     protected void assertLogContains(String needle, AbstractBuild build) throws IOException {
         StringBuilder log = new StringBuilder();
         List<String> logLines = build.getLog(1000);

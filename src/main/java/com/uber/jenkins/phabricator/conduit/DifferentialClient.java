@@ -102,30 +102,7 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
-
-        List<JSONObject> unit = new ArrayList<JSONObject>();
-
-        if (unitResults != null) {
-            unit.addAll(unitResults.toHarbormaster());
-        }
-
-        if (coverage != null) {
-            JSONObject coverageUnit = new JSONObject()
-                    .element("result", "pass")
-                    .element("name", "Coverage Data")
-                    .element("coverage", coverage);
-            unit.add(coverageUnit);
-        }
-
-        JSONObject params = new JSONObject();
-        params.element("type", pass ? "pass" : "fail")
-                .element("buildTargetPHID", phid);
-
-        if (!unit.isEmpty()) {
-            params.element("unit", unit);
-        }
-
-        return this.callConduit("harbormaster.sendmessage", params);
+        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage);
     }
 
     /**
@@ -137,18 +114,7 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterUri(String phid, String buildUri) throws ConduitAPIException, IOException {
-        JSONObject artifactData = new JSONObject();
-        artifactData = artifactData.element("uri", buildUri)
-                .element("name", "Jenkins")
-                .element("ui.external", true);
-
-        JSONObject params = new JSONObject();
-        params.element("buildTargetPHID", phid)
-                .element("artifactKey", "jenkins.uri")
-                .element("artifactType", "uri")
-                .element("artifactData", artifactData);
-
-        return this.callConduit("harbormaster.createartifact", params);
+        return new HarbormasterClient(conduit).sendHarbormasterUri(phid, buildUri);
     }
 
     /**
