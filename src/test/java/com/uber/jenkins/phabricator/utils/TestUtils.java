@@ -44,6 +44,7 @@ import hudson.plugins.cobertura.renderers.SourceEncoding;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tasks.Publisher;
 import hudson.tasks.junit.JUnitResultArchiver;
+import hudson.util.CopyOnWriteMap;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.apache.http.HttpException;
@@ -180,12 +181,22 @@ public class TestUtils {
         return params;
     }
 
+    public static Map<String, String> getValidCommitEnvironment() {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(PhabricatorPlugin.PHID_FIELD, TEST_PHID);
+        return params;
+    }
+
     public static void setDefaultBuildEnvironment(JenkinsRule j) throws IOException {
         setDefaultBuildEnvironment(j, true);
     }
 
     public static void setDefaultBuildEnvironment(JenkinsRule j, boolean harbormaster) throws IOException {
         setEnvironmentVariables(j, getValidBuildEnvironment(harbormaster));
+    }
+
+    public static void setDefaultBuildEnvironmentForCommits(JenkinsRule j) throws IOException {
+        setEnvironmentVariables(j, getValidCommitEnvironment());
     }
 
     public static ConduitCredentials getConduitCredentials(String conduitURI) {
