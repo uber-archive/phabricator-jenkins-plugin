@@ -20,18 +20,22 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import hudson.plugins.cobertura.CoberturaBuildAction;
+import hudson.plugins.cobertura.CoberturaCoverageParser;
 import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
-import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
@@ -41,6 +45,10 @@ import hudson.plugins.cobertura.targets.CoverageResult;
  */
 @SuppressWarnings("unused")
 public class CoberturaCoverageProvider extends CoverageProvider {
+
+    private static final Logger LOGGER = Logger.getLogger(CoberturaCoverageProvider.class.getName());
+    private static final CoberturaReportFilenameFilter COBERTURA_FILENAME_FILTER = new CoberturaReportFilenameFilter();
+
     @Override
     public boolean hasCoverage() {
         CoverageResult result = getCoverageResult();
@@ -86,15 +94,34 @@ public class CoberturaCoverageProvider extends CoverageProvider {
             return null;
         }
 
+        // Check if there is a cobertura build action
         CoberturaBuildAction coberturaAction = build.getAction(CoberturaBuildAction.class);
-        if (coberturaAction == null) {
-            return null;
+        if (coberturaAction != null) {
+            return coberturaAction.getResult();
         }
-        return coberturaAction.getResult();
+
+        // Fallback to scanning for the reports
+        File[] reports = getCoberturaReports(getBuild());
+        CoverageResult result = null;
+        if (reports != null) {
+            for (File report : reports) {
+                try {
+                    result = CoberturaCoverageParser.parse(report, result);
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "Failed to load " + report, e);
+                }
+            }
+        }
+
+        if (result != null) {
+            result.setOwner(build);
+        }
+        return result;
     }
 
     /**
      * Convert Cobertura results to an internal CodeCoverageMetrics representation
+     *
      * @param result The cobertura report
      * @return The internal representation of coverage
      */
@@ -129,6 +156,15 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     }
 
     private File[] getCoberturaReports(AbstractBuild build) {
-        return build.getRootDir().listFiles(hudson.plugins.cobertura.CoberturaPublisher.COBERTURA_FILENAME_FILTER);
+        return build.getRootDir().listFiles(COBERTURA_FILENAME_FILTER);
+    }
+
+    private static class CoberturaReportFilenameFilter implements FilenameFilter {
+        private CoberturaReportFilenameFilter() {
+        }
+
+        public boolean accept(File dir, String name) {
+            return name.matches(".*?coverage.*?\\.xml$");
+        }
     }
 }

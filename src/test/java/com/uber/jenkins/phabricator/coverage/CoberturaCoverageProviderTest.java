@@ -1,5 +1,6 @@
 package com.uber.jenkins.phabricator.coverage;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,6 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +39,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CoberturaCoverageProviderTest {
+
+    private static final String TEST_COVERAGE_FILE = "go-torch-coverage.xml";
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -77,7 +83,7 @@ public class CoberturaCoverageProviderTest {
     }
 
     @Test
-    public void testGetMetricsWithResult() throws IOException {
+    public void testGetMetricsWithBuildActionResult() throws Exception {
         FreeStyleBuild build = getBuild();
         build.addAction(CoberturaBuildAction.load(
                 build,
@@ -96,6 +102,19 @@ public class CoberturaCoverageProviderTest {
         CodeCoverageMetrics metrics = provider.getMetrics();
         assertNotNull(metrics);
         assertEquals(75.0f, metrics.getLineCoveragePercent(), 0.0f);
+    }
+
+    @Test
+    public void testGetMetricsWithoutBuildActionResult() throws Exception {
+        FreeStyleBuild build = getBuild();
+        Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE).toURI());
+        FileUtils.copyFile(testCoverageFile.toFile(), new File(build.getRootDir(), "coverage.xml"));
+        provider.setBuild(build);
+        assertTrue(provider.hasCoverage());
+
+        CodeCoverageMetrics metrics = provider.getMetrics();
+        assertNotNull(metrics);
+        assertEquals(89.69697f, metrics.getLineCoveragePercent(), 0.0f);
     }
 
     @Test
