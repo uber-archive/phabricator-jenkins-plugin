@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.9.1 (unreleased)
+
+* Remove coverage dependency on cobertura build action. Allows Uberalls coverage
+  to work when the cobertura plugin is not enabled (for performance
+  reasons). (Gautam Korlam)
+
 ### 1.9.0 (2016/01/19)
 
 * Add more logging on differential fetch failure
