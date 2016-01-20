@@ -14,7 +14,7 @@ Before the plugin can be used, a few configuration steps on your
 Phabricator and Jenkins instances need to be completed.
 
 Phabricator Setup
-`````````````````
+================
 
 1. Create a bot user in Phabricator.
 2. Generate a Conduit API token for your Phabricator installation.
