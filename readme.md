@@ -10,6 +10,22 @@ if Harbormaster is not enabled).
 Configuration
 -------------
 
+Before the plugin can be used, a few configuration steps on your
+Phabricator and Jenkins instances need to be completed.
+
+Phabricator Setup
+`````````````````
+
+1. Create a bot user in Phabricator.
+2. Generate a Conduit API token for your Phabricator installation.
+	a. Navigate to https://phabricator.example.com/settings/panel/apitokens/. Be sure to replace "phabricator.example" with the base URL of your Phabricator instance.
+	b. Click the "Generate API Token" button. 
+	c. Click the "Generate Token" button.
+	d. Copy the token.
+	
+	
+In this section, you'll create a bot user in Phabricator and generate a Conduit API token. If you already have a bot user and a Conduit API token, skip to the "Jenkins Setup Section".
+
 First, create a bot user and generate a Conduit API token for your Phabricator
 install. This lives at `https://phabricator.example.com/settings/panel/apitokens/`.
 
