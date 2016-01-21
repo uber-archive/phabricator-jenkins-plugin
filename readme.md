@@ -8,68 +8,56 @@ if Harbormaster is not enabled).
 [Jenkins]: https://jenkins-ci.org/
 
 Configuration
--------------
+=============
 
 Before the plugin can be used, a few configuration steps on your
 Phabricator and Jenkins instances need to be completed.
 
-Phabricator Setup
-================
+Phabricator Configuration
+-------------------------
+
+In this section, you'll create a bot user in Phabricator and generate a Conduit API token. If you already have a bot user and a Conduit API token, skip to the "Jenkins Setup Section".
 
 1. Create a bot user in Phabricator.
 2. Generate a Conduit API token for your Phabricator installation.
-	a. Navigate to https://phabricator.example.com/settings/panel/apitokens/. Be sure to replace "phabricator.example" with the base URL of your Phabricator instance.
-	b. Click the "Generate API Token" button. 
-	c. Click the "Generate Token" button.
-	d. Copy the token.
-	
-	
-In this section, you'll create a bot user in Phabricator and generate a Conduit API token. If you already have a bot user and a Conduit API token, skip to the "Jenkins Setup Section".
+  1. Navigate to `https://phabricator.example.com/settings/panel/apitokens/` with your base Phabricator URL in place of "phabricator.example".
+  2. Click the **Generate API Token** button. ![Conduit Token](/docs/conduit-token.png)
+  3. Click the **Generate Token** button.
+  4. Copy the token.
 
-First, create a bot user and generate a Conduit API token for your Phabricator
-install. This lives at `https://phabricator.example.com/settings/panel/apitokens/`.
+Jenkins Setup
+-------------
 
-![Conduit Token](/docs/conduit-token.png)
-
-Next, navigate to `https://ci.example.com/configure`, replacing ci.example.com
-with the URL for your Jenkins instance.
-
-Enter your Conduit credentials by clicking "Add" and selecting "Phabricator
-Conduit Key".
-
-![Add Credentials](/docs/add-credentials.png)
-
-Fill in your "Phabricator URL" with the base
-URL of your phabricator install, for example `https://phabricator.example.com`.
-Enter the conduit token for your Jenkins bot user (create one if necessary). Add a
-Description for readability.
-
-![Configure Credentials](/docs/configure-credentials.png)
+1. Navigate to `https://ci.example.com/configure` with your base Jenkins URL in place of "ci.example".
+2. Navigate to the **Phabricator** section and click the **Add** button. ![Add Credentials](/docs/add-credentials.png)
+3. From the **Kind** dropdown, select **Phabricator Conduit Key**.
+4. Enter the base URL for your Phabricator instance in the **Phabricator URL** field. For example `https://phabricator.example.com`.
+5. Enter a description in the **Description** field for readbility.![Configure Credentials](/docs/configure-credentials.png)
+6. Paste the Conduit API token (created in the Phabrticator Setup section) in the "Conduit Token" field.
+7. Save the configuration. 
 
 Usage
------
+=====
 
-To enable Harbormaster integration, add two string parameters to your jenkins
-job: `DIFF_ID` and `PHID`:
+Now that Jenkins and Phabricator can connect, configure your Jenkins job and Harbormaster.
 
-![Configure job parameters](/docs/configure-job-parameters.png)
+Jenkins Job
+-----------
 
-To apply the differential to your workspace before test runs, enable the "Apply
-Phabricator Differential" step under "Build Environment":
-
+1. Navigate to the Jenkins job you want to integrate with Phabricator.
+2. Click the **Configure** button.
+3. Click the **Add Parameter** button and select **String Parameter**.
+4. Enter **DIFF_ID** in the **Name** field of the parameter.
+5. Repeat step 3.
+6. Enter **PHID** in the **Name** field of the parameter. ![Configure job parameters](/docs/configure-job-parameters.png)
+7. If you want to apply the differential to your workspace before each test run, navigate to the **Build Environment** section and select the **Apply Phabricator Differential** checkbox. This resets to the base commit the differential was generated from. If you'd rather apply the patch to master, select the **Apply patch to master** checkbox.
 ![Enable build environment](/docs/configure-job-environment.png)
-
-By default, this will reset to the base commit that the differential was made
-from. If you wish to apply the patch to master instead, select "Apply patch to master".
-
-To report the build status back to Phabricator after your test run, enable the
-"Post to Phabricator" Post-build Action:
-
+8. To report the build status to Phabricator after the test completes:
+  1. Navigate to the **Post-build Actions** section.
+  2. Click the **Add post-build action** button and select **Post to Phabricator**.
+  3. Make sure the **Comment on Success** and **Comment with console link on Failure** checkboxes are selected.
+  4. Optionally, if you have [Uberalls]: https://github.com/uber/uberalls enabled, enter a path to scan for Cobertura reports.
 ![Add post-build action](/docs/configure-job-post-build.png)
-
-If you have [Uberalls][] enabled, enter a path to scan for cobertura reports.
-
-[Uberalls]: https://github.com/uber/uberalls
 
 Harbormaster
 ------------
