@@ -56,38 +56,33 @@ Jenkins Job
   1. Navigate to the **Post-build Actions** section.
   2. Click the **Add post-build action** button and select **Post to Phabricator**.
   3. Make sure the **Comment on Success** and **Comment with console link on Failure** checkboxes are selected.
-  4. Optionally, if you have [Uberalls]: https://github.com/uber/uberalls enabled, enter a path to scan for Cobertura reports.
+  4. Optionally: 
+    1. If you have [Uberalls]: https://github.com/uber/uberalls enabled, enter a path to scan for Cobertura reports.
+    2. If you want to post additional text to Phabricator other than "Pass" and "Fail", create a `.phabricator-comment` file and enter the text you want Jenkins to add to the build status comment in Phabricator.
 ![Add post-build action](/docs/configure-job-post-build.png)
 
 Harbormaster
 ------------
 
-Once the plugin is configured, you will want to enable harbormaster via herald
-rules to trigger jenkins builds on differentials.
+With Phabricator, Jenkins, and your Jenkins jobs configured it's time to configure a new Harbormaster build plan. This build plan will trigger the Jenkins job using a Herald rule that will be configured in the next section.
 
-First, create a new Harbormaster build plan with a single step, "Make an HTTP
-POST request":
+1. Navigate to `https://phabricator.example.com/harbormaster/plan/` with your base Phabricator URL in place of `phabricator.example`.
+2. Click the **New Build Plan** button in the top right corner of the page.
+3. Enter a name for the build plan in the **Plan Name** field. For these instructions, we'll use "test-example" as the build name.
+4. Click the **Create Build Plan** button.
+5. Click the **Add Build Step button**.
+6. Click the **Make HTTP Request** step.
+7. Use this template URI to fill in the URI field for the build plan: `https://ci.example.com/buildByToken/buildWithParameters?job=test-example&DIFF_ID=${buildable.diff}&PHID=${target.phid}`
 
-Set the URI to
-`https://ci.example.com/buildByToken/buildWithParameters?job=test-example&DIFF_ID=${buildable.diff}&PHID=${target.phid}`,
-replacing `https://ci.example.com` with the URI of your Jenkins instance, and
-`test-example` with the name of your job. If your Jenkins instance is exposed to
-the internet, make sure to install the [Build Token Root Plugin][] and fill in
-the `token` parameter.
-
-Set the "When Complete" dropdown to "Wait For Message"
-
-![Harbormaster plan](/docs/harbormaster-plan.png)
-
+	Be sure to replace `https://ci.example.com` with the URI of your Jenkins instance and `test-example` with the name of your Jenkins job.
+	
+	If your Jenkins instance is exposed to the internet, make sure to install the [Build Token Root Plugin][] and fill in the `token` parameter.
+	
 [Build Token Root Plugin]: https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin
 
-Additional Comments
--------------------
-
-To allow projects to post back additional text instead of just pass/fail, the
-plugin supports a build comment file, which defaults to
-`.phabricator-comment`. Put text in here, and Jenkins will add it to the build
-status comment.
+8. Click the **When Complete** dropdown menu and select **Wait For Message**.
+9. Click the **Create Build Step** button.
+![Harbormaster plan](/docs/harbormaster-plan.png)
 
 Herald
 ------
