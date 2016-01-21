@@ -33,7 +33,7 @@ Jenkins Setup
 3. From the **Kind** dropdown, select **Phabricator Conduit Key**.
 4. Enter the base URL for your Phabricator instance in the **Phabricator URL** field. For example `https://phabricator.example.com`.
 5. Enter a description in the **Description** field for readbility.![Configure Credentials](/docs/configure-credentials.png)
-6. Paste the Conduit API token (created in the [Phabricator Configuration section](Phabricator Configuration)) in the **Conduit Token** field.
+6. Paste the Conduit API token (created in the Phabricator Configuration section) in the **Conduit Token** field.
 7. Save the configuration. 
 
 Usage
@@ -47,9 +47,9 @@ Jenkins Job
 1. Navigate to the Jenkins job you want to integrate with Phabricator.
 2. Click the **Configure** button.
 3. Click the **Add Parameter** button and select **String Parameter**.
-4. Enter **DIFF_ID** in the **Name** field of the parameter.
+4. Enter `DIFF_ID` in the **Name** field of the parameter.
 5. Repeat step 3.
-6. Enter **PHID** in the **Name** field of the parameter. ![Configure job parameters](/docs/configure-job-parameters.png)
+6. Enter `PHID` in the **Name** field of the parameter. ![Configure job parameters](/docs/configure-job-parameters.png)
 7. If you want to apply the differential to your workspace before each test run, navigate to the **Build Environment** section and select the **Apply Phabricator Differential** checkbox. This resets to the base commit the differential was generated from. If you'd rather apply the patch to master, select the **Apply patch to master** checkbox.
 ![Enable build environment](/docs/configure-job-environment.png)
 8. To report the build status to Phabricator after the test completes:
@@ -57,8 +57,8 @@ Jenkins Job
   2. Click the **Add post-build action** button and select **Post to Phabricator**.
   3. Make sure the **Comment on Success** and **Comment with console link on Failure** checkboxes are selected.
   4. Optionally: 
-    1. If you have [Uberalls]: https://github.com/uber/uberalls enabled, enter a path to scan for Cobertura reports.
-    2. If you want to post additional text to Phabricator other than "Pass" and "Fail", create a `.phabricator-comment` file and enter the text you want Jenkins to add to the build status comment in Phabricator.
+    1. If you have [Uberalls](https://github.com/uber/uberalls) enabled, enter a path to scan for Cobertura reports.
+    2. If you want to post additional text to Phabricator other than "Pass" and "Fail", select the **Add Custom Comment** checkbox. Then create a `.phabricator-comment` file and enter the text you want Jenkins to add to the build status comment in Phabricator.
 ![Add post-build action](/docs/configure-job-post-build.png)
 
 Harbormaster
