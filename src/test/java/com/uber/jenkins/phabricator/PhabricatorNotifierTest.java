@@ -120,6 +120,15 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testPostCoverageWithoutPublisher() throws Exception {
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("Publishing coverage data to Harbormaster for 3 files", build);
+    }
+
+    @Test
     public void testPostUnit() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.JUNIT_XML, JUnitTestProvider.class, "go-torch-junit.xml");
         p.getPublishersList().add(TestUtils.getDefaultXUnitPublisher());

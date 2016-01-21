@@ -22,9 +22,13 @@ package com.uber.jenkins.phabricator.coverage;
 
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.CoberturaCoverageParser;
+import hudson.plugins.cobertura.CoberturaPublisher;
+import hudson.remoting.VirtualChannel;
+import org.jenkinsci.remoting.RoleChecker;
 import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +51,7 @@ import hudson.plugins.cobertura.targets.CoverageResult;
 public class CoberturaCoverageProvider extends CoverageProvider {
 
     private static final Logger LOGGER = Logger.getLogger(CoberturaCoverageProvider.class.getName());
-    private static final CoberturaReportFilenameFilter COBERTURA_FILENAME_FILTER = new CoberturaReportFilenameFilter();
+    private static final String COBERTURA_REPORT_PATTERN = ".*?(coverage|cobertura).*?\\.xml$";
 
     @Override
     public boolean hasCoverage() {
@@ -101,7 +105,8 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         }
 
         // Fallback to scanning for the reports
-        File[] reports = getCoberturaReports(getBuild());
+        copyCoverageToJenkinsMaster(build);
+        File[] reports = getCoberturaReports(build);
         CoverageResult result = null;
         if (reports != null) {
             for (File report : reports) {
@@ -116,7 +121,38 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         if (result != null) {
             result.setOwner(build);
         }
+
         return result;
+    }
+
+    private void copyCoverageToJenkinsMaster(AbstractBuild build) {
+        final FilePath[] moduleRoots = build.getModuleRoots();
+        final boolean multipleModuleRoots =
+                moduleRoots != null && moduleRoots.length > 1;
+        final FilePath moduleRoot = multipleModuleRoots ? build.getWorkspace() : build.getModuleRoot();
+        final File buildCoberturaDir = build.getRootDir();
+        FilePath buildTarget = new FilePath(buildCoberturaDir);
+
+        if (moduleRoot != null) {
+            try {
+                List<FilePath> reports = moduleRoot.list();
+
+                int i = 0;
+                for (FilePath report : reports) {
+                    if (report.getName().matches(COBERTURA_REPORT_PATTERN)) {
+                        final FilePath targetPath = new FilePath(buildTarget, "coverage" + (i == 0 ? "" : i) + ".xml");
+                        report.copyTo(targetPath);
+                        i++;
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
+            } catch (IOException e) {
+                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
+            }
+        }
     }
 
     /**
@@ -156,15 +192,6 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     }
 
     private File[] getCoberturaReports(AbstractBuild build) {
-        return build.getRootDir().listFiles(COBERTURA_FILENAME_FILTER);
-    }
-
-    private static class CoberturaReportFilenameFilter implements FilenameFilter {
-        private CoberturaReportFilenameFilter() {
-        }
-
-        public boolean accept(File dir, String name) {
-            return name.matches(".*?coverage.*?\\.xml$");
-        }
+        return build.getRootDir().listFiles(CoberturaPublisher.COBERTURA_FILENAME_FILTER);
     }
 }
