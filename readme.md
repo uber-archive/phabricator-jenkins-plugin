@@ -20,7 +20,7 @@ In this section, you'll create a bot user in Phabricator and generate a Conduit 
 
 1. Create a bot user in Phabricator.
 2. Generate a Conduit API token for your Phabricator installation.
-  1. Navigate to `https://phabricator.example.com/settings/panel/apitokens/` with your base Phabricator URL in place of `phabricator.example`.
+  1. Navigate to `https://phabricator.example/settings/panel/apitokens/` with your base Phabricator URL in place of `phabricator.example`.
   2. Click the **Generate API Token** button. ![Conduit Token](/docs/conduit-token.png)
   3. Click the **Generate Token** button.
   4. Copy the token.
@@ -28,7 +28,7 @@ In this section, you'll create a bot user in Phabricator and generate a Conduit 
 Jenkins Setup
 -------------
 
-1. Navigate to `https://ci.example.com/configure` with your base Jenkins URL in place of "ci.example".
+1. Navigate to `https://ci.example.com/configure` with your base Jenkins URL in place of "ci.example.com".
 2. Navigate to the **Phabricator** section and click the **Add** button. ![Add Credentials](/docs/add-credentials.png)
 3. From the **Kind** dropdown, select **Phabricator Conduit Key**.
 4. Enter the base URL for your Phabricator instance in the **Phabricator URL** field. For example `https://phabricator.example.com`.
@@ -67,7 +67,7 @@ Harbormaster
 
 With Phabricator, Jenkins, and your Jenkins jobs configured it's time to configure a new Harbormaster build plan. This build plan will trigger the Jenkins job using a Herald rule that will be configured in the next section.
 
-1. Navigate to `https://phabricator.example.com/harbormaster/plan/` with your base Phabricator URL in place of `phabricator.example`.
+1. Navigate to `https://phabricator.example/harbormaster/plan/` with your base Phabricator URL in place of `phabricator.example`.
 2. Click the **New Build Plan** button in the top right corner of the page.
 3. Enter a name for the build plan in the **Plan Name** field. For these instructions, we'll use "test-example" as the build name.
 4. Click the **Create Build Plan** button.
@@ -90,7 +90,7 @@ Herald
 
 With the build plans created it's time to create a Herald Rule to trigger the plans. The steps below will configure a Herald Rule to trigger the build plans on Differential Revisions to your repository.
 
-1. Navigate to `https://phabricator.example.com/herald/` with your base Phabricator URL in place of `phabricator.example`.
+1. Navigate to `https://phabricator.example/herald/` with your base Phabricator URL in place of `phabricator.example`.
 2. Click the **Create Herald Rule** button in the top right corner of the page.
 3. Select the **Differential Revisions** checkbox and click **Continue**.
 4. Select the **Global** checkbox and click **Continue**.
