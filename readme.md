@@ -32,14 +32,15 @@ Jenkins Setup
 2. Navigate to the **Phabricator** section and click the **Add** button. ![Add Credentials](/docs/add-credentials.png)
 3. From the **Kind** dropdown, select **Phabricator Conduit Key**.
 4. Enter the base URL for your Phabricator instance in the **Phabricator URL** field. For example `https://phabricator.example.com`.
-5. Enter a description in the **Description** field for readbility.![Configure Credentials](/docs/configure-credentials.png)
+5. Enter a description in the **Description** field for readability.![Configure Credentials](/docs/configure-credentials.png)
 6. Paste the Conduit API token (created in the Phabricator Configuration section) in the **Conduit Token** field.
-7. Save the configuration. 
+7. Click the **Add** button.
+8. Click the **Save** button.
 
 Usage
 =====
 
-Now that Jenkins and Phabricator can connect, configure your Jenkins job and Harbormaster.
+Now that Jenkins and Phabricator are configured you can configure your Jenkins job and Harbormaster.
 
 Jenkins Job
 -----------
@@ -49,7 +50,7 @@ Jenkins Job
 3. Click the **Add Parameter** button and select **String Parameter**.
 4. Enter `DIFF_ID` in the **Name** field of the parameter.
 5. Repeat step 3.
-6. Enter `PHID` in the **Name** field of the parameter. ![Configure job parameters](/docs/configure-job-parameters.png)
+6. Enter `PHID` in the **Name** field of the second parameter. ![Configure job parameters](/docs/configure-job-parameters.png)
 7. If you want to apply the differential to your workspace before each test run, navigate to the **Build Environment** section and select the **Apply Phabricator Differential** checkbox. This resets to the base commit the differential was generated from. If you'd rather apply the patch to master, select the **Apply patch to master** checkbox.
 ![Enable build environment](/docs/configure-job-environment.png)
 8. To report the build status to Phabricator after the test completes:
@@ -96,7 +97,7 @@ With the build plans created it's time to create a Herald Rule to trigger the pl
 5. Enter a name for the Herald Rule in the **Rule Name** field.
 6. In the **Conditions** section, click the dropdown menu that says "Author" and select "Repository".
 7. Enter your repository name in to the blank field in the **Conditions** section.
-8. In the **Actions** section, click the dropwdown menu that says "Add blocking reviewers" and select "Run build plans".
+8. In the **Actions** section, click the dropdown menu that says "Add blocking reviewers" and select "Run build plans".
 9. Enter the build plans that were created in the previous section in to the blank field in the **Action** section.
 10. Click **Save Rule**.
 
@@ -120,7 +121,7 @@ https://wiki.jenkins-ci.org/display/JENKINS/Plugin+tutorial.
 Testing
 -------
 
-Start up Jenkins with the plugin installed
+Start up Jenkins with the plugin installed:
 ```bash
 mvn hpi:run
 ```
