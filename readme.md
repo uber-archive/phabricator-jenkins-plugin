@@ -8,94 +8,103 @@ if Harbormaster is not enabled).
 [Jenkins]: https://jenkins-ci.org/
 
 Configuration
+=============
+
+Before the plugin can be used, a few configuration steps on your
+Phabricator and Jenkins instances need to be completed.
+
+Phabricator Configuration
+-------------------------
+
+In this section, you'll create a bot user in Phabricator and generate a Conduit API token. If you already have a bot user and a Conduit API token, skip to the "Jenkins Setup Section".
+
+1. Create a bot user in Phabricator.
+2. Generate a Conduit API token for your Phabricator installation.
+  1. Navigate to `https://phabricator.example/settings/panel/apitokens/` with your base Phabricator URL in place of `phabricator.example`.
+  2. Click the **Generate API Token** button. ![Conduit Token](/docs/conduit-token.png)
+  3. Click the **Generate Token** button.
+  4. Copy the token.
+
+Jenkins Setup
 -------------
 
-First, create a bot user and generate a Conduit API token for your Phabricator
-install. This lives at `https://phabricator.example.com/settings/panel/apitokens/`.
-
-![Conduit Token](/docs/conduit-token.png)
-
-Next, navigate to `https://ci.example.com/configure`, replacing ci.example.com
-with the URL for your Jenkins instance.
-
-Enter your Conduit credentials by clicking "Add" and selecting "Phabricator
-Conduit Key".
-
-![Add Credentials](/docs/add-credentials.png)
-
-Fill in your "Phabricator URL" with the base
-URL of your phabricator install, for example `https://phabricator.example.com`.
-Enter the conduit token for your Jenkins bot user (create one if necessary). Add a
-Description for readability.
-
-![Configure Credentials](/docs/configure-credentials.png)
+1. Navigate to `https://ci.example.com/configure` with your base Jenkins URL in place of "ci.example.com".
+2. Navigate to the **Phabricator** section and click the **Add** button. ![Add Credentials](/docs/add-credentials.png)
+3. From the **Kind** dropdown, select **Phabricator Conduit Key**.
+4. Enter the base URL for your Phabricator instance in the **Phabricator URL** field. For example `https://phabricator.example.com`.
+5. Enter a description in the **Description** field for readability.![Configure Credentials](/docs/configure-credentials.png)
+6. Paste the Conduit API token (created in the Phabricator Configuration section) in the **Conduit Token** field.
+7. Click the **Add** button.
+8. Click the **Save** button.
 
 Usage
------
+=====
 
-To enable Harbormaster integration, add two string parameters to your jenkins
-job: `DIFF_ID` and `PHID`:
+Now that Jenkins and Phabricator are configured you can configure your Jenkins job and Harbormaster.
 
-![Configure job parameters](/docs/configure-job-parameters.png)
+Jenkins Job
+-----------
 
-To apply the differential to your workspace before test runs, enable the "Apply
-Phabricator Differential" step under "Build Environment":
-
+1. Navigate to the Jenkins job you want to integrate with Phabricator.
+2. Click the **Configure** button.
+3. Click the **Add Parameter** button and select **String Parameter**.
+4. Enter `DIFF_ID` in the **Name** field of the parameter.
+5. Repeat step 3.
+6. Enter `PHID` in the **Name** field of the second parameter. ![Configure job parameters](/docs/configure-job-parameters.png)
+7. If you want to apply the differential to your workspace before each test run, navigate to the **Build Environment** section and select the **Apply Phabricator Differential** checkbox. This resets to the base commit the differential was generated from. If you'd rather apply the patch to master, select the **Apply patch to master** checkbox.
 ![Enable build environment](/docs/configure-job-environment.png)
-
-By default, this will reset to the base commit that the differential was made
-from. If you wish to apply the patch to master instead, select "Apply patch to master".
-
-To report the build status back to Phabricator after your test run, enable the
-"Post to Phabricator" Post-build Action:
-
+8. To report the build status to Phabricator after the test completes:
+  1. Navigate to the **Post-build Actions** section.
+  2. Click the **Add post-build action** button and select **Post to Phabricator**.
+  3. Make sure the **Comment on Success** and **Comment with console link on Failure** checkboxes are selected.
+  4. Optionally: 
+    1. If you have [Uberalls](https://github.com/uber/uberalls) enabled, enter a path to scan for Cobertura reports.
+    2. If you want to post additional text to Phabricator other than "Pass" and "Fail", select the **Add Custom Comment** checkbox. Then create a `.phabricator-comment` file and enter the text you want Jenkins to add to the build status comment in Phabricator.
 ![Add post-build action](/docs/configure-job-post-build.png)
-
-If you have [Uberalls][] enabled, enter a path to scan for cobertura reports.
-
-[Uberalls]: https://github.com/uber/uberalls
 
 Harbormaster
 ------------
 
-Once the plugin is configured, you will want to enable harbormaster via herald
-rules to trigger jenkins builds on differentials.
+With Phabricator, Jenkins, and your Jenkins jobs configured it's time to configure a new Harbormaster build plan. This build plan will trigger the Jenkins job using a Herald rule that will be configured in the next section.
 
-First, create a new Harbormaster build plan with a single step, "Make an HTTP
-POST request":
+1. Navigate to `https://phabricator.example/harbormaster/plan/` with your base Phabricator URL in place of `phabricator.example`.
+2. Click the **New Build Plan** button in the top right corner of the page.
+3. Enter a name for the build plan in the **Plan Name** field. For these instructions, we'll use "test-example" as the build name.
+4. Click the **Create Build Plan** button.
+5. Click the **Add Build Step button**.
+6. Click the **Make HTTP Request** step.
+7. Use this template URI to fill in the URI field for the build plan: `https://ci.example.com/buildByToken/buildWithParameters?job=test-example&DIFF_ID=${buildable.diff}&PHID=${target.phid}`
 
-Set the URI to
-`https://ci.example.com/buildByToken/buildWithParameters?job=test-example&DIFF_ID=${buildable.diff}&PHID=${target.phid}`,
-replacing `https://ci.example.com` with the URI of your Jenkins instance, and
-`test-example` with the name of your job. If your Jenkins instance is exposed to
-the internet, make sure to install the [Build Token Root Plugin][] and fill in
-the `token` parameter.
-
-Set the "When Complete" dropdown to "Wait For Message"
-
-![Harbormaster plan](/docs/harbormaster-plan.png)
-
+	Be sure to replace `https://ci.example.com` with the URI of your Jenkins instance and `test-example` with the name of your Jenkins job.
+	
+	If your Jenkins instance is exposed to the internet, make sure to install the [Build Token Root Plugin][] and fill in the `token` parameter.
+	
 [Build Token Root Plugin]: https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin
 
-Additional Comments
--------------------
-
-To allow projects to post back additional text instead of just pass/fail, the
-plugin supports a build comment file, which defaults to
-`.phabricator-comment`. Put text in here, and Jenkins will add it to the build
-status comment.
+8. Click the **When Complete** dropdown menu and select **Wait For Message**.
+9. Click the **Create Build Step** button.
+![Harbormaster plan](/docs/harbormaster-plan.png)
 
 Herald
 ------
 
-Next, create a Global herald rule:
+With the build plans created it's time to create a Herald Rule to trigger the plans. The steps below will configure a Herald Rule to trigger the build plans on Differential Revisions to your repository.
+
+1. Navigate to `https://phabricator.example/herald/` with your base Phabricator URL in place of `phabricator.example`.
+2. Click the **Create Herald Rule** button in the top right corner of the page.
+3. Select the **Differential Revisions** checkbox and click **Continue**.
+4. Select the **Global** checkbox and click **Continue**.
+5. Enter a name for the Herald Rule in the **Rule Name** field.
+6. In the **Conditions** section, click the dropdown menu that says "Author" and select "Repository".
+7. Enter your repository name in to the blank field in the **Conditions** section.
+8. In the **Actions** section, click the dropdown menu that says "Add blocking reviewers" and select "Run build plans".
+9. Enter the build plans that were created in the previous section in to the blank field in the **Action** section.
+10. Click **Save Rule**.
 
 ![Herald rule](/docs/herald-rule.png)
 
-Fill in your repository name and build plan.
-
-Test it out
------------
+Test Your Configuration
+-----------------------
 
 Try `arc diff`-ing on your repo. If everything goes well, you should see Jenkins
 commenting on your diff:
@@ -105,25 +114,25 @@ commenting on your diff:
 Development
 -----------
 
-Set up your maven file according to
-https://wiki.jenkins-ci.org/display/JENKINS/Plugin+tutorial
+Set up your Maven file according to
+https://wiki.jenkins-ci.org/display/JENKINS/Plugin+tutorial.
 
 
 Testing
 -------
 
-Start up Jenkins with the plugin installed
+Start up Jenkins with the plugin installed:
 ```bash
 mvn hpi:run
 ```
 
-Open your browser to your [local instance](http://localhost:8080/jenkins/)
+Open your browser to your [local instance](http://localhost:8080/jenkins/).
 
 Pull Requests
 -------------
 
-Please open all pull requests / issues against
-https://github.com/uber/phabricator-jenkins-plugin
+Please open all pull requests and issues against
+https://github.com/uber/phabricator-jenkins-plugin.
 
 License
 -------
