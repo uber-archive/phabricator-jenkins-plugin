@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import hudson.FilePath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -29,12 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -49,9 +45,9 @@ public class CoberturaXMLParser {
     private static final String NODE_NAME_LINE = "line";
     private static final String NODE_NUMBER = "number";
     private static final String NODE_HITS = "hits";
-    private final String workspace;
+    private final FilePath workspace;
 
-    public CoberturaXMLParser(String workspace) {
+    public CoberturaXMLParser(FilePath workspace) {
         this.workspace = workspace;
     }
 
@@ -59,7 +55,7 @@ public class CoberturaXMLParser {
             IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
-        Map<NodeList, String> coverageData = new HashMap<NodeList, String>();
+        Map<NodeList, List<String>> coverageData = new HashMap<NodeList, List<String>>();
 
         for (File file : files) {
             InputStream is = null;
@@ -68,8 +64,8 @@ public class CoberturaXMLParser {
                 db = dbf.newDocumentBuilder();
                 Document doc = db.parse(is);
                 NodeList classes = doc.getElementsByTagName(TAG_NAME_CLASS);
-                String sourceDir = getSourceDir(doc);
-                coverageData.put(classes, sourceDir);
+                List<String> sourceDirs = getSourceDirs(doc);
+                coverageData.put(classes, sourceDirs);
             } finally {
                 if (is != null) {
                     is.close();
@@ -80,14 +76,26 @@ public class CoberturaXMLParser {
         return parse(coverageData);
     }
 
-    private Map<String, List<Integer>> parse(Map<NodeList, String> coverageData) {
+    private Map<String, List<Integer>> parse(Map<NodeList, List<String>> coverageData) {
         Map<String, SortedMap<Integer, Integer>> internalCounts = new HashMap<String, SortedMap<Integer, Integer>>();
 
-        for (NodeList classes : coverageData.keySet()) {
-            String sourceDir = coverageData.get(classes);
+        // Each entry in the map is an XML list of classes (files) mapped to its possible source roots
+        for (Map.Entry<NodeList, List<String>> entry : coverageData.entrySet()) {
+            NodeList classes = entry.getKey();
+            List<String> sourceDirs = entry.getValue();
+
+            String detectedSourceRoot = null;
+            // Loop over all files in the coverage report
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
-                String fileName = getFileName(classNode, sourceDir);
+                String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
+
+                // On the first file in each coverage report, we need to detect the root directory
+                if (detectedSourceRoot == null) {
+                    // Make a guess on which of the `sourceDirs` contains the file in question
+                    detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
+                }
+                fileName = join(detectedSourceRoot, fileName);
 
                 SortedMap<Integer, Integer> hitCounts = internalCounts.get(fileName);
                 if (hitCounts == null) {
@@ -117,6 +125,13 @@ public class CoberturaXMLParser {
         return computeLineCoverage(internalCounts);
     }
 
+    private String join(String detectedSourceRoot, String fileName) {
+        if (detectedSourceRoot == null) {
+            return fileName;
+        }
+        return String.format("%s/%s", detectedSourceRoot, fileName);
+    }
+
     private Map<String, List<Integer>> computeLineCoverage(Map<String, SortedMap<Integer, Integer>> internalCounts) {
         Map<String, List<Integer>> lineCoverage = new HashMap<String, List<Integer>>();
         for (Map.Entry<String, SortedMap<Integer, Integer>> entry : internalCounts.entrySet()) {
@@ -135,19 +150,12 @@ public class CoberturaXMLParser {
         return lineCoverage;
     }
 
-    private String getFileName(Node classNode, String sourceDir) {
-        String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
-        if (!sourceDir.isEmpty()) {
-            fileName = sourceDir + "/" + fileName;
-        }
-        return fileName.replaceFirst(workspace, "");
-    }
-
-    private String getSourceDir(Document doc) {
-        if (workspace == null || workspace.isEmpty()) {
-            return "";
+    private List<String> getSourceDirs(Document doc) {
+        if (workspace == null) {
+            return Collections.emptyList();
         }
 
+        List<String> sourceDirs = new ArrayList<String>();
         NodeList sources = doc.getElementsByTagName(TAG_NAME_SOURCE);
         for (int i = 0; i < sources.getLength(); i++) {
             Node source = sources.item(i);
@@ -155,11 +163,11 @@ public class CoberturaXMLParser {
             if (srcDir.contains(workspace + "/")) {
                 String relativeSrcDir = srcDir.replaceFirst(workspace + "/", "");
                 if (!relativeSrcDir.isEmpty()) {
-                    return relativeSrcDir;
+                    sourceDirs.add(relativeSrcDir);
                 }
             }
         }
-        return "";
+        return sourceDirs;
     }
 
     private int getIntValue(Node node, String attributeName) {
