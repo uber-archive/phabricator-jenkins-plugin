@@ -121,7 +121,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPostCoverageWithoutPublisher() throws Exception {
-        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.SUCCESS, build.getResult());
