@@ -1,10 +1,13 @@
 # Changelog
 
-### 1.9.1 (unreleased)
+### 1.9.1 (2016/01/25)
 
 * Remove coverage dependency on cobertura build action. Allows Uberalls coverage
   to work when the cobertura plugin is not enabled (for performance
   reasons). (Gautam Korlam)
+* Improve readme (Brody Klapko)
+* Search for coverage files recursively when Cobertura publisher is disabled
+  (Gautam Korlam)
 
 ### 1.9.0 (2016/01/19)
 
