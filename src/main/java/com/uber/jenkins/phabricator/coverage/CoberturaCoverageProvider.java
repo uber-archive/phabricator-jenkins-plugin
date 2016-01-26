@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -51,7 +52,7 @@ import hudson.plugins.cobertura.targets.CoverageResult;
 public class CoberturaCoverageProvider extends CoverageProvider {
 
     private static final Logger LOGGER = Logger.getLogger(CoberturaCoverageProvider.class.getName());
-    private static final String COBERTURA_REPORT_PATTERN = ".*?(coverage|cobertura).*?\\.xml$";
+    private static final String COVERAGE_REPORT_FILTER = "**/coverage*.xml, **/cobertura*.xml";
 
     @Override
     public boolean hasCoverage() {
@@ -135,15 +136,13 @@ public class CoberturaCoverageProvider extends CoverageProvider {
 
         if (moduleRoot != null) {
             try {
-                List<FilePath> reports = moduleRoot.list();
+                List<FilePath> reports = Arrays.asList(moduleRoot.list(COVERAGE_REPORT_FILTER));
 
                 int i = 0;
                 for (FilePath report : reports) {
-                    if (report.getName().matches(COBERTURA_REPORT_PATTERN)) {
-                        final FilePath targetPath = new FilePath(buildTarget, "coverage" + (i == 0 ? "" : i) + ".xml");
-                        report.copyTo(targetPath);
-                        i++;
-                    }
+                    final FilePath targetPath = new FilePath(buildTarget, "coverage" + (i == 0 ? "" : i) + ".xml");
+                    report.copyTo(targetPath);
+                    i++;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
