@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.2 (unreleased)
+
+* Fix Harbormaster coverage filename/path detection for Python's coverage>=4.0.3
+
 ### 1.9.1 (2016/01/25)
 
 * Remove coverage dependency on cobertura build action. Allows Uberalls coverage
