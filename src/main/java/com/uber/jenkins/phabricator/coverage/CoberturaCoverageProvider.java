@@ -67,13 +67,9 @@ public class CoberturaCoverageProvider extends CoverageProvider {
 
     @Override
     public Map<String, List<Integer>> readLineCoverage() {
-        String basePath = "";
         FilePath workspace = getBuild().getWorkspace();
-        if (workspace != null) {
-            basePath = workspace.getRemote();
-        }
         File[] reports = getCoberturaReports(getBuild());
-        CoberturaXMLParser parser = new CoberturaXMLParser(basePath);
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
         return parseReports(parser, reports);
     }
 

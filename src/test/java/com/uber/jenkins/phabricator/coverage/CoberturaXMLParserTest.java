@@ -20,14 +20,16 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import com.google.common.io.Files;
+import hudson.FilePath;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.xml.sax.SAXException;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,21 +47,24 @@ public class CoberturaXMLParserTest {
     private static final String TEST_COVERAGE_FILE_1 = "go-torch-coverage1.xml";
     private static final String TEST_COVERAGE_FILE_2 = "go-torch-coverage2.xml";
     private static final String TEST_COVERAGE_FILE_3 = "go-torch-coverage3.xml";
+    private static final String TEST_COVERAGE_PYTHON = "python-coverage.xml";
 
     @Parameterized.Parameter
-    public String workspace;
+    public FilePath workspace;
+
+    @Parameterized.Parameter(value = 1)
+    public Boolean createDirectory;
 
     @Test
     public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException,
         URISyntaxException {
         CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
 
-        Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE_1).toURI());
-        Path testCoverageFile2 = Paths.get(getClass().getResource(TEST_COVERAGE_FILE_2).toURI());
-        Path testCoverageFile3 = Paths.get(getClass().getResource(TEST_COVERAGE_FILE_3).toURI());
+        File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
+        File testCoverageFile2 = getResource(TEST_COVERAGE_FILE_2);
+        File testCoverageFile3 = getResource(TEST_COVERAGE_FILE_3);
 
-        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile.toFile(), testCoverageFile2.toFile(),
-            testCoverageFile3.toFile());
+        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile, testCoverageFile2, testCoverageFile3);
         List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
         assertEquals(246, mainCoverage.size());
         assertNull(mainCoverage.get(0));
@@ -69,16 +74,43 @@ public class CoberturaXMLParserTest {
         assertEquals(1, mainCoverage.get(85).longValue());
         assertEquals(0, mainCoverage.get(102).longValue());
 
-        List<Integer> graphCoverage = lineCoverage.get("main/github.com/uber/go-torch/graph/graph.go");
-        if (workspace.isEmpty()) {
-            graphCoverage = lineCoverage.get("github.com/uber/go-torch/graph/graph.go");
-        }
+        List<Integer> graphCoverage = lineCoverage.get("github.com/uber/go-torch/graph/graph.go");
         assertEquals(1, graphCoverage.get(234).longValue());
         assertNull(graphCoverage.get(235));
     }
 
+    @Test
+    public void testDetectCoverageRoot() throws Exception {
+        File tmpDir = Files.createTempDir();
+        File example = new File(tmpDir, "example");
+
+        try {
+            CoberturaXMLParser parser = new CoberturaXMLParser(new FilePath(tmpDir));
+
+            if (createDirectory) {
+                example.mkdir();
+            }
+            Map<String, List<Integer>> lineCoverage = parser.parse(getResource(TEST_COVERAGE_PYTHON));
+            List<Integer> libCoverage = lineCoverage.get("example/lib.py");
+            assertEquals(1, libCoverage.get(2).longValue());
+            assertNull(libCoverage.get(1));
+        } finally {
+            if (createDirectory) {
+                example.delete();
+            }
+            tmpDir.delete();
+        }
+    }
+
+    private File getResource(String fileName) throws URISyntaxException {
+        return Paths.get(getClass().getResource(fileName).toURI()).toFile();
+    }
+
     @Parameterized.Parameters
-    public static Collection<String> data() {
-        return Arrays.asList(new String[] {"", "/Users/aiden/src/gocode/src", "/usr/local/Cellar/go/1.5/libexec/src"});
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                { new FilePath(new File(".")),   false },
+                { new FilePath(new File("/tmp")), true },
+        });
     }
 }
