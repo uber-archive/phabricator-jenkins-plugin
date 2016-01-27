@@ -85,13 +85,15 @@ public class CoberturaXMLParser {
             List<String> sourceDirs = entry.getValue();
 
             String detectedSourceRoot = null;
+            boolean detected = false;
             // Loop over all files in the coverage report
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
                 String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
 
                 // On the first file in each coverage report, we need to detect the root directory
-                if (detectedSourceRoot == null) {
+                if (!detected) {
+                    detected = true;
                     // Make a guess on which of the `sourceDirs` contains the file in question
                     detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
                 }
