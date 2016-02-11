@@ -86,6 +86,7 @@ public abstract class BuildIntegrationTest {
         if (sendMessageResponse != null) {
             responses.put("harbormaster.sendmessage", sendMessageResponse);
         }
+        responses.put("differential.getcommitmessage", new JSONObject().element("result", "commit message"));
         conduit = new FakeConduit(responses);
 
         TestUtils.addValidCredentials(conduit);

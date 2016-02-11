@@ -39,10 +39,16 @@ import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PhabricatorBuildWrapper extends BuildWrapper {
     private static final String CONDUIT_TAG = "conduit";
     private static final String DEFAULT_GIT_PATH = "git";
+    private static final String DIFFERENTIAL_SUMMARY = "PHABRICATOR_DIFFERENTIAL_SUMMARY";
+    private static final String DIFFERENTIAL_AUTHOR = "PHABRICATOR_DIFFERENTIAL_AUTHOR";
+    private static final String DIFFERENTIAL_BASE_COMMIT = "PHABRICATOR_DIFFERENTIAL_BASE_COMMIT";
+    private static final String DIFFERENTIAL_BRANCH = "PHABRICATOR_DIFFERENTIAL_BRANCH";
 
     private final boolean createCommit;
     private final boolean applyToMaster;
@@ -74,6 +80,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return this.ignoreBuild(logger, "No environment variables found?!");
         }
 
+        final Map<String, String> envAdditions = new HashMap<String, String>();
+
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         if (CommonUtils.isBlank(diffID)) {
@@ -97,6 +105,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         Differential diff;
         try {
             diff = new Differential(diffClient.fetchDiff());
+            diff.setCommitMessage(diffClient.getCommitMessage(diff.getRevisionID(false)));
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
 
             logger.info(CONDUIT_TAG, "Fetching differential from Conduit API");
@@ -105,6 +114,10 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             if (showBuildStartedMessage) {
                 diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
             }
+            envAdditions.put(DIFFERENTIAL_AUTHOR, diff.getAuthorEmail());
+            envAdditions.put(DIFFERENTIAL_BASE_COMMIT, diff.getBaseCommit());
+            envAdditions.put(DIFFERENTIAL_BRANCH, diff.getBranch());
+            envAdditions.put(DIFFERENTIAL_SUMMARY, diff.getCommitMessage());
         } catch (ConduitAPIException e) {
             e.printStackTrace(logger.getStream());
             logger.warn(CONDUIT_TAG, "Unable to fetch differential from Conduit API");
@@ -135,7 +148,14 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return null;
         }
 
-        return new Environment(){};
+        return new Environment(){
+            @Override
+            public void buildEnvVars(Map<String, String> env) {
+                EnvVars envVars = new EnvVars(env);
+                envVars.putAll(envAdditions);
+                env.putAll(envVars);
+            }
+        };
     }
 
     private void addShortText(final AbstractBuild build) {

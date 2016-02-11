@@ -129,6 +129,22 @@ public class DifferentialClient {
         return postComment(revisionID, message, true, "none");
     }
 
+    /**
+     * Fetch the commit message for the revision. This isn't available on the diff, so it requires a separate query.
+     * @param revisionID The ID of the revision, e.g. for "D123" this would be "123"
+     * @return A \n-separated string of the commit message
+     * @throws ConduitAPIException
+     * @throws IOException
+     */
+    public String getCommitMessage(String revisionID) throws ConduitAPIException, IOException {
+        JSONObject params = new JSONObject().element("revision_id", revisionID);
+        JSONObject query = callConduit("differential.getcommitmessage", params);
+
+        // NOTE: When you run this with `arc call-conduit dfferential.getcommitmessage` (from the command-line),
+        // it comes back as "response". But it's "result" when running through this conduit API.
+        return query.getString("result");
+    }
+
     protected JSONObject callConduit(String methodName, JSONObject params) throws ConduitAPIException, IOException {
         return conduit.perform(methodName, params);
     }
