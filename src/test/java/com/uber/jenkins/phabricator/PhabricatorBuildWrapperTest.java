@@ -119,6 +119,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         assertNotNull(action);
         assertEquals("sc@ndella.com", action.getAuthorEmail());
         assertEquals("aiden", action.getAuthorName());
+        assertEquals("commit message", action.getCommitMessage());
         assertNotNull(action.getIconPath());
     }
 

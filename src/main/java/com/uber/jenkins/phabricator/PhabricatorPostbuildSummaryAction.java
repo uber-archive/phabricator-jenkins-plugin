@@ -34,13 +34,16 @@ public class PhabricatorPostbuildSummaryAction implements Action {
     private final String revisionID;
     private final String authorName;
     private final String authorEmail;
+    private final String commitMessage;
 
-    public PhabricatorPostbuildSummaryAction(String iconPath, String phabricatorLink, String revisionID, String authorName, String authorEmail) {
+    public PhabricatorPostbuildSummaryAction(String iconPath, String phabricatorLink, String revisionID,
+                                             String authorName, String authorEmail, String commitMessage) {
         this.iconPath = iconPath;
         this.url = phabricatorLink;
         this.revisionID = revisionID;
         this.authorName = authorName;
         this.authorEmail = authorEmail;
+        this.commitMessage = commitMessage;
     }
 
     /* Action methods */
@@ -74,5 +77,9 @@ public class PhabricatorPostbuildSummaryAction implements Action {
 
     @Exported public String getAuthorEmail() {
         return authorEmail;
+    }
+
+    @Exported public String getCommitMessage() {
+        return commitMessage;
     }
 }

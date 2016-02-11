@@ -35,6 +35,7 @@ public class Differential {
     private static final String UNKNOWN_EMAIL = "unknown";
 
     private final JSONObject rawJSON;
+    private String commitMessage;
 
     public Differential(JSONObject rawJSON) {
         this.rawJSON = rawJSON;
@@ -78,7 +79,8 @@ public class Differential {
                 getPhabricatorLink(phabricatorURL),
                 getRevisionID(true),
                 getAuthorName(),
-                getAuthorEmail()
+                getAuthorEmail(),
+                getCommitMessage()
         );
     }
 
@@ -86,7 +88,7 @@ public class Differential {
         return getOrElse(rawJSON, "authorName", UNKNOWN_AUTHOR);
     }
 
-    private String getAuthorEmail() {
+    public String getAuthorEmail() {
         return getOrElse(rawJSON, "authorEmail", UNKNOWN_EMAIL);
     }
 
@@ -128,5 +130,13 @@ public class Differential {
         } catch (ClassCastException e) {
             return "(unknown)";
         }
+    }
+
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    public void setCommitMessage(String commitMesasge) {
+        this.commitMessage = commitMesasge;
     }
 }

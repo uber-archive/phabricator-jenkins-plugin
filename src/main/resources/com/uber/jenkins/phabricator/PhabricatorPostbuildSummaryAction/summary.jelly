@@ -1,6 +1,15 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:t="/lib/hudson">
   <t:summary icon="${it.iconPath}">
-    This was a build of <a href="${it.url}">${it.revisionID}</a> by ${it.authorName} (${it.authorEmail})
+    This was a build of <a href="${it.url}">${it.revisionID}</a> by ${it.authorName}
+
+    <j:if test="${it.authorEmail != null}">
+      (${it.authorEmail})
+    </j:if>
+
+    <j:if test="${it.commitMessage != null}">
+      <br /><br />
+      <pre>${it.commitMessage}</pre>
+    </j:if>
   </t:summary>
 </j:jelly>
