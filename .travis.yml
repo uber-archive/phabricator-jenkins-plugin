@@ -1,5 +1,6 @@
 ---
 language: java
+sudo: true
 
 matrix:
   fast_finish: true
