@@ -25,7 +25,6 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import net.sf.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -55,7 +54,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         assertFalse(wrapper.isPatchWithForceFlag());
     }
 
-    @Ignore("causes travis CI to crash")
     @Test
     public void testRoundTripConfiguration() throws Exception {
         addBuildStep();
