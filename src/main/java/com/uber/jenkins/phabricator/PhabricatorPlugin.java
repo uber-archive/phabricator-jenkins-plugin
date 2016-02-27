@@ -31,6 +31,8 @@ public class PhabricatorPlugin extends Plugin {
     public static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
     // Phabricator object ID (for Harbormaster)
     public static final String PHID_FIELD = "PHID";
+    // Commit SHA1 to build (for non-differential builds)
+    public static final String COMMIT_ID_FIELD = "COMMIT_ID";
 
     public static String getIconPath(String icon) {
         if (icon == null) {

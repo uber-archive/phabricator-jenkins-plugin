@@ -26,6 +26,7 @@ import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.ApplyPatchTask;
+import com.uber.jenkins.phabricator.tasks.CheckoutCommitTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
@@ -35,6 +36,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Job;
+import hudson.model.Result;
 import hudson.tasks.BuildWrapper;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -82,15 +84,24 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         final Map<String, String> envAdditions = new HashMap<String, String>();
 
+        LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
+
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
-        if (CommonUtils.isBlank(diffID)) {
+        String commitSha = environment.get(PhabricatorPlugin.COMMIT_ID_FIELD);
+
+        if (CommonUtils.isBlank(diffID) && CommonUtils.isBlank(commitSha)) {
             this.addShortText(build);
             this.ignoreBuild(logger, "No differential ID found.");
             return new Environment(){};
+        } else if (!CommonUtils.isBlank(commitSha)) {
+            Task.Result result = new CheckoutCommitTask(logger, starter, DEFAULT_GIT_PATH, commitSha).run();
+            if (result != Task.Result.SUCCESS) {
+                logger.warn("phabricator", "Could not reset to given commit");
+                build.setResult(Result.FAILURE);
+            }
+            return new Environment() {};
         }
-
-        LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
 
         ConduitAPIClient conduitClient;
         try {
