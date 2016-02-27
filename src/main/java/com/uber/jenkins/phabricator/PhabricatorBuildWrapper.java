@@ -27,6 +27,7 @@ import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.ApplyPatchTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
+import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -84,9 +85,9 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
-        if (CommonUtils.isBlank(diffID)) {
+        if (CommonUtils.isBlank(diffID) || CommonUtils.isBlank(phid)) {
             this.addShortText(build);
-            this.ignoreBuild(logger, "No differential ID found.");
+            this.ignoreBuild(logger, "No differential ID or PHID found.");
             return new Environment(){};
         }
 
@@ -102,6 +103,15 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         }
 
         DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
+
+        logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
+        String buildUrl = environment.get("BUILD_URL");
+        Task.Result sendUriResult = new SendHarbormasterUriTask(logger, diffClient, phid, buildUrl).run();
+
+        if (sendUriResult != Task.Result.SUCCESS) {
+            logger.info("harbormaster", "Unable to send BUILD_URL to Harbormaster");
+        }
+
         Differential diff;
         try {
             diff = new Differential(diffClient.fetchDiff());
