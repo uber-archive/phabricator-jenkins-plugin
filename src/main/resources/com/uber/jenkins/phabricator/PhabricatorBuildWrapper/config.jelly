@@ -9,7 +9,7 @@
       <f:checkbox />
   </f:entry>
   <f:entry title="Show 'Build Started:' message" field="showBuildStartedMessage"
-           description="Shows the 'Build Started:' information message in Phabricator.">
+           description="[DEPRECATED] Shows the 'Build Started:' information message in Phabricator.">
       <f:checkbox default="true" />
   </f:entry>
   <f:entry title="Skip Forced Git clean" field="skipForcedClean"

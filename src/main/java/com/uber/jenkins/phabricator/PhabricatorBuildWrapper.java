@@ -123,6 +123,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             // Post a silent notification if option is enabled
             if (showBuildStartedMessage) {
                 diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
+                logger.warn("build-started", "[DEPRECATED] Build started message is deprecated. Consider upgrading Phabricator to get build URL as Harbormaster artifact");
             }
             envAdditions.put(DIFFERENTIAL_AUTHOR, diff.getAuthorEmail());
             envAdditions.put(DIFFERENTIAL_BASE_COMMIT, diff.getBaseCommit());
