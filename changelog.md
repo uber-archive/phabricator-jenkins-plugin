@@ -5,6 +5,7 @@
 * Fix Harbormaster coverage filename/path detection for Python's coverage>=4.0.3
 * Add differential variables to environment, display differential summary on build
   summary view
+* Send build URL to Harbormaster when build starts (Chaitanya Pramod)
 
 ### 1.9.1 (2016/01/25)
 
