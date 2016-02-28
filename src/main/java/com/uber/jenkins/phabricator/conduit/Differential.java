@@ -104,8 +104,12 @@ public class Differential {
      * @param environment the environment variables for the build
      * @return the build started message
      */
+    @SuppressWarnings("StringBufferReplaceableByString")
     public String getBuildStartedMessage(EnvVars environment) {
-        return String.format("Build started: %s (console: %sconsole)", environment.get("BUILD_URL"), environment.get("BUILD_URL"));
+        StringBuilder sb = new StringBuilder("[DEPRECATED: Build started message is deprecated, " +
+                "consider upgrading Phabricator to get Build URL as Harbormaster artifact]");
+        sb.append("Build started: %s (console: %sconsole)");
+        return String.format(sb.toString(), environment.get("BUILD_URL"), environment.get("BUILD_URL"));
     }
 
     /**
