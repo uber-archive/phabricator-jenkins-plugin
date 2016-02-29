@@ -85,9 +85,9 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
         String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
-        if (CommonUtils.isBlank(diffID) || CommonUtils.isBlank(phid)) {
+        if (CommonUtils.isBlank(diffID)) {
             this.addShortText(build);
-            this.ignoreBuild(logger, "No differential ID or PHID found.");
+            this.ignoreBuild(logger, "No differential ID found.");
             return new Environment(){};
         }
 
@@ -104,12 +104,14 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
 
-        logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
-        String buildUrl = environment.get("BUILD_URL");
-        Task.Result sendUriResult = new SendHarbormasterUriTask(logger, diffClient, phid, buildUrl).run();
+        if (!CommonUtils.isBlank(phid)) {
+            logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
+            String buildUrl = environment.get("BUILD_URL");
+            Task.Result sendUriResult = new SendHarbormasterUriTask(logger, diffClient, phid, buildUrl).run();
 
-        if (sendUriResult != Task.Result.SUCCESS) {
-            logger.info("harbormaster", "Unable to send BUILD_URL to Harbormaster");
+            if (sendUriResult != Task.Result.SUCCESS) {
+                logger.info("harbormaster", "Unable to send BUILD_URL to Harbormaster");
+            }
         }
 
         Differential diff;
