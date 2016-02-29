@@ -149,7 +149,7 @@ public class BuildResultProcessor {
 
             if (sendUriResult != Task.Result.SUCCESS) {
                 logger.info(LOGGING_TAG, "Unable to send BUILD_URL to Harbormaster. " +
-			    "This can be safely ignored, and is usually because it's already set.");
+                            "This can be safely ignored, and is usually because it's already set.");
             }
 
             if (unitResults != null) {
