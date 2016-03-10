@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.2 (unreleased)
+### 1.9.2 (2016/03/10)
 
 * Fix Harbormaster coverage filename/path detection for Python's coverage>=4.0.3
 * Add differential variables to environment, display differential summary on build
