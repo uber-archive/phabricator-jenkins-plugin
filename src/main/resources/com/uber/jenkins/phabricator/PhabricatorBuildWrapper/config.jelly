@@ -8,10 +8,6 @@
            description="If true, always arc patch apply to master">
       <f:checkbox />
   </f:entry>
-  <f:entry title="Show 'Build Started:' message" field="showBuildStartedMessage"
-           description="[DEPRECATED] Shows the 'Build Started:' information message in Phabricator.">
-      <f:checkbox default="true" />
-  </f:entry>
   <f:entry title="Skip Forced Git clean" field="skipForcedClean"
            description="Skip 'git clean -fd -f' step.">
       <f:checkbox default="false" />

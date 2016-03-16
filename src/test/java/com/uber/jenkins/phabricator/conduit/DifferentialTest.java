@@ -57,11 +57,6 @@ public class DifferentialTest extends TestCase {
     }
 
     @Test
-    public void testGetBuildStartedMessage() throws Exception {
-        assertTrue(differential.getBuildStartedMessage(new EnvVars()).contains("Build started"));
-    }
-
-    @Test
     public void testGetBranch() {
         assertEquals("a-branch-name", differential.getBranch());
     }
