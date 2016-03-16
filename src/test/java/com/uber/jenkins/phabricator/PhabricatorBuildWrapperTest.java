@@ -38,7 +38,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         wrapper = new PhabricatorBuildWrapper(
                 false,
                 false,
-                true,
                 false,
                 false,
                 false
@@ -50,7 +49,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     public void testGetters() {
         assertFalse(wrapper.isCreateCommit());
         assertFalse(wrapper.isApplyToMaster());
-        assertTrue(wrapper.isShowBuildStartedMessage());
         assertFalse(wrapper.isPatchWithForceFlag());
     }
 
@@ -62,7 +60,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
 
         PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
         j.assertEqualBeans(wrapper, after,
-                "createCommit,applyToMaster,showBuildStartedMessage,createBranch");
+                "createCommit,applyToMaster,createBranch");
     }
 
     @Test
@@ -96,13 +94,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     @Test
     public void testBuildValidConduitEmptyResponse() throws Exception {
         FreeStyleBuild build = buildWithConduit(null, null, null, true);
-
-        assertFailureWithMessage("Unable to fetch differential", build);
-    }
-
-    @Test
-    public void testBuildValidErrorCommenting() throws Exception {
-        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null, true);
 
         assertFailureWithMessage("Unable to fetch differential", build);
     }

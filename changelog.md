@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.3 (unreleased)
+
+* Remove deprecated "Build started" comments in favor of Harbormaster
+
 ### 1.9.2 (2016/03/10)
 
 * Fix Harbormaster coverage filename/path detection for Python's coverage>=4.0.3

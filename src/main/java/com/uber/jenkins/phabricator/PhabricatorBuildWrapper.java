@@ -53,18 +53,16 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
     private final boolean createCommit;
     private final boolean applyToMaster;
-    private final boolean showBuildStartedMessage;
     private final boolean skipForcedClean;
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
 
     @DataBoundConstructor
     public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
-                                   boolean showBuildStartedMessage, boolean skipForcedClean,
+                                   boolean skipForcedClean,
                                    boolean createBranch, boolean patchWithForceFlag) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
-        this.showBuildStartedMessage = showBuildStartedMessage;
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
@@ -122,11 +120,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
             logger.info(CONDUIT_TAG, "Fetching differential from Conduit API");
 
-            // Post a silent notification if option is enabled
-            if (showBuildStartedMessage) {
-                diffClient.postComment(diff.getRevisionID(false), diff.getBuildStartedMessage(environment));
-                logger.warn("build-started", "[DEPRECATED] Build started message is deprecated. Consider upgrading Phabricator to get build URL as Harbormaster artifact");
-            }
             envAdditions.put(DIFFERENTIAL_AUTHOR, diff.getAuthorEmail());
             envAdditions.put(DIFFERENTIAL_BASE_COMMIT, diff.getBaseCommit());
             envAdditions.put(DIFFERENTIAL_BRANCH, diff.getBranch());
@@ -200,11 +193,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @SuppressWarnings("UnusedDeclaration")
     public boolean isApplyToMaster() {
         return applyToMaster;
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
-    public boolean isShowBuildStartedMessage() {
-        return showBuildStartedMessage;
     }
 
     @SuppressWarnings("UnusedDeclaration")
