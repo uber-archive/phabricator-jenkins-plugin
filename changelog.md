@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.3 (unreleased)
+### 1.9.3 (2016/04/1)
 
 * Remove deprecated "Build started" comments in favor of Harbormaster
 
