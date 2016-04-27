@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.google.common.collect.Sets;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.EnvVars;
@@ -99,5 +100,13 @@ public class DifferentialTest extends TestCase {
 
         assertEquals("unknown", summary.getAuthorName());
         assertEquals("unknown", summary.getAuthorEmail());
+    }
+
+    @Test
+    public void testFetchDiffResponseWithChanges() throws Exception {
+        JSONObject response = TestUtils.getJSONFromFile(getClass(), "ResponseWithChanges");
+        differential = new Differential(response);
+
+        assertEquals(Sets.newHashSet("file.go","file2.go"), differential.getChangedFiles());
     }
 }

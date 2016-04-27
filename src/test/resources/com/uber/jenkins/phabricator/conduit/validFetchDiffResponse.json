@@ -5,7 +5,18 @@
       "sourceControlBaseRevision": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
       "hello": "world",
       "authorName": "aiden",
-      "authorEmail": "sc@ndella.com"
+      "authorEmail": "sc@ndella.com",
+      "changes": [
+        {
+          "currentPath": "github.com/uber/go-torch/visualization/visualization.go"
+        },
+        {
+          "currentPath": "github.com/uber/go-torch/main.go"
+        },
+        {
+          "currentPath": "github.com/uber/go-torch/graph/graph.go"
+        }
+      ]
     }
   }
 }
