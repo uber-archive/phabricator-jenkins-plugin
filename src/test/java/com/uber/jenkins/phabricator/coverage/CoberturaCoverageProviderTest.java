@@ -118,6 +118,20 @@ public class CoberturaCoverageProviderTest {
     }
 
     @Test
+    public void testGetMetricsWithoutBuildActionResultDeletesFilesFromMasterAfter() throws Exception {
+        FreeStyleBuild build = getBuild();
+        Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE).toURI());
+        File workspaceCopy = new File(build.getRootDir(), "coverage.xml");
+        FileUtils.copyFile(testCoverageFile.toFile(), workspaceCopy);
+        provider.setBuild(build);
+        assertTrue(provider.hasCoverage());
+
+        CodeCoverageMetrics metrics = provider.getMetrics();
+        assertNotNull(metrics);
+        assertFalse(workspaceCopy.exists());
+    }
+
+    @Test
     public void testGetLineCoverageNull() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
         FreeStyleBuild build = new FreeStyleBuild(project);

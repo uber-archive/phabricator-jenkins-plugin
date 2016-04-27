@@ -23,13 +23,10 @@ package com.uber.jenkins.phabricator.coverage;
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.CoberturaCoverageParser;
 import hudson.plugins.cobertura.CoberturaPublisher;
-import hudson.remoting.VirtualChannel;
-import org.jenkinsci.remoting.RoleChecker;
+
 import org.xml.sax.SAXException;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -54,23 +51,32 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     private static final Logger LOGGER = Logger.getLogger(CoberturaCoverageProvider.class.getName());
     private static final String COVERAGE_REPORT_FILTER = "**/coverage*.xml, **/cobertura*.xml";
 
+    private CoverageResult mCoverageResult = null;
+    private Map<String, List<Integer>> mLineCoverage = null;
+    private boolean mHasComputedCoverage = false;
+
     @Override
     public boolean hasCoverage() {
-        CoverageResult result = getCoverageResult();
-        return result != null && result.getCoverage(CoverageMetric.LINE) != null;
+        if (!mHasComputedCoverage) {
+            computeCoverage();
+        }
+        return mCoverageResult != null && mCoverageResult.getCoverage(CoverageMetric.LINE) != null;
     }
 
     @Override
     protected CodeCoverageMetrics getCoverageMetrics() {
-        return convertCobertura(getCoverageResult());
+        if (!mHasComputedCoverage) {
+            computeCoverage();
+        }
+        return convertCobertura(mCoverageResult);
     }
 
     @Override
     public Map<String, List<Integer>> readLineCoverage() {
-        FilePath workspace = getBuild().getWorkspace();
-        File[] reports = getCoberturaReports(getBuild());
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
-        return parseReports(parser, reports);
+        if (!mHasComputedCoverage) {
+            computeCoverage();
+        }
+        return mLineCoverage;
     }
 
     public Map<String, List<Integer>> parseReports(CoberturaXMLParser parser, File[] reports) {
@@ -89,16 +95,22 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         return null;
     }
 
-    private CoverageResult getCoverageResult() {
+    private void computeCoverage() {
         AbstractBuild build = getBuild();
         if (build == null) {
-            return null;
+            mHasComputedCoverage = true;
+            return;
         }
 
         // Check if there is a cobertura build action
         CoberturaBuildAction coberturaAction = build.getAction(CoberturaBuildAction.class);
         if (coberturaAction != null) {
-            return coberturaAction.getResult();
+            mCoverageResult = coberturaAction.getResult();
+            if (mCoverageResult != null) {
+                computeLineCoverage();
+            }
+            mHasComputedCoverage = true;
+            return;
         }
 
         // Fallback to scanning for the reports
@@ -117,9 +129,23 @@ public class CoberturaCoverageProvider extends CoverageProvider {
 
         if (result != null) {
             result.setOwner(build);
+            computeLineCoverage();
+            cleanupCoverageFilesOnJenkinsMaster();
         }
 
-        return result;
+        if (result != null) {
+            result.setOwner(build);
+        }
+
+        mCoverageResult = result;
+        mHasComputedCoverage = true;
+    }
+
+    private void computeLineCoverage() {
+        FilePath workspace = getBuild().getWorkspace();
+        File[] reports = getCoberturaReports(getBuild());
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
+        mLineCoverage = parseReports(parser, reports);
     }
 
     private void copyCoverageToJenkinsMaster(AbstractBuild build) {
@@ -146,6 +172,15 @@ public class CoberturaCoverageProvider extends CoverageProvider {
             } catch (IOException e) {
                 e.printStackTrace();
                 LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
+            }
+        }
+    }
+
+    private void cleanupCoverageFilesOnJenkinsMaster() {
+        File[] reports = getCoberturaReports(getBuild());
+        if (reports != null) {
+            for (File report : reports) {
+                report.delete();
             }
         }
     }
