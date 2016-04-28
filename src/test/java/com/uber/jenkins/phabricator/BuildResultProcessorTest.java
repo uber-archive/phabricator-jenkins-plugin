@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.google.common.collect.Sets;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
@@ -29,6 +30,8 @@ import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.AbstractBuild;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,22 +58,30 @@ public class BuildResultProcessorTest {
     @Test
     public void testProcessCoverage() throws Exception {
         CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
-        processor.processCoverage(provider);
+        processor.processCoverage(provider, Sets.newHashSet("file.go"));
         assertNotNull(processor.getCoverage());
         assertNotNull(processor.getCoverage().get("file.go"));
         assertEquals("NCUC", processor.getCoverage().get("file.go"));
     }
 
     @Test
+    public void testProcessCoverageWithNoIncludes() throws Exception {
+        CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
+        processor.processCoverage(provider, Sets.newHashSet("file2.go"));
+        assertNotNull(processor.getCoverage());
+        assertNull(processor.getCoverage().get("file.go"));
+    }
+
+    @Test
     public void testProcessEmptyCoverage() {
         CoverageProvider provider = new FakeCoverageProvider(null);
-        processor.processCoverage(provider);
+        processor.processCoverage(provider, Sets.<String>newHashSet());
         assertNull(processor.getCoverage());
     }
 
     @Test
     public void testProcessNullProvider() {
-        processor.processCoverage(null);
+        processor.processCoverage(null, Sets.<String>newHashSet());
         assertNull(processor.getCoverage());
     }
 

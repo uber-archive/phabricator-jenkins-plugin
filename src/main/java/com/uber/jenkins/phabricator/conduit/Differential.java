@@ -22,15 +22,23 @@ package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.PhabricatorPostbuildAction;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
+
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+
+import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Differential {
+
     private static final String UNKNOWN_AUTHOR = "unknown";
     private static final String UNKNOWN_EMAIL = "unknown";
 
@@ -42,7 +50,7 @@ public class Differential {
     }
 
     public String getRevisionID(boolean formatted) {
-        String rawRevisionId = (String) this.rawJSON.get("revisionID");
+        String rawRevisionId = (String) rawJSON.get("revisionID");
         if (rawRevisionId == null || rawRevisionId.equals("")) {
             return null;
         }
@@ -53,7 +61,7 @@ public class Differential {
     }
 
     public String getPhabricatorLink(String phabricatorURL) {
-        String revisionID = this.getRevisionID(true);
+        String revisionID = getRevisionID(true);
         try {
             URL base = new URL(phabricatorURL);
             return new URL(base, revisionID).toString();
@@ -65,8 +73,8 @@ public class Differential {
     public void decorate(AbstractBuild build, String phabricatorURL) {
         // Add a badge next to the build
         build.addAction(PhabricatorPostbuildAction.createShortText(
-                this.getRevisionID(true),
-                this.getPhabricatorLink(phabricatorURL)));
+                getRevisionID(true),
+                getPhabricatorLink(phabricatorURL)));
         // Add some long-form text
         PhabricatorPostbuildSummaryAction summary = createSummary(phabricatorURL);
         build.addAction(summary);
@@ -101,6 +109,7 @@ public class Differential {
 
     /**
      * Return the base commit of the diff
+     *
      * @return the base revision for git
      */
     public String getBaseCommit() {
@@ -109,6 +118,7 @@ public class Differential {
 
     /**
      * Return the local branch name
+     *
      * @return the name of the branch, or unknown
      */
     public String getBranch() {
@@ -123,11 +133,39 @@ public class Differential {
         }
     }
 
+    /**
+     * Get the differential commit message.
+     *
+     * @return the differential commit message.
+     */
     public String getCommitMessage() {
         return commitMessage;
     }
 
+    /**
+     * Set the differential commit message.
+     *
+     * @param commitMesasge the differential commit message.
+     */
     public void setCommitMessage(String commitMesasge) {
         this.commitMessage = commitMesasge;
+    }
+
+    /**
+     * Get the list of changed files in the diff.
+     *
+     * @return the list of changed files in the diff.
+     */
+    public Set<String> getChangedFiles() {
+        Set<String> changedFiles = new HashSet<String>();
+        JSONArray changes = rawJSON.getJSONArray("changes");
+        for (int i = 0; i < changes.size(); i++) {
+            JSONObject change = changes.getJSONObject(i);
+            String file = (String) change.get("currentPath");
+            if (file != null) {
+                changedFiles.add(file);
+            }
+        }
+        return changedFiles;
     }
 }

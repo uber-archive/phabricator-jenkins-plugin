@@ -34,6 +34,7 @@ import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
@@ -41,8 +42,10 @@ import hudson.model.Result;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BuildResultProcessor {
+
     private static final String LOGGING_TAG = "process-build-result";
 
     private final Logger logger;
@@ -58,8 +61,9 @@ public class BuildResultProcessor {
     private UnitResults unitResults;
     private Map<String, String> harbormasterCoverage;
 
-    public BuildResultProcessor(Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
-                                String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting) {
+    public BuildResultProcessor(
+            Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
+            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -76,13 +80,15 @@ public class BuildResultProcessor {
 
     /**
      * Fetch parent coverage data from Uberalls, if available
+     *
      * @param uberalls the client to the Uberalls instance
      */
     public void processParentCoverage(UberallsClient uberalls) {
         // First add in info about the change in coverage, if applicable
         if (commenter.hasCoverageAvailable()) {
             if (uberalls.isConfigured()) {
-                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBaseCommit(), diff.getBranch());
+                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBaseCommit(),
+                        diff.getBranch());
             } else {
                 logger.info(LOGGING_TAG, "No Uberalls backend configured, skipping...");
             }
@@ -94,6 +100,7 @@ public class BuildResultProcessor {
 
     /**
      * Add build result data into the commenter
+     *
      * @param commentOnSuccess whether a "success" should trigger a comment
      * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
      */
@@ -103,6 +110,7 @@ public class BuildResultProcessor {
 
     /**
      * Fetch a remote comment from the build workspace
+     *
      * @param commentFile the path pattern of the file
      * @param commentSize the maximum number of bytes to read from the remote file
      */
@@ -120,6 +128,7 @@ public class BuildResultProcessor {
 
     /**
      * Send a comment to the differential, if present
+     *
      * @param commentWithConsoleLinkOnFailure whether we should provide a console link on failure
      */
     public void sendComment(boolean commentWithConsoleLinkOnFailure) {
@@ -138,6 +147,7 @@ public class BuildResultProcessor {
 
     /**
      * Send Harbormaster result to Phabricator
+     *
      * @return whether we were able to successfully send the result
      */
     public boolean processHarbormaster() {
@@ -149,19 +159,21 @@ public class BuildResultProcessor {
 
             if (sendUriResult != Task.Result.SUCCESS) {
                 logger.info(LOGGING_TAG, "Unable to send BUILD_URL to Harbormaster. " +
-                            "This can be safely ignored, and is usually because it's already set.");
+                        "This can be safely ignored, and is usually because it's already set.");
             }
 
             if (unitResults != null) {
                 logger.info(
                         LOGGING_TAG,
-                        String.format("Publishing unit results to Harbormaster for %d tests.", unitResults.getResults().size())
+                        String.format("Publishing unit results to Harbormaster for %d tests.",
+                                unitResults.getResults().size())
                 );
             }
             if (harbormasterCoverage != null) {
                 logger.info(
                         LOGGING_TAG,
-                        String.format("Publishing coverage data to Harbormaster for %d files.", harbormasterCoverage.size())
+                        String.format("Publishing coverage data to Harbormaster for %d files.",
+                                harbormasterCoverage.size())
                 );
             }
 
@@ -197,6 +209,7 @@ public class BuildResultProcessor {
 
     /**
      * Process unit test results from the test run
+     *
      * @param unitProvider a provider for unit test results
      */
     public void processUnitResults(UnitTestProvider unitProvider) {
@@ -213,9 +226,10 @@ public class BuildResultProcessor {
 
     /**
      * Process available coverage data into the Harbormaster coverage format
+     *
      * @param coverageProvider a provider for the coverage data
      */
-    public void processCoverage(CoverageProvider coverageProvider) {
+    public void processCoverage(CoverageProvider coverageProvider, Set<String> include) {
         if (coverageProvider == null) {
             logger.info(LOGGING_TAG, "No coverage provider available.");
             return;
@@ -226,10 +240,12 @@ public class BuildResultProcessor {
             return;
         }
 
+        lineCoverage.keySet().retainAll(include);
+
         harbormasterCoverage = new CoverageConverter().convert(lineCoverage);
     }
 
-    public Map<String,String> getCoverage() {
+    public Map<String, String> getCoverage() {
         return harbormasterCoverage;
     }
 

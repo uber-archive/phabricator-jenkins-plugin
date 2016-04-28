@@ -189,7 +189,7 @@ public class PhabricatorNotifier extends Notifier {
         resultProcessor.processUnitResults(getUnitProvider(build, listener));
 
         // Read coverage data to send to Harbormaster
-        resultProcessor.processCoverage(coverageProvider);
+        resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
 
         // Fail the build if we can't report to Harbormaster
         if (!resultProcessor.processHarbormaster()) {

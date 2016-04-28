@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.9.4 (unreleased)
+
+* Publish inline coverage data only for changed files in the diff
+* Cleanup coverage files on jenkins master to save disk space
+
 ### 1.9.3 (2016/04/1)
 
 * Remove deprecated "Build started" comments in favor of Harbormaster
