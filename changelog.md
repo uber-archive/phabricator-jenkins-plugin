@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.4 (unreleased)
+### 1.9.4 (2016/04/28)
 
 * Publish inline coverage data only for changed files in the diff
 * Cleanup coverage files on jenkins master to save disk space
