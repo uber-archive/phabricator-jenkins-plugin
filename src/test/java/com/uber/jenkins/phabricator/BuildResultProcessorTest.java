@@ -73,6 +73,14 @@ public class BuildResultProcessorTest {
     }
 
     @Test
+    public void testProcessCoverageWithNonMatchingPathIncludes() throws Exception {
+        CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
+        processor.processCoverage(provider, Sets.newHashSet("somePath/file.go"));
+        assertNotNull(processor.getCoverage());
+        assertEquals("NCUC", processor.getCoverage().get("file.go"));
+    }
+
+    @Test
     public void testProcessEmptyCoverage() {
         CoverageProvider provider = new FakeCoverageProvider(null);
         processor.processCoverage(provider, Sets.<String>newHashSet());

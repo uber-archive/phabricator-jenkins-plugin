@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.5 (unreleased)
+
+* Use filenames to compute set of files to publish line coverage
+
 ### 1.9.4 (2016/04/28)
 
 * Publish inline coverage data only for changed files in the diff
