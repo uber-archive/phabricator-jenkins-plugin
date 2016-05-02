@@ -35,11 +35,14 @@ import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 
+import org.apache.commons.io.FilenameUtils;
+
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -240,7 +243,19 @@ public class BuildResultProcessor {
             return;
         }
 
-        lineCoverage.keySet().retainAll(include);
+        Set<String> includeFileNames = new HashSet<String>();
+        for (String file : include) {
+            includeFileNames.add(FilenameUtils.getBaseName(file));
+        }
+
+        Set<String> includedLineCoverage = new HashSet<String>();
+        for (String file : lineCoverage.keySet()) {
+            if (includeFileNames.contains(FilenameUtils.getBaseName(file))) {
+                includedLineCoverage.add(file);
+            }
+        }
+
+        lineCoverage.keySet().retainAll(includedLineCoverage);
 
         harbormasterCoverage = new CoverageConverter().convert(lineCoverage);
     }
