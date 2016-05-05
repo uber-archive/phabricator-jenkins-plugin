@@ -19,11 +19,10 @@ Phabricator Configuration
 In this section, you'll create a bot user in Phabricator and generate a Conduit API token. If you already have a bot user and a Conduit API token, skip to the "Jenkins Setup Section".
 
 1. Create a bot user in Phabricator.
-2. Generate a Conduit API token for your Phabricator installation.
-  1. Navigate to `https://phabricator.example/settings/panel/apitokens/` with your base Phabricator URL in place of `phabricator.example`.
-  2. Click the **Generate API Token** button. ![Conduit Token](/docs/conduit-token.png)
-  3. Click the **Generate Token** button.
-  4. Copy the token.
+2. Click **Edit Settings** on the manage page for that user
+3. Click **Conduit API Tokens** on the left of the settings page
+4. Click **Generate API Token**, and accept.
+5. Copy the token.
 
 Jenkins Setup
 -------------
