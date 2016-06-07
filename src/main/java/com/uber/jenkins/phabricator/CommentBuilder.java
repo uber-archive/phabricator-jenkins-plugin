@@ -91,7 +91,7 @@ class CommentBuilder {
 
         comment.append(" when pulling **" + branchName + "** into ");
         comment.append(baseCommit.substring(0, 7));
-        comment.append(". See " + buildURL + "cobertura for the coverage report");
+        comment.append(".");
     }
 
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {
