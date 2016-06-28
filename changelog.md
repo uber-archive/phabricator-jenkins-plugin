@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.9.6 (unreleased
+
+* Remove cobertura link from comments
+* Add lint reporting to Harbormaster
+
 ### 1.9.5 (2016/05/02)
 
 * Use filenames to compute set of files to publish line coverage

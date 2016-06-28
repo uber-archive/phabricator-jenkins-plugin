@@ -1,5 +1,6 @@
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 import net.sf.json.JSONObject;
 
@@ -20,16 +21,23 @@ public class HarbormasterClient {
      * @param pass whether or not the build passed
      * @param unitResults the results from the unit tests
      * @param coverage the results from the coverage provider
+     * @param lintResults
      * @return the Conduit API response
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
+    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage, LintResults lintResults) throws ConduitAPIException, IOException {
 
         List<JSONObject> unit = new ArrayList<JSONObject>();
 
         if (unitResults != null) {
             unit.addAll(unitResults.toHarbormaster());
+        }
+
+        List<JSONObject> lint = new ArrayList<JSONObject>();
+
+        if (lintResults != null) {
+            lint.addAll(lintResults.toHarbormaster());
         }
 
         if (coverage != null) {
@@ -46,6 +54,10 @@ public class HarbormasterClient {
 
         if (!unit.isEmpty()) {
             params.element("unit", unit);
+        }
+
+        if (!lint.isEmpty()) {
+            params.element("lint", lint);
         }
 
         return conduit.perform("harbormaster.sendmessage", params);

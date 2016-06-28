@@ -80,7 +80,7 @@ public class NonDifferentialHarbormasterTask extends Task {
         try {
             harbormaster.sendHarbormasterUri(phid, buildUrl);
             // Only send pass/fail, since coverage and unit aren't viewable outside of differentials
-            harbormaster.sendHarbormasterMessage(phid, pass, null, null);
+            harbormaster.sendHarbormasterMessage(phid, pass, null, null, null);
             result = Result.SUCCESS;
             return;
         } catch (ConduitAPIException e) {

@@ -100,7 +100,7 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
-        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage);
+        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage, null);
     }
 
     /**
