@@ -47,20 +47,10 @@ import org.kohsuke.stapler.StaplerRequest;
 public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Publisher> {
     private String credentialsID;
     private String uberallsURL;
-    private String commentFile;
-    private String commentSize;
 
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
         load();
-    }
-
-    public String getCommentSize() {
-        return commentSize;
-    }
-
-    public void setCommentSize(String commentSize) {
-        this.commentSize = commentSize;
     }
 
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -112,13 +102,5 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
 
     public void setUberallsURL(String value) {
         uberallsURL = value;
-    }
-
-    public void setCommentFile(String commentFile) {
-        this.commentFile = commentFile;
-    }
-
-    public String getCommentFile() {
-        return commentFile;
     }
 }
