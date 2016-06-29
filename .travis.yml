@@ -8,6 +8,8 @@ matrix:
     - jdk: openjdk7
       env: MAIN_ARGS="test"
     - jdk: oraclejdk7
+      env: MAIN_ARGS="test"
+    - jdk: oraclejdk8
       env: MAIN_ARGS="cobertura:cobertura coveralls:report"
 
 script:
