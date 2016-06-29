@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class RemoteCommentFetcherTest {
+public class RemoteFileFetcherTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -55,23 +55,23 @@ public class RemoteCommentFetcherTest {
     @Test
     public void testNoCommentConfigured() throws Exception {
         FreeStyleBuild build = getBuild();
-        RemoteCommentFetcher fetcher = new RemoteCommentFetcher(
+        RemoteFileFetcher fetcher = new RemoteFileFetcher(
                 build.getWorkspace(),
                 logger,
                 "",
                 "1000"
         );
 
-        assertNull(fetcher.getRemoteComment());
+        assertNull(fetcher.getRemoteFile());
 
-        fetcher = new RemoteCommentFetcher(
+        fetcher = new RemoteFileFetcher(
                 build.getWorkspace(),
                 logger,
                 "non-existent",
                 "1000"
         );
 
-        assertNull(fetcher.getRemoteComment());
+        assertNull(fetcher.getRemoteFile());
     }
 
     @Test
@@ -89,23 +89,23 @@ public class RemoteCommentFetcherTest {
         project.getBuildersList().add(echoBuilder(fileName, content));
         FreeStyleBuild build = getBuild();
 
-        RemoteCommentFetcher fetcher = new RemoteCommentFetcher(
+        RemoteFileFetcher fetcher = new RemoteFileFetcher(
                 build.getWorkspace(),
                 logger,
                 fileName,
                 "1000"
         );
 
-        assertEquals(content, fetcher.getRemoteComment());
+        assertEquals(content, fetcher.getRemoteFile());
 
-        fetcher = new RemoteCommentFetcher(
+        fetcher = new RemoteFileFetcher(
                 build.getWorkspace(),
                 logger,
                 "*.txt",
                 "1000"
         );
 
-        assertEquals(content, fetcher.getRemoteComment());
+        assertEquals(content, fetcher.getRemoteFile());
     }
 
     private Builder echoBuilder(final String fileName, final String content) {

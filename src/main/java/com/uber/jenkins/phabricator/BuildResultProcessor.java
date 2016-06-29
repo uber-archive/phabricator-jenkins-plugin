@@ -118,9 +118,9 @@ public class BuildResultProcessor {
      * @param commentSize the maximum number of bytes to read from the remote file
      */
     public void processRemoteComment(String commentFile, String commentSize) {
-        RemoteCommentFetcher commentFetcher = new RemoteCommentFetcher(workspace, logger, commentFile, commentSize);
+        RemoteFileFetcher commentFetcher = new RemoteFileFetcher(workspace, logger, commentFile, commentSize);
         try {
-            String customComment = commentFetcher.getRemoteComment();
+            String customComment = commentFetcher.getRemoteFile();
             commenter.addUserComment(customComment);
         } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
