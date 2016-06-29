@@ -303,6 +303,21 @@ public class PhabricatorNotifier extends Notifier {
         return preserveFormatting;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean isProcessLint() {
+        return processLint;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getLintFile() {
+        return lintFile;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getLintSize() {
+        return lintSize;
+    }
+
     private ConduitCredentials getConduitCredentials(Job owner) {
         return getDescriptor().getCredentials(owner);
     }
