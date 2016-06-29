@@ -34,7 +34,7 @@ import net.sf.json.JSONObject;
  * severity     string          Severity of the message.
  * path         string          Path to the file containing the lint message, from the project root.
  * line         optional int    Line number in the file where the text which triggered the message first appears. The first line of the file is line 1, not line 0.
- * char         optional int    Bytee position on the line where the text which triggered the message starts. The first byte on the line is byte 1, not byte 0. This position is byte-based (not character-based) because not all lintable files have a valid character encoding.
+ * char         optional int    Byte position on the line where the text which triggered the message starts. The first byte on the line is byte 1, not byte 0. This position is byte-based (not character-based) because not all lintable files have a valid character encoding.
  * description  optional string Long explanation of the lint message.
  */
 public class LintResult {
