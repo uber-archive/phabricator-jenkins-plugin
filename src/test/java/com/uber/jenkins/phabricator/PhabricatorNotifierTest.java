@@ -61,6 +61,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertEquals(".phabricator-comment", notifier.getCommentFile());
         assertEquals("1001", notifier.getCommentSize());
         assertFalse(notifier.isCommentWithConsoleLinkOnFailure());
+        assertTrue(notifier.isProcessLint());
+        assertEquals(".phabricator-lint", notifier.getLintFile());
+        assertEquals("10000", notifier.getLintSize());
     }
 
     @Test
@@ -172,11 +175,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         assertNull(descriptor.getCredentialsID());
         assertNull(descriptor.getUberallsURL());
-        assertNull(descriptor.getCommentSize());
-        assertNull(descriptor.getCommentFile());
 
-        descriptor.setCommentFile("hello.world");
-        descriptor.setCommentSize("1000");
         descriptor.setCredentialsID("not-a-real-uuid");
         descriptor.setUberallsURL("http://uber.alls");
     }
