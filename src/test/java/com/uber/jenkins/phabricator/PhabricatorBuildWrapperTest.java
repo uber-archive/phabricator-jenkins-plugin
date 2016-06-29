@@ -88,7 +88,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         TestUtils.setDefaultBuildEnvironment(j);
 
         FreeStyleBuild build = p.scheduleBuild2(0).get();
-        assertFailureWithMessage("UnknownHostException", build);
+        assertEquals(Result.FAILURE, build.getResult());
     }
 
     @Test
