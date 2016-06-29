@@ -25,6 +25,7 @@ import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
+import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
@@ -63,6 +64,7 @@ public class BuildResultProcessor {
     private final CommentBuilder commenter;
     private UnitResults unitResults;
     private Map<String, String> harbormasterCoverage;
+    private LintResults lintResults;
 
     public BuildResultProcessor(
             Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
@@ -129,6 +131,18 @@ public class BuildResultProcessor {
         }
     }
 
+    public void processLintResults(String lintFile, String lintSize) {
+        RemoteFileFetcher lintFetcher = new RemoteFileFetcher(workspace, logger, lintFile, lintSize);
+        try {
+            String lintResults = lintFetcher.getRemoteFile();
+            // TODO parse the results
+        } catch (InterruptedException e) {
+            e.printStackTrace(logger.getStream());
+        } catch (IOException e) {
+            e.printStackTrace(logger.getStream());
+        }
+    }
+
     /**
      * Send a comment to the differential, if present
      *
@@ -179,6 +193,13 @@ public class BuildResultProcessor {
                                 harbormasterCoverage.size())
                 );
             }
+            if (lintResults != null) {
+                logger.info(
+                        LOGGING_TAG,
+                        String.format("Publishing lint results for %d violations",
+                            lintResults.getResults().size())
+                );
+            }
 
             logger.info(
                     LOGGING_TAG,
@@ -194,7 +215,8 @@ public class BuildResultProcessor {
                     phid,
                     harbormasterSuccess,
                     unitResults,
-                    harbormasterCoverage
+                    harbormasterCoverage,
+                    lintResults
             ).run();
             if (result != Task.Result.SUCCESS) {
                 return false;
