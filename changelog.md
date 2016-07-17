@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.6 (unreleased)
+
+* Fix incorrect line coverage when merging multiple cobertura reports
+
 ### 1.9.5 (2016/05/02)
 
 * Use filenames to compute set of files to publish line coverage
