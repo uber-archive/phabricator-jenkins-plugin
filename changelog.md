@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.6 (unreleased)
+### 1.9.6 (2016/07/17)
 
 * Fix incorrect line coverage when merging multiple cobertura reports
 
