@@ -21,6 +21,8 @@
 package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+import junit.framework.TestCase;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +30,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -114,10 +117,33 @@ public class DifferentialClientTest {
         differentialClient.sendHarbormasterMessage(TestUtils.TEST_PHID, true, null, null, null);
     }
 
+    @Test
+    public void testSendHarbormasterJsonSuccess() throws IOException, ConduitAPIException {
+        JSONArray jsonArray = JSONArray.fromObject(singleWarning());
+        JSONObject object = jsonArray.getJSONObject(0);
+
+        mockConduitResponse(differentialClient, object);
+        differentialClient.postInlineComment(object);
+    }
+
     private void mockConduitResponse(DifferentialClient client, JSONObject response) throws IOException, ConduitAPIException {
         doReturn(response).when(client).callConduit(
                 anyString(),
                 any(JSONObject.class)
         );
     }
+
+    private String singleWarning() {
+        return "[\n" +
+                "  {\n" +
+                "    \"name\": \"Syntax Error\",\n" +
+                "    \"code\": \"EXAMPLE1\",\n" +
+                "    \"severity\": \"error\",\n" +
+                "    \"path\": \"path/to/example.c\",\n" +
+                "    \"line\": 17,\n" +
+                "    \"char\": 3\n" +
+                "  }" +
+                "]";
+    }
+
 }

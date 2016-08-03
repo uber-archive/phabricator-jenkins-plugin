@@ -49,7 +49,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 true,
                 ".phabricator-lint",
-                "10000"
+                "10000",
+                ".phabricator-warning",
+                "10001"
         );
     }
 
@@ -64,6 +66,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertTrue(notifier.isProcessLint());
         assertEquals(".phabricator-lint", notifier.getLintFile());
         assertEquals("10000", notifier.getLintSize());
+        assertEquals(".phabricator-warning", notifier.getInlineFile());
+        assertEquals("10001", notifier.getInlineFileSize());
     }
 
     @Test
@@ -156,7 +160,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 true,
                 ".phabricator-lint",
-                "10000"
+                "10000",
+                ".phabricator-warning",
+                "10001"
         );
         testPostCoverage();
     }

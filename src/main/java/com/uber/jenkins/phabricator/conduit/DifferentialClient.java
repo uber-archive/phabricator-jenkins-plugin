@@ -131,6 +131,17 @@ public class DifferentialClient {
     }
 
     /**
+     * Post differential inline comment
+     * @param json JSONObject to be sent to Harbormaster
+     * @return the Conduit API response
+     * @throws IOException if there is a network error talking to Conduit
+     * @throws ConduitAPIException if any error is experienced talking to Conduit
+     */
+    public JSONObject postInlineComment(JSONObject json) throws ConduitAPIException, IOException {
+        return conduit.perform("differential.createinline", json);
+    }
+
+    /**
      * Fetch the commit message for the revision. This isn't available on the diff, so it requires a separate query.
      * @param revisionID The ID of the revision, e.g. for "D123" this would be "123"
      * @return A \n-separated string of the commit message

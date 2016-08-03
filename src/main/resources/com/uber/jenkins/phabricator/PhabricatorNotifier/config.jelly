@@ -34,6 +34,13 @@
     <f:entry title="Maximum comment character length" field="commentSize">
       <f:textbox default="1000" />
     </f:entry>
+    <f:entry title="Read inline json from file" field="inlineFile"
+             description="Add inline context to phabricator based on the specified json format">
+      <f:textbox default=".phabricator-inline" />
+    </f:entry>
+    <f:entry title="Maximum inline character length" field="inlineFileSize">
+      <f:textbox default="10000" />
+    </f:entry>
   </f:optionalBlock>
   <f:optionalBlock field="processLint" name="processLint" inline="true" title="Process lint results from a file" checked="${instance.isProcessLint()}">
     <f:entry title="Read lint violations from file" field="lintFile"

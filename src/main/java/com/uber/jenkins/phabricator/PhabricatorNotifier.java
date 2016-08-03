@@ -63,6 +63,8 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean preserveFormatting;
     private final String commentFile;
     private final String commentSize;
+    private final String inlineFile;
+    private final String inlineFileSize;
     private final boolean customComment;
     private final boolean processLint;
     private final String lintFile;
@@ -71,11 +73,15 @@ public class PhabricatorNotifier extends Notifier {
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean preserveFormatting,
-                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint, String lintFile, String lintSize) {
+                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure,
+                               boolean customComment, boolean processLint, String lintFile, String lintSize,
+                               String inlineFile, String inlineFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
+        this.inlineFile = inlineFile;
+        this.inlineFileSize = inlineFileSize;
         this.preserveFormatting = preserveFormatting;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
@@ -205,6 +211,10 @@ public class PhabricatorNotifier extends Notifier {
             return false;
         }
 
+        resultProcessor.processRemoteInline(inlineFile, inlineFileSize);
+
+        resultProcessor.sendInline();
+
         resultProcessor.processRemoteComment(commentFile, commentSize);
 
         resultProcessor.sendComment(commentWithConsoleLinkOnFailure);
@@ -222,7 +232,8 @@ public class PhabricatorNotifier extends Notifier {
 
     /**
      * Get the cobertura coverage for the build
-     * @param build The current build
+     *
+     * @param build    The current build
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
@@ -299,6 +310,16 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public String getCommentSize() {
         return commentSize;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getInlineFile() {
+        return inlineFile;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getInlineFileSize() {
+        return inlineFileSize;
     }
 
     @SuppressWarnings("UnusedDeclaration")

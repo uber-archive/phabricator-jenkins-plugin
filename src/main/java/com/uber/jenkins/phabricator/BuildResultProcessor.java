@@ -27,9 +27,11 @@ import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
+import com.uber.jenkins.phabricator.tasks.PostInlineTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
 import com.uber.jenkins.phabricator.tasks.Task;
+
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
@@ -62,6 +64,7 @@ public class BuildResultProcessor {
     private final FilePath workspace;
     private String commentAction;
     private final CommentBuilder commenter;
+    private final InlineBuilder inlineBuilder;
     private UnitResults unitResults;
     private Map<String, String> harbormasterCoverage;
     private LintResults lintResults;
@@ -80,6 +83,7 @@ public class BuildResultProcessor {
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting);
+        this.inlineBuilder = new InlineBuilder();
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
@@ -106,7 +110,7 @@ public class BuildResultProcessor {
     /**
      * Add build result data into the commenter
      *
-     * @param commentOnSuccess whether a "success" should trigger a comment
+     * @param commentOnSuccess                whether a "success" should trigger a comment
      * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
      */
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure) {
@@ -144,6 +148,27 @@ public class BuildResultProcessor {
     }
 
     /**
+     * Fetch remote warning from the build workspace and validate its format
+     *
+     * @param inlineFile     the path pattern of the file
+     * @param inlineFileSize maximum number of bytes to read from the remote file
+     */
+    public void processRemoteInline(String inlineFile, String inlineFileSize) {
+        RemoteFileFetcher inlineFetcher = new RemoteFileFetcher(workspace, logger, inlineFile, inlineFileSize);
+        try {
+            String inline = inlineFetcher.getRemoteFile();
+            inlineBuilder.addInlineContext(inline);
+            if (!inlineBuilder.validateInlineFormat()) {
+                logger.warn(LOGGING_TAG, "The json format for processing inline is not valid");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace(logger.getStream());
+        } catch (IOException e) {
+            e.printStackTrace(logger.getStream());
+        }
+    }
+
+    /**
      * Send a comment to the differential, if present
      *
      * @param commentWithConsoleLinkOnFailure whether we should provide a console link on failure
@@ -160,6 +185,10 @@ public class BuildResultProcessor {
         }
 
         new PostCommentTask(logger, diffClient, diff.getRevisionID(false), commenter.getComment(), commentAction).run();
+    }
+
+    public void sendInline() {
+        new PostInlineTask(logger, diffClient, diff.getRevisionID(false), inlineBuilder.getInlineJson()).run();
     }
 
     /**
@@ -197,7 +226,7 @@ public class BuildResultProcessor {
                 logger.info(
                         LOGGING_TAG,
                         String.format("Publishing lint results for %d violations",
-                            lintResults.getResults().size())
+                                lintResults.getResults().size())
                 );
             }
 

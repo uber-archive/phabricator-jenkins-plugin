@@ -76,6 +76,7 @@ public class RemoteFileFetcher {
         }
         byte[] buffer = new byte[maxLength];
         source.read().read(buffer, 0, maxLength);
+
         return new String(buffer);
     }
 }
