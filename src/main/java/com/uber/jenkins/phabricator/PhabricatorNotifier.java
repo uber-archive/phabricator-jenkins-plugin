@@ -63,31 +63,26 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean preserveFormatting;
     private final String commentFile;
     private final String commentSize;
-    private final String inlineFile;
-    private final String inlineFileSize;
+    private final String lintFile;
+    private final String lintFileSize;
     private final boolean customComment;
     private final boolean processLint;
-    private final String lintFile;
-    private final String lintSize;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean preserveFormatting,
                                String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure,
-                               boolean customComment, boolean processLint, String lintFile, String lintSize,
-                               String inlineFile, String inlineFileSize) {
+                               boolean customComment, boolean processLint, String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
-        this.inlineFile = inlineFile;
-        this.inlineFileSize = inlineFileSize;
+        this.lintFile = lintFile;
+        this.lintFileSize = lintFileSize;
         this.preserveFormatting = preserveFormatting;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
         this.processLint = processLint;
-        this.lintFile = lintFile;
-        this.lintSize = lintSize;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -204,16 +199,14 @@ public class PhabricatorNotifier extends Notifier {
         resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
 
         // Read lint results to send to Harbormaster
-        resultProcessor.processLintResults(lintFile, lintSize);
+        if (processLint) {
+            resultProcessor.processLintResults(conduitClient, lintFile, lintFileSize);
+        }
 
         // Fail the build if we can't report to Harbormaster
         if (!resultProcessor.processHarbormaster()) {
             return false;
         }
-
-        resultProcessor.processRemoteInline(inlineFile, inlineFileSize);
-
-        resultProcessor.sendInline();
 
         resultProcessor.processRemoteComment(commentFile, commentSize);
 
@@ -313,16 +306,6 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public String getInlineFile() {
-        return inlineFile;
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
-    public String getInlineFileSize() {
-        return inlineFileSize;
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
     public boolean isPreserveFormatting() {
         return preserveFormatting;
     }
@@ -338,8 +321,8 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public String getLintSize() {
-        return lintSize;
+    public String getLintFileSize() {
+        return lintFileSize;
     }
 
     private ConduitCredentials getConduitCredentials(Job owner) {

@@ -117,15 +117,6 @@ public class DifferentialClientTest {
         differentialClient.sendHarbormasterMessage(TestUtils.TEST_PHID, true, null, null, null);
     }
 
-    @Test
-    public void testSendHarbormasterJsonSuccess() throws IOException, ConduitAPIException {
-        JSONArray jsonArray = JSONArray.fromObject(singleWarning());
-        JSONObject object = jsonArray.getJSONObject(0);
-
-        mockConduitResponse(differentialClient, object);
-        differentialClient.postInlineComment(object);
-    }
-
     private void mockConduitResponse(DifferentialClient client, JSONObject response) throws IOException, ConduitAPIException {
         doReturn(response).when(client).callConduit(
                 anyString(),

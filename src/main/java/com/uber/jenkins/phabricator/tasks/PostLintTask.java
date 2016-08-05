@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2016 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,34 +22,31 @@ package com.uber.jenkins.phabricator.tasks;
 
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
-import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.conduit.HarbormasterClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Post warnings task.
  */
-public class PostInlineTask extends Task {
-    private final List<JSONObject> inlineContext;
-    private final DifferentialClient differentialClient;
-    private final String revisionID;
+public class PostLintTask extends Task {
+    private final JSONObject json;
+    private final HarbormasterClient harbormaster;
+
     /**
-     * PostInlineTask constructor.
+     * PostLintTask constructor.
      *
      * @param logger the logger
-     * @param differentialClient
-     * @param inlineContext JSON Objects understood by HarborMaster
+     * @param conduit conduit client for harbormaster
+     * @param json JSON Object understood by HarborMaster sendmessage call
      */
-    public PostInlineTask(Logger logger, DifferentialClient differentialClient, String revisionID, List<JSONObject> inlineContext) {
+    public PostLintTask(Logger logger, ConduitAPIClient conduit, JSONObject json) {
         super(logger);
 
-        this.inlineContext = inlineContext;
-        this.differentialClient = differentialClient;
-        this.revisionID = revisionID;
+        this.json = json;
+        this.harbormaster = new HarbormasterClient(conduit);
     }
 
     /**
@@ -57,7 +54,7 @@ public class PostInlineTask extends Task {
      */
     @Override
     protected String getTag() {
-        return "post-inline";
+        return "post-lint";
     }
 
     /**
@@ -73,14 +70,10 @@ public class PostInlineTask extends Task {
      */
     @Override
     protected void execute() {
-        System.out.println("posting inline: ");
         try {
-            for (JSONObject inline : inlineContext) {
-                inline.element("revisionID", revisionID);
-                differentialClient.postInlineComment(inline);
-            }
+            harbormaster.sendHarbormasterJson(json);
         } catch (ConduitAPIException e) {
-            info("unable to post inline context to phabricator");
+            info("unable to post lint message to phabricator");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
