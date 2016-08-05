@@ -25,6 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UnitResultTest {
     private UnitResult result;
@@ -38,10 +40,20 @@ public class UnitResultTest {
     public void testToHarbormaster() {
         JSONObject json = result.toHarbormaster();
 
+        assertTrue(json.keySet().contains("engine"));
         assertEquals("display-name", json.getString("name"));
         assertEquals("class-name", json.getString("namespace"));
         assertEquals("pass", json.getString("result"));
         assertEquals(1.2, json.getDouble("duration"), 0.01);
+        assertFalse(json.keySet().contains("details"));
+    }
+
+    @Test
+    public void testToHarbormasterWithTrace() {
+        JSONObject json = makeResult(1, 0, 0, "trace").toHarbormaster();
+
+        assertTrue(json.keySet().contains("details"));
+        assertEquals("trace", json.getString("details"));
     }
 
     @Test
@@ -53,9 +65,14 @@ public class UnitResultTest {
     }
 
     private UnitResult makeResult(int fail, int skip, int pass) {
+        return makeResult(fail, skip, pass, null);
+    }
+
+    private UnitResult makeResult(int fail, int skip, int pass, String trace) {
         return new UnitResult(
                 "class-name",
                 "display-name",
+                trace,
                 1.2f,
                 fail,
                 skip,

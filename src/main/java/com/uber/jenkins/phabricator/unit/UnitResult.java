@@ -30,18 +30,20 @@ public class UnitResult {
     private static final String ENGINE_NAME = "Jenkins";
     private final String className;
     private final String name;
+    private final String stackTrace;
     private final float duration;
     private final int failCount;
     private final int skipCount;
     private final int passCount;
 
-    public UnitResult(String className, String displayName, float duration, int failCount, int skipCount, int passCount) {
+    public UnitResult(String className, String displayName, String stackTrace, float duration, int failCount, int skipCount, int passCount) {
         this.className = className;
         name = displayName;
         this.duration = duration;
         this.failCount = failCount;
         this.skipCount = skipCount;
         this.passCount = passCount;
+        this.stackTrace = stackTrace;
     }
 
     public String getHarbormasterResult() {
@@ -60,6 +62,7 @@ public class UnitResult {
                 .element("name", name)
                 .element("result", getHarbormasterResult())
                 .element("namespace", className)
+                .element("details", stackTrace)
                 .element("engine", ENGINE_NAME)
                 .element("duration", duration);
     }

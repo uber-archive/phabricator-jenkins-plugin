@@ -259,6 +259,7 @@ public class TestUtils {
         return new UnitResult(
                 TEST_UNIT_NAMESPACE,
                 TEST_UNIT_NAME,
+                null,
                 1.0f,
                 0,
                 0,
