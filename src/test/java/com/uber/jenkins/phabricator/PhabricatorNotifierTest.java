@@ -21,6 +21,8 @@
 package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.coverage.CoberturaXMLParser;
+import com.uber.jenkins.phabricator.lint.LintResult;
+import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
@@ -111,6 +113,17 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     @Test
     public void testPostToHarbormaster() throws Exception {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
+    public void testPostToHarbormasterValidLint() throws Exception {
+        JSONObject json = new JSONObject();
+        LintResults result = new LintResults();
+        result.add(new LintResult("test", "testcode", "error", "to/path", 10, 3, "test description"));
+        json.element("lint", result);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, json);
 
         assertEquals(Result.SUCCESS, build.getResult());
     }

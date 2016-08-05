@@ -86,15 +86,4 @@ public class HarbormasterClient {
 
         return conduit.perform("harbormaster.createartifact", params);
     }
-
-    /**
-     * Send Harbormaster json message
-     * @param json JSONObject to be sent to Harbormaster
-     * @return the Conduit API response
-     * @throws IOException if there is a network error talking to Conduit
-     * @throws ConduitAPIException if any error is experienced talking to Conduit
-     */
-    public JSONObject sendHarbormasterJson(JSONObject json) throws ConduitAPIException, IOException {
-        return conduit.perform("harbormaster.sendmessage", json);
-    }
 }

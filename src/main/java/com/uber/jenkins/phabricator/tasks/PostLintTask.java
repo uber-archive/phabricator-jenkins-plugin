@@ -23,16 +23,24 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.HarbormasterClient;
+import com.uber.jenkins.phabricator.lint.LintResults;
+import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.utils.Logger;
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Post warnings task.
  */
 public class PostLintTask extends Task {
-    private final JSONObject json;
+    private final String phid;
+    private final boolean type;
+    private final UnitResults unitResults;
+    private final Map<String, String> coverage;
+    private final LintResults lintResults;
+
     private final HarbormasterClient harbormaster;
 
     /**
@@ -40,12 +48,16 @@ public class PostLintTask extends Task {
      *
      * @param logger the logger
      * @param conduit conduit client for harbormaster
-     * @param json JSON Object understood by HarborMaster sendmessage call
+     * @param lintResults JSON Object understood by HarborMaster sendmessage call
      */
-    public PostLintTask(Logger logger, ConduitAPIClient conduit, JSONObject json) {
+    public PostLintTask(Logger logger, ConduitAPIClient conduit, String phid, boolean type, UnitResults unitResults, Map<String, String> coverage, LintResults lintResults) {
         super(logger);
 
-        this.json = json;
+        this.phid = phid;
+        this.type = type;
+        this.unitResults = unitResults;
+        this.coverage = coverage;
+        this.lintResults = lintResults;
         this.harbormaster = new HarbormasterClient(conduit);
     }
 
@@ -71,7 +83,7 @@ public class PostLintTask extends Task {
     @Override
     protected void execute() {
         try {
-            harbormaster.sendHarbormasterJson(json);
+            harbormaster.sendHarbormasterMessage(phid, type, unitResults, coverage, lintResults);
         } catch (ConduitAPIException e) {
             info("unable to post lint message to phabricator");
         } catch (IOException e) {

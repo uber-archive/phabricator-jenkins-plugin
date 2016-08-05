@@ -26,6 +26,7 @@ import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
+import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.tasks.*;
 
@@ -43,7 +44,9 @@ import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -142,16 +145,26 @@ public class BuildResultProcessor {
     public void processLintResults(ConduitAPIClient conduit, String lintFile, String lintFileSize) {
         RemoteFileFetcher lintFetcher = new RemoteFileFetcher(workspace, logger, lintFile, lintFileSize);
         try {
-            String lintResults = lintFetcher.getRemoteFile();
-            if (lintResults != null && lintResults.length() > 0) {
-                JSONObject lintJson = JSONObject.fromObject(lintResults);
-                if (phid != null) {
-                    lintJson.element("buildTargetPHID", phid);
+            String input = lintFetcher.getRemoteFile();
+            if (input != null && input.length() > 0) {
+                LintResults lintResults = new LintResults();
+                BufferedReader reader = new BufferedReader(new StringReader(input));
+
+                String lint;
+                while ((lint = reader.readLine()) != null) {
+                    JSONObject json = JSONObject.fromObject(lint);
+                    lintResults.add(new LintResult(
+                            (String) json.get("name"),
+                            (String) json.get("code"),
+                            (String) json.get("severity"),
+                            (String) json.get("path"),
+                            (Integer) json.get("line"),
+                            (Integer) json.get("char"),
+                            (String) json.get("description")));
+
                 }
-                if (lintJson.get("type") == null || lintJson.get("unit") == null) {
-                    logger.warn(LOGGING_TAG, "The json format for processing input lint is not valid");
-                }
-                new PostLintTask(logger, conduit, lintJson).run();
+                boolean pass = buildResult.isBetterOrEqualTo(hudson.model.Result.SUCCESS);
+                new PostLintTask(logger, conduit, phid, pass, unitResults, harbormasterCoverage, lintResults).run();
             }
         } catch (JSONException e) {
             e.printStackTrace(logger.getStream());
