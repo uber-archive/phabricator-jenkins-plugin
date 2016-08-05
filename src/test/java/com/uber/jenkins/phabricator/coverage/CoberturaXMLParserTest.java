@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -36,17 +37,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(Parameterized.class)
 public class CoberturaXMLParserTest {
 
+    private static final String TEST_COVERAGE_FILE = "go-torch-coverage1.xml";
     private static final String TEST_COVERAGE_FILE_1 = "go-torch-coverage1.xml";
     private static final String TEST_COVERAGE_FILE_2 = "go-torch-coverage2.xml";
     private static final String TEST_COVERAGE_FILE_3 = "go-torch-coverage3.xml";
+    private static final String TEST_COVERAGE_FILE_OVERWRITE = "go-torch-coverage_overwrite.xml";
     private static final String TEST_COVERAGE_PYTHON = "python-coverage.xml";
 
     @Parameterized.Parameter
@@ -57,7 +58,7 @@ public class CoberturaXMLParserTest {
 
     @Test
     public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException,
-        URISyntaxException {
+            URISyntaxException {
         CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
 
         File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
@@ -77,6 +78,23 @@ public class CoberturaXMLParserTest {
         List<Integer> graphCoverage = lineCoverage.get("github.com/uber/go-torch/graph/graph.go");
         assertEquals(1, graphCoverage.get(234).longValue());
         assertNull(graphCoverage.get(235));
+    }
+
+    @Test
+    public void testGetLineCoverageWhenOneFileOverwriteTheOther()
+            throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
+
+        // In `TEST_COVERAGE_FILE`, line 212 has 1 hit
+        File testCoverageFile = getResource(TEST_COVERAGE_FILE);
+        // In `TEST_COVERAGE_FILE_OVERWRITE`, line 212 has 0 hit
+        File testCoverageFileOverwrite = getResource(TEST_COVERAGE_FILE_OVERWRITE);
+
+        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile, testCoverageFileOverwrite);
+        List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
+
+        // Line 212 is recorded as hit
+        assertEquals(1, mainCoverage.get(212).longValue());
     }
 
     @Test
@@ -109,8 +127,8 @@ public class CoberturaXMLParserTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new FilePath(new File(".")),   false },
-                { new FilePath(new File("/tmp")), true },
+                {new FilePath(new File(".")), false},
+                {new FilePath(new File("/tmp")), true},
         });
     }
 }
