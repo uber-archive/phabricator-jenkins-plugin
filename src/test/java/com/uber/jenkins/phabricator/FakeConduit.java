@@ -25,13 +25,18 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.localserver.LocalTestServer;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class FakeConduit {
     private LocalTestServer server;
+    private List<String> requestBodies;
 
     public FakeConduit(Map<String, JSONObject> responses) throws Exception {
         server = new LocalTestServer(null, null);
+        this.requestBodies = new ArrayList<String>();
         for (Map.Entry<String, JSONObject> entry : responses.entrySet()) {
             register(entry.getKey(), entry.getValue());
         }
@@ -42,6 +47,14 @@ public class FakeConduit {
         server.stop();
     }
 
+    public LocalTestServer getServer() {
+        return server;
+    }
+
+    public List<String> getRequestBodies() throws UnsupportedEncodingException {
+        return requestBodies;
+    }
+
     public String uri() {
         return TestUtils.getTestServerAddress(server);
     }
@@ -49,7 +62,7 @@ public class FakeConduit {
     public void register(String method, JSONObject response) {
         server.register(
                 "/api/" + method,
-                TestUtils.makeHttpHandler(HttpStatus.SC_OK, response.toString(2))
+                TestUtils.makeHttpHandler(HttpStatus.SC_OK, response.toString(2), requestBodies)
         );
     }
 }
