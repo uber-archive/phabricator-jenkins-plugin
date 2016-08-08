@@ -20,13 +20,17 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClientTest;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import net.sf.json.JSONObject;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Rule;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -56,6 +60,10 @@ public abstract class BuildIntegrationTest {
         }
     }
 
+    public FakeConduit getConduitClient() {
+        return conduit;
+    }
+
     void assertSuccessfulBuild(Result result) {
         assertTrue(result.isCompleteBuild());
         assertTrue(result.isBetterOrEqualTo(Result.SUCCESS));
@@ -69,6 +77,10 @@ public abstract class BuildIntegrationTest {
 
     protected JSONObject getFetchDiffResponse() throws IOException {
         return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "validFetchDiffResponse");
+    }
+
+    protected JSONObject getUnitResultWithFailureRequest() throws IOException {
+        return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "unitResultWithFailureRequest");
     }
 
     protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse) throws Exception {
@@ -120,6 +132,15 @@ public abstract class BuildIntegrationTest {
             log.append(s);
         }
         assertThat(log.toString(), containsString(needle));
+    }
+
+    protected void assertConduitRequest(JSONObject expectedRequestParams, String actualRequestBody) throws IOException, ConduitAPIException {
+        String conduitTestServerAddress = TestUtils.getTestServerAddress(conduit.getServer());
+        ConduitAPIClient conduitTestClient = new ConduitAPIClient(conduitTestServerAddress, TestUtils.TEST_CONDUIT_TOKEN);
+        HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) conduitTestClient.createRequest("", expectedRequestParams);
+        String expectedRequestBody = EntityUtils.toString(request.getEntity());
+
+        assertEquals(expectedRequestBody, actualRequestBody);
     }
 
     protected void assertFailureWithMessage(String message, AbstractBuild build) throws IOException {

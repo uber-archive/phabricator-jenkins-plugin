@@ -139,6 +139,23 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testPostUnitWithFailure() throws Exception {
+        TestUtils.addCopyBuildStep(p, TestUtils.JUNIT_XML, JUnitTestProvider.class, "go-torch-junit-fail.xml");
+        p.getPublishersList().add(TestUtils.getDefaultXUnitPublisher());
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.UNSTABLE, build.getResult());
+        assertLogContains("Publishing unit results to Harbormaster for 8 tests", build);
+
+        FakeConduit conduitTestClient = getConduitClient();
+        // There are two requests, first it fetches the diff info, secondly it posts the unit result to harbormaster
+        assertEquals(2, conduitTestClient.getRequestBodies().size());
+        String actualUnitResultWithFailureRequestBody = conduitTestClient.getRequestBodies().get(1);
+
+        assertConduitRequest(getUnitResultWithFailureRequest(), actualUnitResultWithFailureRequestBody);
+    }
+
+    @Test
     public void testPostCoverageUberallsDisabled() throws Exception {
         notifier = new PhabricatorNotifier(
                 false,

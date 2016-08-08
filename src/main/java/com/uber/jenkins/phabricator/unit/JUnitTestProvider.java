@@ -62,6 +62,7 @@ public class JUnitTestProvider extends UnitTestProvider {
                 UnitResult result = new UnitResult(
                         cr.getClassName(),
                         cr.getDisplayName(),
+                        cr.getErrorStackTrace(),
                         cr.getDuration(),
                         cr.getFailCount(),
                         cr.getSkipCount(),

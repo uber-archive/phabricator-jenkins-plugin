@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite tests="8" failures="1" time="0.014" name="github.com/uber/go-torch/visualization">
+		<properties>
+			<property name="go.version" value="go1.5"></property>
+		</properties>
+		<testcase classname="visualization" name="TestCreateFile" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestCreateFileOverwriteExisting" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestGenerateFlameGraph" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestGenerateFlameGraphPrintsToStdout" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestGenerateFlameGraphExecError" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestRunPerlScriptDoesExist" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestRunPerlScriptDoesNotExist" time="0.000"></testcase>
+		<testcase classname="visualization" name="TestNewVisualizer" time="0.000">
+			<failure>1. It fails  </failure>
+		</testcase>
+	</testsuite>
+</testsuites>

@@ -47,6 +47,8 @@ import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.util.CopyOnWriteMap;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -54,6 +56,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.localserver.LocalTestServer;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.apache.http.util.EntityUtils;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
@@ -156,11 +159,24 @@ public class TestUtils {
     }
 
     public static HttpRequestHandler makeHttpHandler(final int statusCode, final String body) {
+        ArrayList<String> requestBodies = new ArrayList<String>();
+        return makeHttpHandler(statusCode, body, requestBodies);
+    }
+
+    public static HttpRequestHandler makeHttpHandler(final int statusCode, final String body,
+                                                     final List<String> requestBodies) {
         return new HttpRequestHandler() {
             @Override
             public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
                 response.setStatusCode(statusCode);
                 response.setEntity(new StringEntity(body));
+
+                if (request instanceof HttpEntityEnclosingRequest) {
+                    HttpEntity entity = ((HttpEntityEnclosingRequest)request).getEntity();
+                    requestBodies.add(EntityUtils.toString(entity));
+                } else {
+                    requestBodies.add("");
+                }
             }
         };
     }
@@ -259,6 +275,7 @@ public class TestUtils {
         return new UnitResult(
                 TEST_UNIT_NAMESPACE,
                 TEST_UNIT_NAME,
+                null,
                 1.0f,
                 0,
                 0,
