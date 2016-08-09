@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.7 (unreleased)
+### 1.9.7 (2016/08/09)
 
 * Report lint warnings from file (Anup Talwalkar)
 * Add "details" to unit results from "failure" in JUnit files (Haotian Liu)
