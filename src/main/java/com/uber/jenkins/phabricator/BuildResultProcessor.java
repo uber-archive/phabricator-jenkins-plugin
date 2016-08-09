@@ -29,20 +29,17 @@ import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.tasks.*;
-
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
-
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
-import org.apache.commons.io.FilenameUtils;
-
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -136,7 +133,7 @@ public class BuildResultProcessor {
     }
 
     /**
-     * Fetch remote warning from the build workspace and process
+     * Fetch remote lint violations from the build workspace and process
      *
      * @param conduit      conduit API client
      * @param lintFile     the path pattern of the file
@@ -147,7 +144,7 @@ public class BuildResultProcessor {
         try {
             String input = lintFetcher.getRemoteFile();
             if (input != null && input.length() > 0) {
-                LintResults lintResults = new LintResults();
+                lintResults = new LintResults();
                 BufferedReader reader = new BufferedReader(new StringReader(input));
 
                 String lint;
