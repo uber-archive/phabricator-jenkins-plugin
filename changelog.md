@@ -4,6 +4,7 @@
 
 * Report lint warnings from file (Anup Talwalkar)
 * Add "details" to unit results from "failure" in JUnit files (Haotian Liu)
+* Soften error message on URI artifact to prevent confusion about build failures
 
 ### 1.9.6 (2016/07/17)
 

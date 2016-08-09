@@ -54,7 +54,7 @@ public class SendHarbormasterUriTask extends Task {
         try {
             JSONObject result = diffClient.sendHarbormasterUri(phid, buildUri);
             if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {
-                info(String.format("Error from Harbormaster: %s", result.getString("error_info")));
+                info(String.format("Harbormaster declined URI artifact: %s", result.getString("error_info")));
                 this.result = Result.FAILURE;
             } else {
                 this.result = Result.SUCCESS;
