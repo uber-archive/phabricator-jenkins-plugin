@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.9.7 (unreleased)
+
+* Report lint warnings from file (Anup Talwalkar)
+* Add "details" to unit results from "failure" in JUnit files (Haotian Liu)
+
 ### 1.9.6 (2016/07/17)
 
 * Fix incorrect line coverage when merging multiple cobertura reports
