@@ -63,10 +63,10 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean preserveFormatting;
     private final String commentFile;
     private final String commentSize;
-    private final String lintFile;
-    private final String lintFileSize;
     private final boolean customComment;
     private final boolean processLint;
+    private final String lintFile;
+    private final String lintFileSize;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
@@ -198,8 +198,10 @@ public class PhabricatorNotifier extends Notifier {
         // Read coverage data to send to Harbormaster
         resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
 
-        // Read lint results to send to Harbormaster
-        resultProcessor.processLintResults(lintFile, lintFileSize);
+        if (processLint) {
+            // Read lint results to send to Harbormaster
+            resultProcessor.processLintResults(lintFile, lintFileSize);
+        }
 
         // Fail the build if we can't report to Harbormaster
         if (!resultProcessor.processHarbormaster()) {
