@@ -28,37 +28,37 @@ import java.io.IOException;
 
 import static java.lang.Integer.parseInt;
 
-public class RemoteCommentFetcher {
-    private static final int DEFAULT_COMMENT_SIZE = 1000;
-    private static final String LOGGER_TAG = "comment-file";
+public class RemoteFileFetcher {
+    private static final int DEFAULT_MAX_SIZE = 1000;
+    private static final String LOGGER_TAG = "file-fetcher";
 
     private final FilePath workspace;
     private final Logger logger;
-    private final String commentFile;
+    private final String fileName;
     private final String maxSize;
 
-    public RemoteCommentFetcher(FilePath workspace, Logger logger, String commentFile, String maxSize) {
+    public RemoteFileFetcher(FilePath workspace, Logger logger, String fileName, String maxSize) {
         this.workspace = workspace;
         this.logger = logger;
-        this.commentFile = commentFile;
+        this.fileName = fileName;
         this.maxSize = maxSize;
     }
 
     /**
-     * Attempt to read a remote comment file
+     * Attempt to read a remote  file
      * @return the content of the remote comment file, if present
      * @throws InterruptedException if there is an error fetching the file
      * @throws IOException if any network error occurs
      */
-    public String getRemoteComment() throws InterruptedException, IOException {
-        if (CommonUtils.isBlank(commentFile)) {
-            logger.info(LOGGER_TAG, "no comment file configured");
+    public String getRemoteFile() throws InterruptedException, IOException {
+        if (CommonUtils.isBlank(fileName)) {
+            logger.info(LOGGER_TAG, "no file configured");
             return null;
         }
 
-        FilePath[] src = workspace.list(commentFile);
+        FilePath[] src = workspace.list(fileName);
         if (src.length == 0) {
-            logger.info(LOGGER_TAG, "no files found by path: '" + commentFile + "'");
+            logger.info(LOGGER_TAG, "no files found by path: '" + fileName + "'");
             return null;
         }
         if (src.length > 1) {
@@ -67,7 +67,7 @@ public class RemoteCommentFetcher {
 
         FilePath source = src[0];
 
-        int maxLength = DEFAULT_COMMENT_SIZE;
+        int maxLength = DEFAULT_MAX_SIZE;
         if (!CommonUtils.isBlank(maxSize)) {
             maxLength = parseInt(maxSize, 10);
         }
@@ -76,6 +76,7 @@ public class RemoteCommentFetcher {
         }
         byte[] buffer = new byte[maxLength];
         source.read().read(buffer, 0, maxLength);
+
         return new String(buffer);
     }
 }

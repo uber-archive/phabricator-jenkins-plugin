@@ -21,28 +21,45 @@
 package com.uber.jenkins.phabricator;
 
 import com.google.common.collect.Sets;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
+import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.coverage.FakeCoverageProvider;
+import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.tasks.Builder;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class BuildResultProcessorTest {
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
     private BuildResultProcessor processor;
+    private FreeStyleProject project;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         processor = new BuildResultProcessor(
                 TestUtils.getDefaultLogger(),
                 mock(AbstractBuild.class),
@@ -53,6 +70,7 @@ public class BuildResultProcessorTest {
                 TestUtils.TEST_BASE_URL,
                 true
         );
+        project = j.createFreeStyleProject();
     }
 
     @Test
@@ -97,5 +115,57 @@ public class BuildResultProcessorTest {
     public void testProcessNullUnitProvider() {
         processor.processUnitResults(null);
         assertNull(processor.getUnitResults());
+    }
+
+    @Test
+    public void testProcessLintViolations() throws Exception {
+        String content = "{\"name\": \"Syntax Error\",\"code\": \"EXAMPLE\",\"severity\": \"error\",\"path\": \"path/to/example\",\"line\": 17,\"char\": 3}";
+        final LintResult result = new LintResult("Syntax Error", "EXAMPLE", "error", "path/to/example", 17, 3, "");
+
+        final String fileName = ".phabricator-lint";
+        project.getBuildersList().add(echoBuilder(fileName, content));
+        FreeStyleBuild build = getBuild();
+
+        BuildResultProcessor processor = new BuildResultProcessor(
+                TestUtils.getDefaultLogger(),
+                build,
+                mock(Differential.class),
+                new DifferentialClient(null, new ConduitAPIClient(null, null) {
+                    @Override
+                    public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
+                        if (action == "harbormaster.sendmessage") {
+                            JSONObject json = (JSONObject) ((JSONArray) params.get("lint")).get(0);
+                            JSONObject parsed = result.toHarbormaster();
+                            assertNotNull(parsed);
+                            assertNotNull(json);
+                            for (String key : (Set<String>) params.keySet()) {
+                                assertEquals("mismatch in expected json key: " + key, parsed.get(key), json.get(key));
+                            }
+                            return result.toHarbormaster();
+                        }
+                        return new JSONObject();
+                    }
+                }),
+                TestUtils.TEST_PHID,
+                mock(CodeCoverageMetrics.class),
+                TestUtils.TEST_BASE_URL,
+                true
+        );
+        processor.processLintResults(fileName, "1000");
+        processor.processHarbormaster();
+    }
+
+    private Builder echoBuilder(final String fileName, final String content) {
+        return new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                build.getWorkspace().child(fileName).write(content, "UTF-8");
+                return true;
+            }
+        };
+    }
+
+    private FreeStyleBuild getBuild() throws ExecutionException, InterruptedException {
+        return project.scheduleBuild2(0).get();
     }
 }

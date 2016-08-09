@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -99,8 +100,10 @@ public class DifferentialClient {
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage) throws ConduitAPIException, IOException {
-        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage);
+    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults,
+                                              Map<String, String> coverage,
+                                              LintResults lintResults) throws ConduitAPIException, IOException {
+        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage, lintResults);
     }
 
     /**

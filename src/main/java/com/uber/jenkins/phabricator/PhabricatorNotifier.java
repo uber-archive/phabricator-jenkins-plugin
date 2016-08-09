@@ -64,18 +64,25 @@ public class PhabricatorNotifier extends Notifier {
     private final String commentFile;
     private final String commentSize;
     private final boolean customComment;
+    private final boolean processLint;
+    private final String lintFile;
+    private final String lintFileSize;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean preserveFormatting,
-                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure, boolean customComment) {
+                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure,
+                               boolean customComment, boolean processLint, String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
+        this.lintFile = lintFile;
+        this.lintFileSize = lintFileSize;
         this.preserveFormatting = preserveFormatting;
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
+        this.processLint = processLint;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -191,6 +198,11 @@ public class PhabricatorNotifier extends Notifier {
         // Read coverage data to send to Harbormaster
         resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
 
+        if (processLint) {
+            // Read lint results to send to Harbormaster
+            resultProcessor.processLintResults(lintFile, lintFileSize);
+        }
+
         // Fail the build if we can't report to Harbormaster
         if (!resultProcessor.processHarbormaster()) {
             return false;
@@ -213,7 +225,8 @@ public class PhabricatorNotifier extends Notifier {
 
     /**
      * Get the cobertura coverage for the build
-     * @param build The current build
+     *
+     * @param build    The current build
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
@@ -295,6 +308,21 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public boolean isPreserveFormatting() {
         return preserveFormatting;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean isProcessLint() {
+        return processLint;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getLintFile() {
+        return lintFile;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public String getLintFileSize() {
+        return lintFileSize;
     }
 
     private ConduitCredentials getConduitCredentials(Job owner) {

@@ -25,6 +25,8 @@ import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
+import com.uber.jenkins.phabricator.lint.LintResult;
+import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.tasks.PostCommentTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
@@ -34,14 +36,16 @@ import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
-
-import org.apache.commons.io.FilenameUtils;
-
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import org.apache.commons.io.FilenameUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +67,7 @@ public class BuildResultProcessor {
     private final CommentBuilder commenter;
     private UnitResults unitResults;
     private Map<String, String> harbormasterCoverage;
+    private LintResults lintResults;
 
     public BuildResultProcessor(
             Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
@@ -104,7 +109,7 @@ public class BuildResultProcessor {
     /**
      * Add build result data into the commenter
      *
-     * @param commentOnSuccess whether a "success" should trigger a comment
+     * @param commentOnSuccess                whether a "success" should trigger a comment
      * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
      */
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure) {
@@ -118,10 +123,46 @@ public class BuildResultProcessor {
      * @param commentSize the maximum number of bytes to read from the remote file
      */
     public void processRemoteComment(String commentFile, String commentSize) {
-        RemoteCommentFetcher commentFetcher = new RemoteCommentFetcher(workspace, logger, commentFile, commentSize);
+        RemoteFileFetcher commentFetcher = new RemoteFileFetcher(workspace, logger, commentFile, commentSize);
         try {
-            String customComment = commentFetcher.getRemoteComment();
+            String customComment = commentFetcher.getRemoteFile();
             commenter.addUserComment(customComment);
+        } catch (InterruptedException e) {
+            e.printStackTrace(logger.getStream());
+        } catch (IOException e) {
+            e.printStackTrace(logger.getStream());
+        }
+    }
+
+    /**
+     * Fetch remote lint violations from the build workspace and process
+     *
+     * @param lintFile     the path pattern of the file
+     * @param lintFileSize maximum number of bytes to read from the remote file
+     */
+    public void processLintResults(String lintFile, String lintFileSize) {
+        RemoteFileFetcher lintFetcher = new RemoteFileFetcher(workspace, logger, lintFile, lintFileSize);
+        try {
+            String input = lintFetcher.getRemoteFile();
+            if (input != null && input.length() > 0) {
+                lintResults = new LintResults();
+                BufferedReader reader = new BufferedReader(new StringReader(input));
+
+                String lint;
+                while ((lint = reader.readLine()) != null) {
+                    JSONObject json = JSONObject.fromObject(lint);
+                    lintResults.add(new LintResult(
+                            (String) json.get("name"),
+                            (String) json.get("code"),
+                            (String) json.get("severity"),
+                            (String) json.get("path"),
+                            (Integer) json.get("line"),
+                            (Integer) json.get("char"),
+                            (String) json.get("description")));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace(logger.getStream());
         } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
         } catch (IOException e) {
@@ -179,6 +220,13 @@ public class BuildResultProcessor {
                                 harbormasterCoverage.size())
                 );
             }
+            if (lintResults != null) {
+                logger.info(
+                        LOGGING_TAG,
+                        String.format("Publishing lint results for %d violations",
+                                lintResults.getResults().size())
+                );
+            }
 
             logger.info(
                     LOGGING_TAG,
@@ -194,7 +242,8 @@ public class BuildResultProcessor {
                     phid,
                     harbormasterSuccess,
                     unitResults,
-                    harbormasterCoverage
+                    harbormasterCoverage,
+                    lintResults
             ).run();
             if (result != Task.Result.SUCCESS) {
                 return false;

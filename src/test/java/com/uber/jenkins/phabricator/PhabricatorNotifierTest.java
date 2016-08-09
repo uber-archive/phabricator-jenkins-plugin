@@ -21,6 +21,8 @@
 package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.coverage.CoberturaXMLParser;
+import com.uber.jenkins.phabricator.lint.LintResult;
+import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
@@ -46,7 +48,10 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 ".phabricator-comment",
                 "1001",
                 false,
-                true
+                true,
+                true,
+                ".phabricator-lint",
+                "10000"
         );
     }
 
@@ -58,6 +63,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertEquals(".phabricator-comment", notifier.getCommentFile());
         assertEquals("1001", notifier.getCommentSize());
         assertFalse(notifier.isCommentWithConsoleLinkOnFailure());
+        assertTrue(notifier.isProcessLint());
+        assertEquals(".phabricator-lint", notifier.getLintFile());
+        assertEquals("10000", notifier.getLintFileSize());
     }
 
     @Test
@@ -105,6 +113,17 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     @Test
     public void testPostToHarbormaster() throws Exception {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
+    public void testPostToHarbormasterValidLint() throws Exception {
+        JSONObject json = new JSONObject();
+        LintResults result = new LintResults();
+        result.add(new LintResult("test", "testcode", "error", "to/path", 10, 3, "test description"));
+        json.element("lint", result);
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, json);
 
         assertEquals(Result.SUCCESS, build.getResult());
     }
@@ -164,7 +183,10 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 ".phabricator-comment",
                 "1000",
                 false,
-                true
+                true,
+                true,
+                ".phabricator-lint",
+                "10000"
         );
         testPostCoverage();
     }
@@ -183,11 +205,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         assertNull(descriptor.getCredentialsID());
         assertNull(descriptor.getUberallsURL());
-        assertNull(descriptor.getCommentSize());
-        assertNull(descriptor.getCommentFile());
 
-        descriptor.setCommentFile("hello.world");
-        descriptor.setCommentSize("1000");
         descriptor.setCredentialsID("not-a-real-uuid");
         descriptor.setUberallsURL("http://uber.alls");
     }
