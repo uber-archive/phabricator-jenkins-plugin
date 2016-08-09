@@ -199,7 +199,7 @@ public class PhabricatorNotifier extends Notifier {
         resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
 
         // Read lint results to send to Harbormaster
-        resultProcessor.processLintResults(conduitClient, lintFile, lintFileSize);
+        resultProcessor.processLintResults(lintFile, lintFileSize);
 
         // Fail the build if we can't report to Harbormaster
         if (!resultProcessor.processHarbormaster()) {

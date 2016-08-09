@@ -130,27 +130,29 @@ public class BuildResultProcessorTest {
                 TestUtils.getDefaultLogger(),
                 build,
                 mock(Differential.class),
-                mock(DifferentialClient.class),
+                new DifferentialClient(null, new ConduitAPIClient(null, null) {
+                    @Override
+                    public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
+                        if (action == "harbormaster.sendmessage") {
+                            JSONObject json = (JSONObject) ((JSONArray) params.get("lint")).get(0);
+                            JSONObject parsed = result.toHarbormaster();
+                            assertNotNull(parsed);
+                            assertNotNull(json);
+                            for (String key : (Set<String>) params.keySet()) {
+                                assertEquals("mismatch in expected json key: " + key, parsed.get(key), json.get(key));
+                            }
+                            return result.toHarbormaster();
+                        }
+                        return new JSONObject();
+                    }
+                }),
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
                 true
         );
-
-        ConduitAPIClient conduit = new ConduitAPIClient(null, null) {
-            @Override
-            public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
-                JSONObject json = (JSONObject) ((JSONArray) params.get("lint")).get(0);
-                JSONObject parsed = result.toHarbormaster();
-                assertNotNull(parsed);
-                assertNotNull(json);
-                for (String key : (Set<String>) params.keySet()) {
-                    assertEquals("mismatch in expected json key: " + key, parsed.get(key), json.get(key));
-                }
-                return result.toHarbormaster();
-            }
-        };
-        processor.processLintResults(conduit, fileName, "1000");
+        processor.processLintResults(fileName, "1000");
+        processor.processHarbormaster();
     }
 
     private Builder echoBuilder(final String fileName, final String content) {

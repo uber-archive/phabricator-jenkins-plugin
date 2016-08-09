@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
@@ -28,7 +27,10 @@ import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.lint.LintResults;
-import com.uber.jenkins.phabricator.tasks.*;
+import com.uber.jenkins.phabricator.tasks.PostCommentTask;
+import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
+import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
+import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
@@ -135,11 +137,10 @@ public class BuildResultProcessor {
     /**
      * Fetch remote lint violations from the build workspace and process
      *
-     * @param conduit      conduit API client
      * @param lintFile     the path pattern of the file
      * @param lintFileSize maximum number of bytes to read from the remote file
      */
-    public void processLintResults(ConduitAPIClient conduit, String lintFile, String lintFileSize) {
+    public void processLintResults(String lintFile, String lintFileSize) {
         RemoteFileFetcher lintFetcher = new RemoteFileFetcher(workspace, logger, lintFile, lintFileSize);
         try {
             String input = lintFetcher.getRemoteFile();
@@ -158,10 +159,7 @@ public class BuildResultProcessor {
                             (Integer) json.get("line"),
                             (Integer) json.get("char"),
                             (String) json.get("description")));
-
                 }
-                boolean pass = buildResult.isBetterOrEqualTo(hudson.model.Result.SUCCESS);
-                new PostLintTask(logger, conduit, phid, pass, unitResults, harbormasterCoverage, lintResults).run();
             }
         } catch (JSONException e) {
             e.printStackTrace(logger.getStream());
