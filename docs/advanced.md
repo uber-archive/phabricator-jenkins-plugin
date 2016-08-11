@@ -61,3 +61,22 @@ The severity parameter recognizes these severity levels:
 | warning  | Warning  |
 | error    | Error    |
 | disabled | Disabled |
+
+Suspend Useless Jobs
+---------------------
+
+When new builds are triggered from Phabricator due to new changes to the same diff or
+rebuilding via harbormaster, it may be desirable to suspend existing jobs that were triggered
+for the same diff. This can be done by adding the `ABORT_ON_REVISION_ID` string parameter to your job.
+
+![abort on revision id parameter](/docs/jenkins-suspend-param.png)
+
+You need to also add the parameter to your harbormaster request
+![abort on revision id parameter](/docs/harbormaster-suspend-param.png)
+
+This makes the latest build triggered for a diff automatically abort the existing running builds
+for the same diff on the job. Jobs aborted this way will skip notifying phabricator to
+avoid confusion. Please note that builds on the same diff triggered by the same upstream build will not be aborted this way. This can be useful when running multi-configuration jobs and parallel builds that run on the same diff.
+
+Also note that if you pass additional arguments to your harbormaster request they may need to be included in the `ABORT_ON_REVISION_ID` field as well. A good example is when you use the same CI job to build multiple targets on a single diff. So for example, if the jenkins request params have
+`TARGET=some_target`, then to ensure other targets are not cancelled for the same diff, you may want to set `ABORT_ON_REVISION_ID=some_target_${buildable.revision}`.

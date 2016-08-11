@@ -20,12 +20,15 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.google.common.collect.Lists;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Result;
+import hudson.model.*;
 import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -127,6 +130,32 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), commentResponse, null, true);
 
         assertFailureWithMessage("Error applying arc patch", build);
+    }
+
+    @Test
+    public void getAbortOnRevisionIdIfAvailable() throws Exception {
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null, true);
+        assertNull(PhabricatorBuildWrapper.getAbortOnRevisionId(build));
+
+        List<ParameterValue> parameters = Lists.newArrayList();
+        parameters.add(new ParameterValue("ABORT_ON_REVISION_ID") {
+            @Override
+            public Object getValue() {
+                return "test";
+            }
+        });
+        build.addAction(new ParametersAction(parameters));
+        assertEquals("test", PhabricatorBuildWrapper.getAbortOnRevisionId(build));
+    }
+
+    @Test
+    public void getUpstreamRunIfAvailable() throws Exception {
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, null, true);
+        FreeStyleBuild upstream = buildWithConduit(getFetchDiffResponse(), null, null, true);
+        assertNull(PhabricatorBuildWrapper.getUpstreamRun(build));
+
+        build.getAction(CauseAction.class).getCauses().add((new Cause.UpstreamCause(upstream)));
+        assertEquals(upstream, PhabricatorBuildWrapper.getUpstreamRun(build));
     }
 
     @Override

@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.9.8 (Unreleased)
+
+* Abort existing builds when a new build referencing same diff is scheduled (Gautam Korlam)
+
 ### 1.9.7 (2016/08/09)
 
 * Report lint warnings from file (Anup Talwalkar)

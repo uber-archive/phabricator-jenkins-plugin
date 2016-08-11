@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
@@ -35,8 +36,17 @@ import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.Executor;
 import hudson.model.Job;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
+import hudson.util.RunList;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -164,6 +174,42 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         };
     }
 
+    /**
+     * Abort running builds when new build referencing same revision is scheduled to run
+     */
+    @Override
+    public void preCheckout(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException,
+            InterruptedException {
+        String abortOnRevisionId = getAbortOnRevisionId(build);
+        // If ABORT_ON_REVISION_ID is available
+        if (!CommonUtils.isBlank(abortOnRevisionId)) {
+            // Create a cause of interruption
+            PhabricatorCauseOfInterruption causeOfInterruption =
+                    new PhabricatorCauseOfInterruption(build.getUrl());
+            Run upstreamRun = getUpstreamRun(build);
+
+            // Get the running builds that were scheduled before the current one
+            RunList<AbstractBuild> runningBuilds = (RunList<AbstractBuild>) build.getProject().getBuilds();
+            for (AbstractBuild runningBuild : runningBuilds) {
+                Executor executor = runningBuild.getExecutor();
+                Run runningBuildUpstreamRun = getUpstreamRun(runningBuild);
+
+                // Ignore builds that were triggered by the same upstream build
+                // Find builds triggered with the same ABORT_ON_REVISION_ID_FIELD
+                if (runningBuild.isBuilding()
+                        && runningBuild.number < build.number
+                        && abortOnRevisionId.equals(getAbortOnRevisionId(runningBuild))
+                        && (upstreamRun == null
+                        || runningBuildUpstreamRun == null
+                        || !upstreamRun.equals(runningBuildUpstreamRun))
+                        && executor != null) {
+                    // Abort the builds
+                    executor.interrupt(Result.ABORTED, causeOfInterruption);
+                }
+            }
+        }
+    }
+
     private void addShortText(final AbstractBuild build) {
         build.addAction(PhabricatorPostbuildAction.createShortText("master", null));
     }
@@ -238,5 +284,30 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @Override
     public PhabricatorBuildWrapperDescriptor getDescriptor() {
         return (PhabricatorBuildWrapperDescriptor)super.getDescriptor();
+    }
+
+    @VisibleForTesting
+    static String getAbortOnRevisionId(AbstractBuild build) {
+        ParametersAction parameters = build.getAction(ParametersAction.class);
+        if (parameters != null) {
+            ParameterValue parameterValue = parameters.getParameter(
+                    PhabricatorPlugin.ABORT_ON_REVISION_ID_FIELD);
+            if (parameterValue != null) {
+                return (String) parameterValue.getValue();
+            }
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    static Run<?, ?> getUpstreamRun(AbstractBuild build) {
+        CauseAction action = build.getAction(hudson.model.CauseAction.class);
+        if (action != null) {
+            Cause.UpstreamCause upstreamCause = action.findCause(hudson.model.Cause.UpstreamCause.class);
+            if (upstreamCause != null) {
+                return upstreamCause.getUpstreamRun();
+            }
+        }
+        return null;
     }
 }
