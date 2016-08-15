@@ -7,6 +7,20 @@ if Harbormaster is not enabled).
 [Phabricator]: http://phabricator.org/
 [Jenkins]: https://jenkins-ci.org/
 
+Table of Contents
+=================
+* [Configuration](#configuration)
+  * [Phabricator Configuration](#phabricator-configuration)
+  * [Jenkins Setup](#jenkins-setup)
+* [Usage](#usage)
+  * [Jenkins Job](#jenkins-job)
+  * [Harbormaster](#harbormaster)
+  * [Herald](#herald)
+* [Advanced Usage](docs/advanced.md)
+* [Test Your Configuration](#test-your-configuration)
+* [Development](#development)
+* [Testing](#testing)
+
 Configuration
 =============
 
@@ -56,7 +70,7 @@ Jenkins Job
   1. Navigate to the **Post-build Actions** section.
   2. Click the **Add post-build action** button and select **Post to Phabricator**.
   3. Make sure the **Comment on Success** and **Comment with console link on Failure** checkboxes are selected.
-  4. Optionally: 
+  4. Optionally:
     1. If you have [Uberalls](https://github.com/uber/uberalls) enabled, enter a path to scan for Cobertura reports.
     2. If you want to post additional text to Phabricator other than "Pass" and "Fail", select the **Add Custom Comment** checkbox. Then create a `.phabricator-comment` file and enter the text you want Jenkins to add to the build status comment in Phabricator.
 ![Add post-build action](/docs/configure-job-post-build.png)
@@ -75,9 +89,9 @@ With Phabricator, Jenkins, and your Jenkins jobs configured it's time to configu
 7. Use this template URI to fill in the URI field for the build plan: `https://ci.example.com/buildByToken/buildWithParameters?job=test-example&DIFF_ID=${buildable.diff}&PHID=${target.phid}`
 
 	Be sure to replace `https://ci.example.com` with the URI of your Jenkins instance and `test-example` with the name of your Jenkins job.
-	
+
 	If your Jenkins instance is exposed to the internet, make sure to install the [Build Token Root Plugin][] and fill in the `token` parameter.
-	
+
 [Build Token Root Plugin]: https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin
 
 8. Click the **When Complete** dropdown menu and select **Wait For Message**.
@@ -109,6 +123,12 @@ Try `arc diff`-ing on your repo. If everything goes well, you should see Jenkins
 commenting on your diff:
 
 ![Example](/docs/uberalls-integration.png)
+
+Advanced Usage
+--------------
+
+Now that you have build status and optionally coverage data set up, check out some
+[advanced features](docs/advanced.md).
 
 Development
 -----------
