@@ -217,7 +217,7 @@ public class TestUtils {
     }
 
     public static ConduitCredentials getConduitCredentials(String conduitURI) {
-        return new ConduitCredentialsImpl(TEST_CREDENTIALS_ID, conduitURI, TEST_CONDUIT_GATEWAY, "description",
+        return new ConduitCredentialsImpl(TEST_CREDENTIALS_ID, conduitURI, conduitURI, "description",
                 TestUtils.TEST_CONDUIT_TOKEN);
     }
 
