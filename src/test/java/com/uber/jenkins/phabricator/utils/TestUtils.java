@@ -83,6 +83,7 @@ public class TestUtils {
     public static final String TEST_PHID = "PHID-not-real";
     private static final String TEST_CREDENTIALS_ID = "not-a-real-uuid-for-credentials";
     private static final String TEST_CONDUIT_URL = "http://example.gophers";
+    private static final String TEST_CONDUIT_GATEWAY = "http://foo.bar";
     private static final String TEST_UNIT_NAMESPACE = "unit namespace";
     private static final String TEST_UNIT_NAME = "fake test name";
 
@@ -216,7 +217,8 @@ public class TestUtils {
     }
 
     public static ConduitCredentials getConduitCredentials(String conduitURI) {
-        return new ConduitCredentialsImpl(TEST_CREDENTIALS_ID, conduitURI, "description", TestUtils.TEST_CONDUIT_TOKEN);
+        return new ConduitCredentialsImpl(TEST_CREDENTIALS_ID, conduitURI, TEST_CONDUIT_GATEWAY, "description",
+                TestUtils.TEST_CONDUIT_TOKEN);
     }
 
     public static ConduitCredentials getDefaultConduitCredentials() {

@@ -24,7 +24,10 @@ import com.cloudbees.plugins.credentials.Credentials;
 import hudson.util.Secret;
 
 public interface ConduitCredentials extends Credentials {
+
     Secret getToken();
+
+    String getGateway();
 
     String getUrl();
 }

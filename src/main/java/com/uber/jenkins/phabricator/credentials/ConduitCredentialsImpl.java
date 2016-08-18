@@ -23,8 +23,10 @@ package com.uber.jenkins.phabricator.credentials;
 import com.cloudbees.plugins.credentials.CredentialsDescriptor;
 import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
+import com.uber.jenkins.phabricator.utils.CommonUtils;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import hudson.Extension;
 import hudson.util.Secret;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -35,22 +37,32 @@ public class ConduitCredentialsImpl extends BaseStandardCredentials implements C
     @NonNull
     private final Secret token;
 
+    @Nullable
+    private final String gateway;
+
     @NonNull
     private final String url;
 
     @DataBoundConstructor
     public ConduitCredentialsImpl(@CheckForNull String id,
                                   @NonNull @CheckForNull String url,
+                                  @Nullable String gateway,
                                   @CheckForNull String description,
                                   @CheckForNull String token) {
         super(id, description);
         this.url = url;
+        this.gateway = gateway;
         this.token = Secret.fromString(token);
     }
 
     @NonNull
     public String getUrl() {
         return url;
+    }
+
+    @Nullable
+    public String getGateway() {
+        return !CommonUtils.isBlank(gateway) ? gateway : getUrl();
     }
 
     @NonNull
