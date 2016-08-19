@@ -46,5 +46,6 @@ public class ConduitCredentialsImplTest extends BuildIntegrationTest {
 
     @Override
     protected void addBuildStep() {
+        // Do nothing.
     }
 }
