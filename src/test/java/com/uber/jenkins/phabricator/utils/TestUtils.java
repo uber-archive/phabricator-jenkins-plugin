@@ -81,9 +81,10 @@ public class TestUtils {
     public static final String TEST_DIFFERENTIAL_ID = "123";
     public static final String TEST_CONDUIT_TOKEN = "notarealtoken";
     public static final String TEST_PHID = "PHID-not-real";
-    private static final String TEST_CREDENTIALS_ID = "not-a-real-uuid-for-credentials";
-    private static final String TEST_CONDUIT_URL = "http://example.gophers";
-    private static final String TEST_CONDUIT_GATEWAY = "http://foo.bar";
+    public static final String TEST_CREDENTIALS_ID = "not-a-real-uuid-for-credentials";
+    public static final String TEST_CONDUIT_URL = "http://example.gophers";
+    public static final String TEST_CONDUIT_GATEWAY = "http://foo.bar";
+    public static final String TEST_DESCRIPTION = "foobar";
     private static final String TEST_UNIT_NAMESPACE = "unit namespace";
     private static final String TEST_UNIT_NAME = "fake test name";
 
@@ -216,9 +217,12 @@ public class TestUtils {
         setEnvironmentVariables(j, getValidCommitEnvironment());
     }
 
+    public static ConduitCredentials getConduitCredentials(String url, String gateway) {
+        return new ConduitCredentialsImpl(TEST_CREDENTIALS_ID, url, gateway, TEST_DESCRIPTION, TEST_CONDUIT_TOKEN);
+    }
+
     public static ConduitCredentials getConduitCredentials(String conduitURI) {
-        return new ConduitCredentialsImpl(TEST_CREDENTIALS_ID, conduitURI, conduitURI, "description",
-                TestUtils.TEST_CONDUIT_TOKEN);
+        return getConduitCredentials(conduitURI, conduitURI);
     }
 
     public static ConduitCredentials getDefaultConduitCredentials() {
