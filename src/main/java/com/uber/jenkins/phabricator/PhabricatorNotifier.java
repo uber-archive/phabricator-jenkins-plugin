@@ -220,7 +220,7 @@ public class PhabricatorNotifier extends Notifier {
         if (credentials == null) {
             throw new ConduitAPIException("No credentials configured for conduit");
         }
-        return new ConduitAPIClient(credentials.getUrl(), credentials.getToken().getPlainText());
+        return new ConduitAPIClient(credentials.getGateway(), credentials.getToken().getPlainText());
     }
 
     /**
