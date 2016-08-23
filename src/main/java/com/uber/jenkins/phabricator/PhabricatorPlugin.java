@@ -31,6 +31,8 @@ public class PhabricatorPlugin extends Plugin {
     public static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
     // Phabricator object ID (for Harbormaster)
     public static final String PHID_FIELD = "PHID";
+    // Revision ID (to abort old running jobs)
+    public static final String ABORT_ON_REVISION_ID_FIELD = "ABORT_ON_REVISION_ID";
 
     public static String getIconPath(String icon) {
         if (icon == null) {

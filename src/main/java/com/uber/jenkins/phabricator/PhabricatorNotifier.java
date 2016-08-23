@@ -43,10 +43,13 @@ import hudson.model.Job;
 import hudson.model.Result;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
+import jenkins.model.CauseOfInterruption;
+import jenkins.model.InterruptedBuildAction;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.util.List;
 
 public class PhabricatorNotifier extends Notifier {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
@@ -54,6 +57,7 @@ public class PhabricatorNotifier extends Notifier {
     private static final String JUNIT_PLUGIN_NAME = "junit";
     private static final String JUNIT_CLASS_NAME = "com.uber.jenkins.phabricator.unit.JUnitTestProvider";
     private static final String COBERTURA_PLUGIN_NAME = "cobertura";
+    private static final String ABORT_TAG = "abort";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
     // Post a comment on success. Useful for lengthy builds.
@@ -113,6 +117,18 @@ public class PhabricatorNotifier extends Notifier {
         final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
         final String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
         final boolean isDifferential = !CommonUtils.isBlank(diffID);
+
+        InterruptedBuildAction action = build.getAction(InterruptedBuildAction.class);
+        if (action != null) {
+            List<CauseOfInterruption> causes = action.getCauses();
+            for (CauseOfInterruption cause : causes) {
+                if (cause instanceof PhabricatorCauseOfInterruption) {
+                    logger.warn(ABORT_TAG, "Skipping notification step since this build was interrupted"
+                            + " by a newer build with the same differential revision");
+                    return true;
+                }
+            }
+        }
 
         // Handle non-differential build invocations. If PHID is present but DIFF_ID is not, it means somebody is doing
         // a Harbormaster build on a commit rather than a differential, but still wants build status.
