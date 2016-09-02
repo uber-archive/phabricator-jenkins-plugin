@@ -33,6 +33,7 @@ import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -48,6 +49,7 @@ import hudson.tasks.BuildWrapper;
 import hudson.util.RunList;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -66,6 +68,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean skipForcedClean;
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
+    private String workDir;
 
     @DataBoundConstructor
     public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
@@ -76,6 +79,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
+    }
+
+    @DataBoundSetter
+    public void setWorkDir(final String workDir) {
+        this.workDir = workDir;
     }
 
     /** {@inheritDoc} */
@@ -99,7 +107,13 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return new Environment(){};
         }
 
-        LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), build.getWorkspace());
+        FilePath arcWorkPath;
+        if (this.workDir != null && this.workDir.length() > 0) {
+            arcWorkPath = build.getWorkspace().child(workDir);
+        } else {
+            arcWorkPath = build.getWorkspace();
+        }
+        LauncherFactory starter = new LauncherFactory(launcher, environment, listener.getLogger(), arcWorkPath);
 
         ConduitAPIClient conduitClient;
         try {
