@@ -1,5 +1,9 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <f:entry title="SCM type" field="scmType" description="SCM used in this job">
+          <f:radio name="scmType" title="git" value="git" checked="${instance.scmType == 'git' || instance.scmType == null}" />
+          <f:radio name="scmType" title="svn" value="svn" checked="${instance.scmType == 'svn'}" />
+  </f:entry>
   <f:entry title="Create git commit" field="createCommit"
            description="Create a git commit with the patch">
       <f:checkbox />

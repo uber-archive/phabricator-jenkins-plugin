@@ -69,6 +69,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
     private String workDir;
+    private String scmType;
 
     @DataBoundConstructor
     public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
@@ -84,6 +85,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @DataBoundSetter
     public void setWorkDir(final String workDir) {
         this.workDir = workDir;
+    }
+
+    @DataBoundSetter
+    public void setScmType(final String scmType) {
+        this.scmType = scmType;
     }
 
     /** {@inheritDoc} */
@@ -164,7 +170,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         Task.Result result = new ApplyPatchTask(
                 logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
                 DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch,
-                patchWithForceFlag
+                patchWithForceFlag, scmType
         ).run();
 
         if (result != Task.Result.SUCCESS) {
@@ -263,6 +269,16 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @SuppressWarnings("unused")
     public boolean isPatchWithForceFlag() {
         return patchWithForceFlag;
+    }
+
+    @SuppressWarnings("unused")
+    public String getWorkDir() {
+        return workDir;
+    }
+
+    @SuppressWarnings("unused")
+    public String getScmType() {
+        return scmType;
     }
 
     private String getPhabricatorURL(Job owner) {

@@ -42,11 +42,13 @@ public class ApplyPatchTask extends Task {
     private final boolean skipForcedClean;
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
+    private final String scmType;
 
     public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
                           String diffID, String conduitToken, String arcPath,
                           String gitPath, boolean createCommit, boolean skipForcedClean,
-                          boolean createBranch, boolean patchWithForceFlag) {
+                          boolean createBranch, boolean patchWithForceFlag,
+                          String scmType) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
@@ -58,6 +60,7 @@ public class ApplyPatchTask extends Task {
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
+        this.scmType = scmType;
 
         this.logStream = logger.getStream();
     }
@@ -84,36 +87,42 @@ public class ApplyPatchTask extends Task {
     @Override
     protected void execute() {
         try {
-            int exitCode = starter.launch()
-                    .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
-                    .stdout(logStream)
-                    .join();
+            int exitCode;
+            if (this.scmType.equals("git")) {
+                exitCode = starter.launch()
+                        .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
+                        .stdout(logStream)
+                        .join();
 
-            if (exitCode != 0) {
-                info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
-            }
+                if (exitCode != 0) {
+                    info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
+                }
 
-            if (!skipForcedClean) {
-                // Clean workspace, otherwise `arc patch` may fail
+                if (!skipForcedClean) {
+                    // Clean workspace, otherwise `arc patch` may fail
+                    starter.launch()
+                        .stdout(logStream)
+                        .cmds(Arrays.asList(gitPath, "clean", "-fd", "-f"))
+                        .join();
+                }
+
+                // Update submodules recursively.
                 starter.launch()
-                    .stdout(logStream)
-                    .cmds(Arrays.asList(gitPath, "clean", "-fd", "-f"))
-                    .join();
+                        .stdout(logStream)
+                        .cmds(Arrays.asList(gitPath, "submodule", "update", "--init", "--recursive"))
+                        .join();
             }
-
-            // Update submodules recursively.
-            starter.launch()
-                    .stdout(logStream)
-                    .cmds(Arrays.asList(gitPath, "submodule", "update", "--init", "--recursive"))
-                    .join();
 
             List<String> arcPatchParams = new ArrayList<String>(Arrays.asList("--diff", diffID));
-            if (!createCommit) {
-                arcPatchParams.add("--nocommit");
-            }
 
-            if (!createBranch) {
-                arcPatchParams.add("--nobranch");
+            if (this.scmType.equals("git")) {
+                if (!createCommit) {
+                    arcPatchParams.add("--nocommit");
+                }
+
+                if (!createBranch) {
+                    arcPatchParams.add("--nobranch");
+                }
             }
 
             if (patchWithForceFlag) {
