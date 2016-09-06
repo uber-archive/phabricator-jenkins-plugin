@@ -63,7 +63,8 @@ public class ApplyPatchTaskTest {
                 false, // createCommit
                 false, // skipForcedClean
                 false, // createBranch
-                false  // patchWithForceFlag
+                false,  // patchWithForceFlag
+                "git" // scmType
         );
     }
 }
