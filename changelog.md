@@ -1,6 +1,6 @@
 # Changelog
 
-### 1.9.8 (2016/08/26)
+### 1.9.8 (Unreleased)
 
 * Abort existing builds when a new build referencing same diff is scheduled (Gautam Korlam)
 * Add a gateway option - used as an override to url in Conduit credentials
