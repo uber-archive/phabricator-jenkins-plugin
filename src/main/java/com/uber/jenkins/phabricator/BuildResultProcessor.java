@@ -91,19 +91,20 @@ public class BuildResultProcessor {
      *
      * @param uberalls the client to the Uberalls instance
      */
-    public void processParentCoverage(UberallsClient uberalls) {
+    public boolean processParentCoverage(UberallsClient uberalls) {
         // First add in info about the change in coverage, if applicable
+        boolean passBuild = true;
         if (commenter.hasCoverageAvailable()) {
             if (uberalls.isConfigured()) {
-                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBaseCommit(),
-                        diff.getBranch());
+                passBuild = commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()),
+                    diff.getBaseCommit(), diff.getBranch());
             } else {
                 logger.info(LOGGING_TAG, "No Uberalls backend configured, skipping...");
             }
         } else {
             logger.info(LOGGING_TAG, "No line coverage found, skipping...");
         }
-
+        return passBuild;
     }
 
     /**

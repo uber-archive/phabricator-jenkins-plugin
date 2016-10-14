@@ -65,10 +65,11 @@ class CommentBuilder {
      * @param baseCommit
      * @param branchName the name of the current branch
      */
-    public void processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
+    public boolean processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
+        boolean passCoverage = true;
         if (parentCoverage == null) {
             logger.info(UBERALLS_TAG, "unable to find coverage for parent commit");
-            return;
+            return passCoverage;
         }
 
         Float lineCoveragePercent = currentCoverage.getLineCoveragePercent();
@@ -82,6 +83,7 @@ class CommentBuilder {
         String lineCoverageDisplay = String.format("%.3f", lineCoveragePercent);
 
         if (coverageDelta > 0) {
+            passCoverage = false;
             comment.append("Coverage increased (+" + coverageDeltaDisplay + "%) to " + lineCoverageDisplay + "%");
         } else if (coverageDelta < 0) {
             comment.append("Coverage decreased (" + coverageDeltaDisplay + "%) to " + lineCoverageDisplay + "%");
@@ -92,6 +94,8 @@ class CommentBuilder {
         comment.append(" when pulling **" + branchName + "** into ");
         comment.append(baseCommit.substring(0, 7));
         comment.append(".");
+
+        return passCoverage;
     }
 
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {

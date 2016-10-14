@@ -14,10 +14,13 @@
            description="Post a differential comment on successful builds">
     <f:checkbox default="false" />
   </f:entry>
-  <f:entry title="Enable Uberalls" field="uberallsEnabled"
+  <f:optionalBlock field="uberallsEnabled" title="Enable Uberalls" checked="true" inline="true"
            description="Enable code coverage reporting">
-    <f:checkbox default="true" />
-  </f:entry>
+    <f:entry title="Fail on decreased coverage" field="uberallsFailDecreased"
+            description="Fail the build if coverage percentage goes down from last build">
+      <f:checkbox default="false" />
+    </f:entry>
+  </f:optionalBlock>
   <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
            description="Post a differential comment on failed builds with a link to the raw Console Output">
     <f:checkbox default="false" />
