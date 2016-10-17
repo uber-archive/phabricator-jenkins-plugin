@@ -14,6 +14,10 @@
            description="Post a differential comment on successful builds">
     <f:checkbox default="false" />
   </f:entry>
+  <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
+           description="Post a differential comment on failed builds with a link to the raw Console Output">
+    <f:checkbox default="false" />
+  </f:entry>
   <f:optionalBlock field="uberallsEnabled" title="Enable Uberalls" checked="true" inline="true"
            description="Enable code coverage reporting">
     <f:entry title="Fail on decreased coverage" field="coverageCheck"
@@ -25,11 +29,7 @@
         <f:textbox default="0" />
     </f:entry>
   </f:optionalBlock>
-  <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
-           description="Post a differential comment on failed builds with a link to the raw Console Output">
-    <f:checkbox default="false" />
-  </f:entry>
-  <f:optionalBlock field="customComment" name="customComment" title="Add Custom Comment" inline="true" checked="${instance.isCustomComment()}">
+ <f:optionalBlock field="customComment" name="customComment" title="Add Custom Comment" inline="true" checked="${instance.isCustomComment()}">
     <f:entry title="Read comment from file" field="commentFile"
              description="Add additional context to Phabricator comment by outputting to this file">
       <f:textbox default=".phabricator-comment" />
