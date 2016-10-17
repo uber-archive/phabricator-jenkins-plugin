@@ -50,6 +50,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 false,
                 true,
                 false,
+                0.0,
                 true,
                 ".phabricator-comment",
                 "1001",
@@ -148,16 +149,16 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testFailBuildOnDecreasedCoverage() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
-        notifier = getDecreasedLineCoverageNotifier();
+        notifier = getDecreasedLineCoverageNotifier(0.0);
 
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
             "  \"sha\": \"deadbeef\",\n" +
-            "  \"lineCoverage\": 42,\n" +
-            "  \"filesCoverage\": 99.99,\n" +
+            "  \"lineCoverage\": 100,\n" +
+            "  \"filesCoverage\": 100,\n" +
             "  \"packageCoverage\": 100,\n" +
             "  \"classesCoverage\": 100,\n" +
-            "  \"methodCoverage\": 42,\n" +
-            "  \"conditionalCoverage\": 0\n" +
+            "  \"methodCoverage\": 100,\n" +
+            "  \"conditionalCoverage\": 100\n" +
             "}");
         notifier.getDescriptor().setUberallsURL("http://uber.alls");
         notifier.setUberallsClient(uberalls);
@@ -170,18 +171,16 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testPassBuildOnSameCoverage() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
-        notifier = getDecreasedLineCoverageNotifier();
-
+        notifier = getDecreasedLineCoverageNotifier(0.0);
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
             "  \"sha\": \"deadbeef\",\n" +
-            "  \"lineCoverage\": 99.99,\n" +
-            "  \"filesCoverage\": 99.99,\n" +
-            "  \"packageCoverage\": 100,\n" +
-            "  \"classesCoverage\": 100,\n" +
-            "  \"methodCoverage\": 42,\n" +
+            "  \"lineCoverage\": 0,\n" +
+            "  \"filesCoverage\": 0,\n" +
+            "  \"packageCoverage\": 0,\n" +
+            "  \"classesCoverage\": 0,\n" +
+            "  \"methodCoverage\": 0,\n" +
             "  \"conditionalCoverage\": 0\n" +
             "}");
-        notifier.getDescriptor().setUberallsURL("http://uber.alls");
         notifier.setUberallsClient(uberalls);
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
@@ -230,6 +229,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 false,
                 false,
                 false,
+                0.0,
                 true,
                 ".phabricator-comment",
                 "1000",
@@ -266,11 +266,12 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         p.getPublishersList().add(notifier);
     }
 
-    protected PhabricatorNotifier getDecreasedLineCoverageNotifier() {
+    protected PhabricatorNotifier getDecreasedLineCoverageNotifier(double threshold) {
         return new PhabricatorNotifier(
             false,
             true,
             true,
+            threshold,
             true,
             ".phabricator-comment",
             "1001",

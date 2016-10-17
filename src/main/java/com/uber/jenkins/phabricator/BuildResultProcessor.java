@@ -71,7 +71,8 @@ public class BuildResultProcessor {
 
     public BuildResultProcessor(
             Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
-            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting) {
+            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting,
+            double coverageFailThreshold) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -82,7 +83,8 @@ public class BuildResultProcessor {
         this.workspace = build.getWorkspace();
 
         this.commentAction = "none";
-        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting);
+        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
+            coverageFailThreshold);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
@@ -90,6 +92,8 @@ public class BuildResultProcessor {
      * Fetch parent coverage data from Uberalls, if available
      *
      * @param uberalls the client to the Uberalls instance
+     *
+     * @return boolean if coverage threshold passes
      */
     public boolean processParentCoverage(UberallsClient uberalls) {
         // First add in info about the change in coverage, if applicable

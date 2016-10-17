@@ -67,7 +67,7 @@ public class PhabricatorNotifier extends Notifier {
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
-    private final boolean uberallsFailDecreased;
+    private final boolean coverageCheck;
     private final boolean commentWithConsoleLinkOnFailure;
     private final boolean preserveFormatting;
     private final String commentFile;
@@ -76,17 +76,19 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean processLint;
     private final String lintFile;
     private final String lintFileSize;
+    private final double coverageThreshold;
     private UberallsClient uberallsClient;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean uberallsFailDecreased,
+    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
+                               double coverageThreshold,
                                boolean preserveFormatting, String commentFile, String commentSize,
                                boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
                                String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
-        this.uberallsFailDecreased = uberallsFailDecreased;
+        this.coverageCheck = coverageCheck;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
         this.lintFile = lintFile;
@@ -95,6 +97,7 @@ public class PhabricatorNotifier extends Notifier {
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
         this.processLint = processLint;
+        this.coverageThreshold = coverageThreshold;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -210,19 +213,20 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         BuildResultProcessor resultProcessor = new BuildResultProcessor(
-                logger,
-                build,
-                diff,
-                diffClient,
-                environment.get(PhabricatorPlugin.PHID_FIELD),
-                coverageResult,
-                buildUrl,
-                preserveFormatting
+            logger,
+            build,
+            diff,
+            diffClient,
+            environment.get(PhabricatorPlugin.PHID_FIELD),
+            coverageResult,
+            buildUrl,
+            preserveFormatting,
+            coverageThreshold
         );
 
         if (uberallsEnabled) {
             boolean passBuildOnUberalls = resultProcessor.processParentCoverage(uberallsClient);
-            if (!passBuildOnUberalls && uberallsFailDecreased) {
+            if (!passBuildOnUberalls && coverageCheck) {
                 build.setResult(Result.FAILURE);
             }
         }

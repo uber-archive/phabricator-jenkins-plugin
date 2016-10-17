@@ -33,8 +33,11 @@ class CommentBuilder {
     private final String buildURL;
     private final Result result;
     private final boolean preserveFormatting;
+    private final double coverageFailThreshold;
 
-    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL, boolean preserveFormatting) {
+    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
+                          boolean preserveFormatting, double coverageFailThreshold) {
+        this.coverageFailThreshold = coverageFailThreshold;
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
@@ -64,6 +67,8 @@ class CommentBuilder {
      * @param parentCoverage the parent coverage returned from uberalls
      * @param baseCommit
      * @param branchName the name of the current branch
+     *
+     * @return boolean if we fail coverage reporting from threshold
      */
     public boolean processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
         boolean passCoverage = true;
@@ -83,12 +88,16 @@ class CommentBuilder {
         String lineCoverageDisplay = String.format("%.3f", lineCoveragePercent);
 
         if (coverageDelta > 0) {
-            passCoverage = false;
             comment.append("Coverage increased (+" + coverageDeltaDisplay + "%) to " + lineCoverageDisplay + "%");
         } else if (coverageDelta < 0) {
             comment.append("Coverage decreased (" + coverageDeltaDisplay + "%) to " + lineCoverageDisplay + "%");
         } else {
             comment.append("Coverage remained the same (" + lineCoverageDisplay + "%)");
+        }
+
+        // If coverage goes below a certain threshold fail the build
+        if (coverageDelta < coverageFailThreshold) {
+            passCoverage = false;
         }
 
         comment.append(" when pulling **" + branchName + "** into ");

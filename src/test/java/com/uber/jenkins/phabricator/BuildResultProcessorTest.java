@@ -67,7 +67,8 @@ public class BuildResultProcessorTest {
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
-                true
+                true,
+                0.0
         );
         project = j.createFreeStyleProject();
     }
@@ -132,7 +133,8 @@ public class BuildResultProcessorTest {
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
-                true
+                true,
+                0.0
         );
         processor.processLintResults(fileName, "1000");
         processor.processHarbormaster();
