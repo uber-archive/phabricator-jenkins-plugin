@@ -36,22 +36,27 @@ import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.List;
 
-public class PhabricatorNotifier extends Notifier {
+public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
 
     private static final String JUNIT_PLUGIN_NAME = "junit";
@@ -198,7 +203,8 @@ public class PhabricatorNotifier extends Notifier {
                 environment.get(PhabricatorPlugin.PHID_FIELD),
                 coverageResult,
                 buildUrl,
-                preserveFormatting
+                preserveFormatting,
+                build.getWorkspace()
         );
 
         if (uberallsEnabled) {
@@ -273,7 +279,7 @@ public class PhabricatorNotifier extends Notifier {
         }
     }
 
-    private UnitTestProvider getUnitProvider(AbstractBuild build, BuildListener listener) {
+    private UnitTestProvider getUnitProvider(Run<?, ?> build, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
 
         InstanceProvider<UnitTestProvider> provider = new InstanceProvider<UnitTestProvider>(
@@ -357,5 +363,144 @@ public class PhabricatorNotifier extends Notifier {
     @Override
     public PhabricatorNotifierDescriptor getDescriptor() {
         return (PhabricatorNotifierDescriptor) super.getDescriptor();
+    }
+
+    @Override
+    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
+    throws InterruptedException, IOException {
+        EnvVars environment = build.getEnvironment(listener);
+        Logger logger = new Logger(listener.getLogger());
+
+//        final CoverageProvider coverageProvider = getCoverageProvider(build, listener);
+        CodeCoverageMetrics coverageResult = null;
+//        if (coverageProvider != null) {
+//            coverageResult = coverageProvider.getMetrics();
+//        }
+
+        final String branch = environment.get("GIT_BRANCH");
+        final UberallsClient uberallsClient = new UberallsClient(
+                getDescriptor().getUberallsURL(),
+                logger,
+                environment.get("GIT_URL"),
+                branch
+        );
+        final boolean needsDecoration = build.getActions(PhabricatorPostbuildAction.class).size() == 0;
+
+        final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
+        final String phid = environment.get(PhabricatorPlugin.PHID_FIELD);
+        final boolean isDifferential = !CommonUtils.isBlank(diffID);
+
+        InterruptedBuildAction action = build.getAction(InterruptedBuildAction.class);
+        if (action != null) {
+            List<CauseOfInterruption> causes = action.getCauses();
+            for (CauseOfInterruption cause : causes) {
+                if (cause instanceof PhabricatorCauseOfInterruption) {
+                    logger.warn(ABORT_TAG, "Skipping notification step since this build was interrupted"
+                            + " by a newer build with the same differential revision");
+                    return;
+                }
+            }
+        }
+
+        // Handle non-differential build invocations. If PHID is present but DIFF_ID is not, it means somebody is doing
+        // a Harbormaster build on a commit rather than a differential, but still wants build status.
+        // If DIFF_ID is present but PHID is not, it means somebody is doing a Differential build without Harbormaster.
+        // So only skip build result processing if both are blank (e.g. master runs to update coverage data)
+        if (CommonUtils.isBlank(phid) && !isDifferential) {
+            if (needsDecoration) {
+                build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
+            }
+
+            NonDifferentialBuildTask nonDifferentialBuildTask = new NonDifferentialBuildTask(
+                    logger,
+                    uberallsClient,
+                    coverageResult,
+                    uberallsEnabled,
+                    environment.get("GIT_COMMIT")
+            );
+
+            // Ignore the result.
+            nonDifferentialBuildTask.run();
+            return;
+        }
+
+        ConduitAPIClient conduitClient;
+        try {
+            conduitClient = getConduitClient(build.getParent());
+        } catch (ConduitAPIException e) {
+            e.printStackTrace(logger.getStream());
+            logger.warn(CONDUIT_TAG, e.getMessage());
+            return;
+        }
+
+        final String buildUrl = environment.get("BUILD_URL");
+
+        if (!isDifferential) {
+            // Process harbormaster for non-differential builds
+            Task.Result result = new NonDifferentialHarbormasterTask(
+                    logger,
+                    phid,
+                    conduitClient,
+                    build.getResult(),
+                    buildUrl
+            ).run();
+            return;
+        }
+
+        DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
+        Differential diff;
+        try {
+            diff = new Differential(diffClient.fetchDiff());
+        } catch (ConduitAPIException e) {
+            e.printStackTrace(logger.getStream());
+            logger.warn(CONDUIT_TAG, "Unable to fetch differential from Conduit API");
+            logger.warn(CONDUIT_TAG, e.getMessage());
+            return;
+        }
+
+        if (needsDecoration) {
+            diff.decorate(build, this.getPhabricatorURL(build.getParent()));
+        }
+
+        BuildResultProcessor resultProcessor = new BuildResultProcessor(
+                logger,
+                build,
+                diff,
+                diffClient,
+                environment.get(PhabricatorPlugin.PHID_FIELD),
+                coverageResult,
+                buildUrl,
+                preserveFormatting,
+                workspace
+        );
+
+        if (uberallsEnabled) {
+            resultProcessor.processParentCoverage(uberallsClient);
+        }
+
+        // Add in comments about the build result
+        resultProcessor.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure);
+
+        // Process unit tests results to send to Harbormaster
+        resultProcessor.processUnitResults(getUnitProvider(build, listener));
+
+        // Read coverage data to send to Harbormaster
+        //resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
+
+        if (processLint) {
+            // Read lint results to send to Harbormaster
+            resultProcessor.processLintResults(lintFile, lintFileSize);
+        }
+
+        // Fail the build if we can't report to Harbormaster
+        if (!resultProcessor.processHarbormaster()) {
+            return;
+        }
+
+        resultProcessor.processRemoteComment(commentFile, commentSize);
+
+        resultProcessor.sendComment(commentWithConsoleLinkOnFailure);
+
+        return;
     }
 }

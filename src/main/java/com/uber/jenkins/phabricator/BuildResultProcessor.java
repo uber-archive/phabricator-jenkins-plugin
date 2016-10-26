@@ -39,6 +39,7 @@ import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FilenameUtils;
@@ -70,8 +71,9 @@ public class BuildResultProcessor {
     private LintResults lintResults;
 
     public BuildResultProcessor(
-            Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
-            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting) {
+            Logger logger, Run<?, ?> build, Differential diff, DifferentialClient diffClient,
+            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting,
+            FilePath workspace) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -79,7 +81,7 @@ public class BuildResultProcessor {
         this.buildUrl = buildUrl;
 
         this.buildResult = build.getResult();
-        this.workspace = build.getWorkspace();
+        this.workspace = workspace;
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting);
