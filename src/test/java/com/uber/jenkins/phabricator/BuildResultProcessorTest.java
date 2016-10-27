@@ -30,6 +30,8 @@ import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.coverage.FakeCoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -44,6 +46,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -68,7 +71,8 @@ public class BuildResultProcessorTest {
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
-                true
+                true,
+                mock(AbstractBuild.class).getWorkspace()
         );
         project = j.createFreeStyleProject();
     }
@@ -149,7 +153,8 @@ public class BuildResultProcessorTest {
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
-                true
+                true,
+                build.getWorkspace()
         );
         processor.processLintResults(fileName, "1000");
         processor.processHarbormaster();
