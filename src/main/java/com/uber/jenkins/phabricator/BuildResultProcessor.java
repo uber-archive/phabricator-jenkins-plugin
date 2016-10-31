@@ -281,7 +281,7 @@ public class BuildResultProcessor {
      *
      * @param coverageProvider a provider for the coverage data
      */
-    public void processCoverage(CoverageProvider coverageProvider, Set<String> include) {
+    void processCoverage(CoverageProvider coverageProvider) {
         if (coverageProvider == null) {
             logger.info(LOGGING_TAG, "No coverage provider available.");
             return;
@@ -291,20 +291,6 @@ public class BuildResultProcessor {
             logger.info(LOGGING_TAG, "No line coverage available to post to Harbormaster.");
             return;
         }
-
-        Set<String> includeFileNames = new HashSet<String>();
-        for (String file : include) {
-            includeFileNames.add(FilenameUtils.getBaseName(file));
-        }
-
-        Set<String> includedLineCoverage = new HashSet<String>();
-        for (String file : lineCoverage.keySet()) {
-            if (includeFileNames.contains(FilenameUtils.getBaseName(file))) {
-                includedLineCoverage.add(file);
-            }
-        }
-
-        lineCoverage.keySet().retainAll(includedLineCoverage);
 
         harbormasterCoverage = new CoverageConverter().convert(lineCoverage);
     }

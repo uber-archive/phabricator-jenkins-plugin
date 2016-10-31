@@ -79,7 +79,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         return mLineCoverage;
     }
 
-    public Map<String, List<Integer>> parseReports(CoberturaXMLParser parser, File[] reports) {
+    Map<String, List<Integer>> parseReports(CoberturaXMLParser parser, File[] reports) {
         if (reports == null) {
             return null;
         }
@@ -144,7 +144,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     private void computeLineCoverage() {
         FilePath workspace = getBuild().getWorkspace();
         File[] reports = getCoberturaReports(getBuild());
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, getIncludeFileNames());
         mLineCoverage = parseReports(parser, reports);
     }
 
