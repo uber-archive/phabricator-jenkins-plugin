@@ -261,12 +261,14 @@ public class PhabricatorNotifier extends Notifier {
         if (uberallsClient != null) {
             return uberallsClient;
         }
-        return new UberallsClient(
-                getDescriptor().getUberallsURL(),
-                logger,
-                gitUrl,
-                branch
-        );
+
+        setUberallsClient(new UberallsClient(
+            getDescriptor().getUberallsURL(),
+            logger,
+            gitUrl,
+            branch
+        ));
+        return uberallsClient;
     }
 
     // Just for testing

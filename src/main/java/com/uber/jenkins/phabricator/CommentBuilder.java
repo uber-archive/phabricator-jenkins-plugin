@@ -33,11 +33,11 @@ class CommentBuilder {
     private final String buildURL;
     private final Result result;
     private final boolean preserveFormatting;
-    private final double coverageFailThreshold;
+    private final double maximumCoverageDecreaseInPercent;
 
     public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
-                          boolean preserveFormatting, double coverageFailThreshold) {
-        this.coverageFailThreshold = coverageFailThreshold;
+                          boolean preserveFormatting, double maximumCoverageDecreaseInPercent) {
+        this.maximumCoverageDecreaseInPercent = maximumCoverageDecreaseInPercent;
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
@@ -95,8 +95,8 @@ class CommentBuilder {
             comment.append("Coverage remained the same (" + lineCoverageDisplay + "%)");
         }
 
-        // If coverage goes below a certain threshold fail the build
-        if (coverageDelta < coverageFailThreshold) {
+        // If coverage change is less than zero and dips below a certain threshold fail the build
+        if (coverageDelta < 0 && coverageDelta < maximumCoverageDecreaseInPercent) {
             passCoverage = false;
         }
 
