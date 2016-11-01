@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.google.common.collect.Sets;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
@@ -76,38 +75,22 @@ public class BuildResultProcessorTest {
     @Test
     public void testProcessCoverage() throws Exception {
         CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
-        processor.processCoverage(provider, Sets.newHashSet("file.go"));
+        processor.processCoverage(provider);
         assertNotNull(processor.getCoverage());
         assertNotNull(processor.getCoverage().get("file.go"));
         assertEquals("NCUC", processor.getCoverage().get("file.go"));
     }
 
     @Test
-    public void testProcessCoverageWithNoIncludes() throws Exception {
-        CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
-        processor.processCoverage(provider, Sets.newHashSet("file2.go"));
-        assertNotNull(processor.getCoverage());
-        assertNull(processor.getCoverage().get("file.go"));
-    }
-
-    @Test
-    public void testProcessCoverageWithNonMatchingPathIncludes() throws Exception {
-        CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
-        processor.processCoverage(provider, Sets.newHashSet("somePath/file.go"));
-        assertNotNull(processor.getCoverage());
-        assertEquals("NCUC", processor.getCoverage().get("file.go"));
-    }
-
-    @Test
     public void testProcessEmptyCoverage() {
         CoverageProvider provider = new FakeCoverageProvider(null);
-        processor.processCoverage(provider, Sets.<String>newHashSet());
+        processor.processCoverage(provider);
         assertNull(processor.getCoverage());
     }
 
     @Test
     public void testProcessNullProvider() {
-        processor.processCoverage(null, Sets.<String>newHashSet());
+        processor.processCoverage(null);
         assertNull(processor.getCoverage());
     }
 

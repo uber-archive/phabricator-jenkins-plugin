@@ -24,9 +24,23 @@ import hudson.model.AbstractBuild;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class CoverageProvider {
     private AbstractBuild<?, ?> build;
+    private Set<String> includeFileNames;
+
+    /**
+     * Set the list of file names to get coverage metrics for
+     * @param includeFileNames The list of file names to get coverage metrics for
+     */
+    public void setIncludeFileNames(Set<String> includeFileNames) {
+        this.includeFileNames = includeFileNames;
+    }
+
+    protected Set<String> getIncludeFileNames() {
+        return includeFileNames;
+    }
 
     /**
      * Set the owning build for this provider

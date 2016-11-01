@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -29,13 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,9 +48,11 @@ public class CoberturaXMLParser {
     private static final String NODE_NUMBER = "number";
     private static final String NODE_HITS = "hits";
     private final FilePath workspace;
+    private final Set<String> includeFileNames;
 
-    public CoberturaXMLParser(FilePath workspace) {
+    CoberturaXMLParser(FilePath workspace, Set<String> includeFileNames) {
         this.workspace = workspace;
+        this.includeFileNames = includeFileNames;
     }
 
     public Map<String, List<Integer>> parse(File... files) throws ParserConfigurationException, SAXException,
@@ -91,19 +88,17 @@ public class CoberturaXMLParser {
             NodeList classes = entry.getKey();
             List<String> sourceDirs = entry.getValue();
 
-            String detectedSourceRoot = null;
-            boolean detected = false;
             // Loop over all files in the coverage report
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
                 String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
 
-                // On the first file in each coverage report, we need to detect the root directory
-                if (!detected) {
-                    detected = true;
-                    // Make a guess on which of the `sourceDirs` contains the file in question
-                    detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
+                if (includeFileNames != null && !includeFileNames.contains(FilenameUtils.getName(fileName))) {
+                    continue;
                 }
+
+                // Make a guess on which of the `sourceDirs` contains the file in question
+                String detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
                 fileName = join(detectedSourceRoot, fileName);
 
                 SortedMap<Integer, Integer> hitCounts = internalCounts.get(fileName);

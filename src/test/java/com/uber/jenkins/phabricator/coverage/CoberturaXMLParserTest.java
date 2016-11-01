@@ -20,11 +20,11 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import com.google.common.io.Files;
 import hudson.FilePath;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.rules.TemporaryFolder;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,34 +32,38 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-@RunWith(Parameterized.class)
 public class CoberturaXMLParserTest {
 
-    private static final String TEST_COVERAGE_FILE = "go-torch-coverage1.xml";
+    private static final String TEST_COVERAGE_FILE = "go-torch-coverage.xml";
     private static final String TEST_COVERAGE_FILE_1 = "go-torch-coverage1.xml";
     private static final String TEST_COVERAGE_FILE_2 = "go-torch-coverage2.xml";
     private static final String TEST_COVERAGE_FILE_3 = "go-torch-coverage3.xml";
     private static final String TEST_COVERAGE_FILE_OVERWRITE = "go-torch-coverage_overwrite.xml";
-    private static final String TEST_COVERAGE_PYTHON = "python-coverage.xml";
 
-    @Parameterized.Parameter
-    public FilePath workspace;
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Parameterized.Parameter(value = 1)
-    public Boolean createDirectory;
+    private FilePath workspace;
+    private Set<String> includeFileNames;
+
+    @Before
+    public void setUp() {
+        workspace = new FilePath(temporaryFolder.getRoot());
+        includeFileNames = null;
+    }
 
     @Test
     public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException,
             URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, includeFileNames);
 
         File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
         File testCoverageFile2 = getResource(TEST_COVERAGE_FILE_2);
@@ -83,10 +87,10 @@ public class CoberturaXMLParserTest {
     @Test
     public void testGetLineCoverageWhenOneFileOverwriteTheOther()
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace);
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, includeFileNames);
 
         // In `TEST_COVERAGE_FILE`, line 212 has 1 hit
-        File testCoverageFile = getResource(TEST_COVERAGE_FILE);
+        File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
         // In `TEST_COVERAGE_FILE_OVERWRITE`, line 212 has 0 hit
         File testCoverageFileOverwrite = getResource(TEST_COVERAGE_FILE_OVERWRITE);
 
@@ -98,37 +102,22 @@ public class CoberturaXMLParserTest {
     }
 
     @Test
-    public void testDetectCoverageRoot() throws Exception {
-        File tmpDir = Files.createTempDir();
-        File example = new File(tmpDir, "example");
+    public void testGetLineCoverageWithIncludes()
+            throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, Collections.singleton("main.go"));
 
-        try {
-            CoberturaXMLParser parser = new CoberturaXMLParser(new FilePath(tmpDir));
+        File testCoverageFile = getResource(TEST_COVERAGE_FILE);
 
-            if (createDirectory) {
-                example.mkdir();
-            }
-            Map<String, List<Integer>> lineCoverage = parser.parse(getResource(TEST_COVERAGE_PYTHON));
-            List<Integer> libCoverage = lineCoverage.get("example/lib.py");
-            assertEquals(1, libCoverage.get(2).longValue());
-            assertNull(libCoverage.get(1));
-        } finally {
-            if (createDirectory) {
-                example.delete();
-            }
-            tmpDir.delete();
-        }
+        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile);
+        List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
+        assertEquals(1, mainCoverage.get(212).longValue());
+
+        List<Integer> graphCoverage = lineCoverage.get("github.com/uber/go-torch/graph.go");
+        assertNull(graphCoverage);
+
     }
 
     private File getResource(String fileName) throws URISyntaxException {
         return Paths.get(getClass().getResource(fileName).toURI()).toFile();
-    }
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {new FilePath(new File(".")), false},
-                {new FilePath(new File("/tmp")), true},
-        });
     }
 }

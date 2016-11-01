@@ -46,10 +46,14 @@ import hudson.tasks.Notifier;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PhabricatorNotifier extends Notifier {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
@@ -99,12 +103,6 @@ public class PhabricatorNotifier extends Notifier {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
-        final CoverageProvider coverageProvider = getCoverageProvider(build, listener);
-        CodeCoverageMetrics coverageResult = null;
-        if (coverageProvider != null) {
-            coverageResult = coverageProvider.getMetrics();
-        }
-
         final String branch = environment.get("GIT_BRANCH");
         final UberallsClient uberallsClient = new UberallsClient(
                 getDescriptor().getUberallsURL(),
@@ -130,6 +128,8 @@ public class PhabricatorNotifier extends Notifier {
             }
         }
 
+        CoverageProvider coverageProvider;
+
         // Handle non-differential build invocations. If PHID is present but DIFF_ID is not, it means somebody is doing
         // a Harbormaster build on a commit rather than a differential, but still wants build status.
         // If DIFF_ID is present but PHID is not, it means somebody is doing a Differential build without Harbormaster.
@@ -137,6 +137,12 @@ public class PhabricatorNotifier extends Notifier {
         if (CommonUtils.isBlank(phid) && !isDifferential) {
             if (needsDecoration) {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
+            }
+
+            coverageProvider = getCoverageProvider(build, listener, Collections.<String>emptySet());
+            CodeCoverageMetrics coverageResult = null;
+            if (coverageProvider != null) {
+                coverageResult = coverageProvider.getMetrics();
             }
 
             NonDifferentialBuildTask nonDifferentialBuildTask = new NonDifferentialBuildTask(
@@ -190,6 +196,17 @@ public class PhabricatorNotifier extends Notifier {
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
         }
 
+        Set<String> includeFileNames = new HashSet<String>();
+        for (String file : diff.getChangedFiles()) {
+            includeFileNames.add(FilenameUtils.getName(file));
+        }
+
+        coverageProvider = getCoverageProvider(build, listener, includeFileNames);
+        CodeCoverageMetrics coverageResult = null;
+        if (coverageProvider != null) {
+            coverageResult = coverageProvider.getMetrics();
+        }
+
         BuildResultProcessor resultProcessor = new BuildResultProcessor(
                 logger,
                 build,
@@ -212,7 +229,7 @@ public class PhabricatorNotifier extends Notifier {
         resultProcessor.processUnitResults(getUnitProvider(build, listener));
 
         // Read coverage data to send to Harbormaster
-        resultProcessor.processCoverage(coverageProvider, diff.getChangedFiles());
+        resultProcessor.processCoverage(coverageProvider);
 
         if (processLint) {
             // Read lint results to send to Harbormaster
@@ -246,7 +263,8 @@ public class PhabricatorNotifier extends Notifier {
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
-    private CoverageProvider getCoverageProvider(AbstractBuild build, BuildListener listener) {
+    private CoverageProvider getCoverageProvider(AbstractBuild build, BuildListener listener,
+                                                 Set<String> includeFileNames) {
         if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE)) {
             return null;
         }
@@ -265,6 +283,7 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         coverage.setBuild(build);
+        coverage.setIncludeFileNames(includeFileNames);
         if (coverage.hasCoverage()) {
             return coverage;
         } else {
