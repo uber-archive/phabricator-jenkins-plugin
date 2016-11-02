@@ -66,6 +66,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testGetters() {
         assertFalse(notifier.isCommentOnSuccess());
         assertTrue(notifier.isUberallsEnabled());
+        assertFalse(notifier.isCoverageCheck());
+        assertEquals(0.0, notifier.getCoverageThreshold(), 0);
         assertTrue(notifier.isPreserveFormatting());
         assertEquals(".phabricator-comment", notifier.getCommentFile());
         assertEquals("1001", notifier.getCommentSize());

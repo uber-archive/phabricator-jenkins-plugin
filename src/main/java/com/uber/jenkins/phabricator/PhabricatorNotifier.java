@@ -354,6 +354,11 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
+    public boolean isCoverageCheck() {
+        return coverageCheck;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
     public boolean isCommentWithConsoleLinkOnFailure() {
         return commentWithConsoleLinkOnFailure;
     }
@@ -366,6 +371,11 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public String getCommentSize() {
         return commentSize;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public double getCoverageThreshold() {
+        return coverageThreshold;
     }
 
     @SuppressWarnings("UnusedDeclaration")
