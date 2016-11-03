@@ -82,7 +82,7 @@ class CommentBuilder {
         logger.info(UBERALLS_TAG, "line coverage: " + lineCoveragePercent);
         logger.info(UBERALLS_TAG, "found parent coverage as " + parentCoverage.getLineCoveragePercent());
 
-        float coverageDelta = lineCoveragePercent - parentCoverage.getLineCoveragePercent();
+        double coverageDelta = lineCoveragePercent - parentCoverage.getLineCoveragePercent();
 
         String coverageDeltaDisplay = String.format("%.3f", coverageDelta);
         String lineCoverageDisplay = String.format("%.3f", lineCoveragePercent);
@@ -96,7 +96,7 @@ class CommentBuilder {
         }
 
         // If coverage change is less than zero and dips below a certain threshold fail the build
-        if (coverageDelta < 0 && coverageDelta < maximumCoverageDecreaseInPercent) {
+        if (coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(maximumCoverageDecreaseInPercent)) {
             passCoverage = false;
         }
 
