@@ -23,7 +23,9 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.coverage.CoberturaXMLParser;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.lint.LintResults;
+import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
+import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
@@ -34,6 +36,9 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class PhabricatorNotifierTest extends BuildIntegrationTest {
     private PhabricatorNotifier notifier;
@@ -44,6 +49,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         notifier = new PhabricatorNotifier(
                 false,
                 true,
+                false,
+                0.0,
                 true,
                 ".phabricator-comment",
                 "1001",
@@ -59,6 +66,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testGetters() {
         assertFalse(notifier.isCommentOnSuccess());
         assertTrue(notifier.isUberallsEnabled());
+        assertFalse(notifier.isCoverageCheck());
+        assertEquals(0.0, notifier.getCoverageThreshold(), 0);
         assertTrue(notifier.isPreserveFormatting());
         assertEquals(".phabricator-comment", notifier.getCommentFile());
         assertEquals("1001", notifier.getCommentSize());
@@ -139,6 +148,89 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testFailBuildOnDecreasedCoverage() throws Exception {
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
+        UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
+        notifier = getDecreasedLineCoverageNotifier(0.0);
+
+        when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
+            "  \"sha\": \"deadbeef\",\n" +
+            "  \"lineCoverage\": 100,\n" +
+            "  \"filesCoverage\": 100,\n" +
+            "  \"packageCoverage\": 100,\n" +
+            "  \"classesCoverage\": 100,\n" +
+            "  \"methodCoverage\": 100,\n" +
+            "  \"conditionalCoverage\": 100\n" +
+            "}");
+        notifier.getDescriptor().setUberallsURL("http://uber.alls");
+        notifier.setUberallsClient(uberalls);
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.FAILURE, build.getResult());
+    }
+
+    @Test
+    public void testPassBuildOnDecreasedCoverageGreaterThanMaxPercent() throws Exception {
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
+        UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
+        notifier = getDecreasedLineCoverageNotifier(-5.0);
+
+        when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
+            "  \"sha\": \"deadbeef\",\n" +
+            "  \"lineCoverage\": 100,\n" +
+            "  \"filesCoverage\": 100,\n" +
+            "  \"packageCoverage\": 100,\n" +
+            "  \"classesCoverage\": 100,\n" +
+            "  \"methodCoverage\": 100,\n" +
+            "  \"conditionalCoverage\": 100\n" +
+            "}");
+        notifier.getDescriptor().setUberallsURL("http://uber.alls");
+        notifier.setUberallsClient(uberalls);
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
+    public void testPassBuildOnSameCoverage() throws Exception {
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
+        UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
+        notifier = getDecreasedLineCoverageNotifier(0.0);
+        when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
+            "  \"sha\": \"deadbeef\",\n" +
+            "  \"lineCoverage\": 0.0,\n" +
+            "  \"packageCoverage\": 0,\n" +
+            "  \"classesCoverage\": 0,\n" +
+            "  \"methodCoverage\": 0,\n" +
+            "  \"conditionalCoverage\": 0\n" +
+            "}");
+        notifier.setUberallsClient(uberalls);
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
+    public void testPassBuildOnPositiveMaximumCoverageDecrease() throws Exception {
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
+        UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
+        notifier = getDecreasedLineCoverageNotifier(0.01);
+        when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
+            "  \"sha\": \"deadbeef\",\n" +
+            "  \"lineCoverage\": 95.2391,\n" +
+            "  \"filesCoverage\": 0,\n" +
+            "  \"packageCoverage\": 0,\n" +
+            "  \"classesCoverage\": 0,\n" +
+            "  \"methodCoverage\": 0,\n" +
+            "  \"conditionalCoverage\": 0\n" +
+            "}");
+        notifier.setUberallsClient(uberalls);
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+    }
+
+    @Test
     public void testPostCoverageWithoutPublisher() throws Exception {
         TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
 
@@ -179,6 +271,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         notifier = new PhabricatorNotifier(
                 false,
                 false,
+                false,
+                0.0,
                 true,
                 ".phabricator-comment",
                 "1000",
@@ -213,5 +307,22 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     @Override
     protected void addBuildStep() {
         p.getPublishersList().add(notifier);
+    }
+
+    protected PhabricatorNotifier getDecreasedLineCoverageNotifier(double threshold) {
+        return new PhabricatorNotifier(
+            false,
+            true,
+            true,
+            threshold,
+            true,
+            ".phabricator-comment",
+            "1001",
+            false,
+            true,
+            true,
+            ".phabricator-lint",
+            "10000"
+        );
     }
 }

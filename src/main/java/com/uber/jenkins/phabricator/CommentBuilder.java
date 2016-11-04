@@ -33,8 +33,11 @@ class CommentBuilder {
     private final String buildURL;
     private final Result result;
     private final boolean preserveFormatting;
+    private final double maximumCoverageDecreaseInPercent;
 
-    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL, boolean preserveFormatting) {
+    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
+                          boolean preserveFormatting, double maximumCoverageDecreaseInPercent) {
+        this.maximumCoverageDecreaseInPercent = maximumCoverageDecreaseInPercent;
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
@@ -64,11 +67,14 @@ class CommentBuilder {
      * @param parentCoverage the parent coverage returned from uberalls
      * @param baseCommit
      * @param branchName the name of the current branch
+     *
+     * @return boolean if we fail coverage reporting from threshold
      */
-    public void processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
+    public boolean processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
+        boolean passCoverage = true;
         if (parentCoverage == null) {
             logger.info(UBERALLS_TAG, "unable to find coverage for parent commit");
-            return;
+            return passCoverage;
         }
 
         Float lineCoveragePercent = currentCoverage.getLineCoveragePercent();
@@ -76,7 +82,7 @@ class CommentBuilder {
         logger.info(UBERALLS_TAG, "line coverage: " + lineCoveragePercent);
         logger.info(UBERALLS_TAG, "found parent coverage as " + parentCoverage.getLineCoveragePercent());
 
-        float coverageDelta = lineCoveragePercent - parentCoverage.getLineCoveragePercent();
+        double coverageDelta = lineCoveragePercent - parentCoverage.getLineCoveragePercent();
 
         String coverageDeltaDisplay = String.format("%.3f", coverageDelta);
         String lineCoverageDisplay = String.format("%.3f", lineCoveragePercent);
@@ -89,9 +95,16 @@ class CommentBuilder {
             comment.append("Coverage remained the same (" + lineCoverageDisplay + "%)");
         }
 
+        // If coverage change is less than zero and dips below a certain threshold fail the build
+        if (coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(maximumCoverageDecreaseInPercent)) {
+            passCoverage = false;
+        }
+
         comment.append(" when pulling **" + branchName + "** into ");
         comment.append(baseCommit.substring(0, 7));
         comment.append(".");
+
+        return passCoverage;
     }
 
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {

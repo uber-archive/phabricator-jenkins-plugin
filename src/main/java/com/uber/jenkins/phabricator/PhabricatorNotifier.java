@@ -67,6 +67,7 @@ public class PhabricatorNotifier extends Notifier {
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
+    private final boolean coverageCheck;
     private final boolean commentWithConsoleLinkOnFailure;
     private final boolean preserveFormatting;
     private final String commentFile;
@@ -75,14 +76,19 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean processLint;
     private final String lintFile;
     private final String lintFileSize;
+    private final double coverageThreshold;
+    private UberallsClient uberallsClient;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean preserveFormatting,
-                               String commentFile, String commentSize, boolean commentWithConsoleLinkOnFailure,
-                               boolean customComment, boolean processLint, String lintFile, String lintFileSize) {
+    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
+                               double coverageThreshold,
+                               boolean preserveFormatting, String commentFile, String commentSize,
+                               boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
+                               String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
+        this.coverageCheck = coverageCheck;
         this.commentFile = commentFile;
         this.commentSize = commentSize;
         this.lintFile = lintFile;
@@ -91,6 +97,7 @@ public class PhabricatorNotifier extends Notifier {
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
         this.processLint = processLint;
+        this.coverageThreshold = coverageThreshold;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -104,12 +111,10 @@ public class PhabricatorNotifier extends Notifier {
         Logger logger = new Logger(listener.getLogger());
 
         final String branch = environment.get("GIT_BRANCH");
-        final UberallsClient uberallsClient = new UberallsClient(
-                getDescriptor().getUberallsURL(),
-                logger,
-                environment.get("GIT_URL"),
-                branch
-        );
+        final String gitUrl = environment.get("GIT_URL");
+
+        final UberallsClient uberallsClient = getUberallsClient(logger, gitUrl, branch);
+
         final boolean needsDecoration = build.getActions(PhabricatorPostbuildAction.class).size() == 0;
 
         final String diffID = environment.get(PhabricatorPlugin.DIFFERENTIAL_ID_FIELD);
@@ -208,18 +213,22 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         BuildResultProcessor resultProcessor = new BuildResultProcessor(
-                logger,
-                build,
-                diff,
-                diffClient,
-                environment.get(PhabricatorPlugin.PHID_FIELD),
-                coverageResult,
-                buildUrl,
-                preserveFormatting
+            logger,
+            build,
+            diff,
+            diffClient,
+            environment.get(PhabricatorPlugin.PHID_FIELD),
+            coverageResult,
+            buildUrl,
+            preserveFormatting,
+            coverageThreshold
         );
 
         if (uberallsEnabled) {
-            resultProcessor.processParentCoverage(uberallsClient);
+            boolean passBuildOnUberalls = resultProcessor.processParentCoverage(uberallsClient);
+            if (!passBuildOnUberalls && coverageCheck) {
+                build.setResult(Result.FAILURE);
+            }
         }
 
         // Add in comments about the build result
@@ -246,6 +255,25 @@ public class PhabricatorNotifier extends Notifier {
         resultProcessor.sendComment(commentWithConsoleLinkOnFailure);
 
         return true;
+    }
+
+    protected UberallsClient getUberallsClient(Logger logger, String gitUrl, String branch) {
+        if (uberallsClient != null) {
+            return uberallsClient;
+        }
+
+        setUberallsClient(new UberallsClient(
+            getDescriptor().getUberallsURL(),
+            logger,
+            gitUrl,
+            branch
+        ));
+        return uberallsClient;
+    }
+
+    // Just for testing
+    protected void setUberallsClient(UberallsClient client) {
+        uberallsClient = client;
     }
 
     private ConduitAPIClient getConduitClient(Job owner) throws ConduitAPIException {
@@ -326,6 +354,11 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
+    public boolean isCoverageCheck() {
+        return coverageCheck;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
     public boolean isCommentWithConsoleLinkOnFailure() {
         return commentWithConsoleLinkOnFailure;
     }
@@ -338,6 +371,11 @@ public class PhabricatorNotifier extends Notifier {
     @SuppressWarnings("UnusedDeclaration")
     public String getCommentSize() {
         return commentSize;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public double getCoverageThreshold() {
+        return coverageThreshold;
     }
 
     @SuppressWarnings("UnusedDeclaration")

@@ -71,7 +71,8 @@ public class BuildResultProcessor {
 
     public BuildResultProcessor(
             Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
-            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting) {
+            String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting,
+            double maximumCoverageDecreaseInPercent) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -82,7 +83,8 @@ public class BuildResultProcessor {
         this.workspace = build.getWorkspace();
 
         this.commentAction = "none";
-        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting);
+        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
+            maximumCoverageDecreaseInPercent);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
@@ -90,20 +92,23 @@ public class BuildResultProcessor {
      * Fetch parent coverage data from Uberalls, if available
      *
      * @param uberalls the client to the Uberalls instance
+     *
+     * @return
      */
-    public void processParentCoverage(UberallsClient uberalls) {
+    public boolean processParentCoverage(UberallsClient uberalls) {
         // First add in info about the change in coverage, if applicable
+        boolean passBuild = true;
         if (commenter.hasCoverageAvailable()) {
             if (uberalls.isConfigured()) {
-                commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()), diff.getBaseCommit(),
-                        diff.getBranch());
+                passBuild = commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()),
+                    diff.getBaseCommit(), diff.getBranch());
             } else {
                 logger.info(LOGGING_TAG, "No Uberalls backend configured, skipping...");
             }
         } else {
             logger.info(LOGGING_TAG, "No line coverage found, skipping...");
         }
-
+        return passBuild;
     }
 
     /**

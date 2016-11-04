@@ -203,6 +203,6 @@ public class CommentBuilderTest {
     }
 
     private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage, boolean preserveFormatting) {
-        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL, preserveFormatting);
+        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL, preserveFormatting, 0.0);
     }
 }

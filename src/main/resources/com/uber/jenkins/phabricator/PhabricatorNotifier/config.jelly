@@ -14,14 +14,22 @@
            description="Post a differential comment on successful builds">
     <f:checkbox default="false" />
   </f:entry>
-  <f:entry title="Enable Uberalls" field="uberallsEnabled"
-           description="Enable code coverage reporting">
-    <f:checkbox default="true" />
-  </f:entry>
   <f:entry title="Comment with console link on Failure" field="commentWithConsoleLinkOnFailure"
            description="Post a differential comment on failed builds with a link to the raw Console Output">
     <f:checkbox default="false" />
   </f:entry>
+  <f:optionalBlock field="uberallsEnabled" name="uberallsEnabled" title="Enable Uberalls" checked="${instance.isUberallsEnabled()}" inline="true"
+           description="Enable code coverage reporting">
+    <f:entry title="Fail on decreased coverage" field="coverageCheck"
+            description="Fail the build if coverage percentage goes down from last build">
+      <f:checkbox default="false" />
+    </f:entry>
+    <f:entry title="Coverage failure threshold" field="coverageThreshold"
+            description="Fail builds if coverage is below this threshold. Should be a negative number i.e. -5.0 as percent">
+        <f:textbox default="0" />
+    </f:entry>
+  </f:optionalBlock>
+
   <f:optionalBlock field="customComment" name="customComment" title="Add Custom Comment" inline="true" checked="${instance.isCustomComment()}">
     <f:entry title="Read comment from file" field="commentFile"
              description="Add additional context to Phabricator comment by outputting to this file">
@@ -35,6 +43,7 @@
       <f:textbox default="1000" />
     </f:entry>
   </f:optionalBlock>
+
   <f:optionalBlock field="processLint" name="processLint" inline="true" title="Process lint results from a file" checked="${instance.isProcessLint()}">
     <f:entry title="Read lint violations from file" field="lintFile"
              description="Report lint violations by outputting them in Harbormaster-compatible JSON to this file">
