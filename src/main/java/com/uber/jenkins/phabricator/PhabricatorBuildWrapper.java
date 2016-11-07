@@ -224,7 +224,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         if (credentials == null) {
             throw new ConduitAPIException("No credentials configured for conduit");
         }
-        return new ConduitAPIClient(credentials.getUrl(), getConduitToken(owner, logger));
+        return new ConduitAPIClient(credentials.getGateway(), getConduitToken(owner, logger));
     }
 
     private ConduitCredentials getConduitCredentials(Job owner) {
