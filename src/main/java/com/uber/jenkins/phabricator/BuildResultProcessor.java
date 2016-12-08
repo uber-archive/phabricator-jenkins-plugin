@@ -41,15 +41,12 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class BuildResultProcessor {
 
@@ -156,14 +153,7 @@ public class BuildResultProcessor {
                 String lint;
                 while ((lint = reader.readLine()) != null) {
                     JSONObject json = JSONObject.fromObject(lint);
-                    lintResults.add(new LintResult(
-                            (String) json.get("name"),
-                            (String) json.get("code"),
-                            (String) json.get("severity"),
-                            (String) json.get("path"),
-                            (Integer) json.get("line"),
-                            (Integer) json.get("char"),
-                            (String) json.get("description")));
+                    lintResults.add(LintResult.fromJsonObject(json));
                 }
             }
         } catch (JSONException e) {
