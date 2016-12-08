@@ -21,37 +21,30 @@
 package com.uber.jenkins.phabricator.lint;
 
 import net.sf.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class LintResultTest {
-    private LintResult results;
-
-    @Before
-    public void setUp() {
-        results = new LintResult("name", "code", "severity", "path", null, null, "description");
-    }
-
     @Test
     public void testToHarbormaster() {
+        LintResult results = new LintResult("name", "code", "severity", "path", 1, 2, "description");
         assertEquals(7, results.toHarbormaster().size());
     }
 
     @Test
     public void testFromJsonObject() {
-        results = LintResult.fromJsonObject(
+        LintResult results = LintResult.fromJsonObject(
                 JSONObject.fromObject(
                         "{ \"name\": \"NewApi\"," +
                                 "\"code\": \"_code\"," +
                                 "\"severity\": \"error\", " +
-                                "\"path\": \"foobar.java\","));
-        assertTrue(results.name == "NewApi");
-        assertTrue(results.code == "_code");
-        assertTrue(results.severity == "error");
-        assertTrue(results.path == "foobar.java");
+                                "\"path\": \"foobar.java\"}"));
+        assertEquals(results.name, "NewApi");
+        assertEquals(results.code, "_code");
+        assertEquals(results.severity, "error");
+        assertEquals(results.path, "foobar.java");
         assertTrue(results.line == null);
         assertTrue(results.charPosition == null);
         assertTrue(results.description == null);
