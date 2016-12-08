@@ -79,7 +79,7 @@ public class LintResult {
         String path = (String) json.get("path");
         Integer line = (Integer) json.opt("line");
         Integer charPosition = (Integer) json.opt("char");
-        String description = (String) json.get("description");
+        String description = (String) json.opt("description");
 
         return new LintResult(name, code, severity, path, line, charPosition, description);
     }
