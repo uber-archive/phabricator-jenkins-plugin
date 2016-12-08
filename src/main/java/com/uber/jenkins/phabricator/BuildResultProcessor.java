@@ -153,16 +153,7 @@ public class BuildResultProcessor {
                 String lint;
                 while ((lint = reader.readLine()) != null) {
                     JSONObject json = JSONObject.fromObject(lint);
-                    Object line = json.get("line");
-                    Object charPosition = json.get("char");
-                    lintResults.add(new LintResult(
-                            (String) json.get("name"),
-                            (String) json.get("code"),
-                            (String) json.get("severity"),
-                            (String) json.get("path"),
-                            line == null ? null : (Integer) line,
-                            charPosition == null ? null : (Integer) charPosition,
-                            (String) json.get("description")));
+                    lintResults.add(LintResult.fromJsonObject(json));
                 }
             }
         } catch (JSONException e) {
