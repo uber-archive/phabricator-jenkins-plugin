@@ -42,11 +42,12 @@ public class LintResult {
     final String code;
     final String severity;
     final String path;
-    final int line;
-    final int charPosition; // NOTE "char" parameter in JSON
+    final Integer line;
+    final Integer charPosition; // NOTE "char" parameter in JSON
     final String description;
 
-    public LintResult(String name, String code, String severity, String path, int line, int charPosition, String description) {
+    public LintResult(String name, String code, String severity, String path, Integer line, Integer charPosition,
+                      String description) {
         this.name = name;
         this.code = code;
         this.severity = severity;
