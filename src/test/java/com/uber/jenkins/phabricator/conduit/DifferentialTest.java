@@ -32,7 +32,8 @@ import org.junit.Test;
 import java.io.IOException;
 
 public class DifferentialTest extends TestCase {
-    private static final String FAKE_DIFF_ID = "not-a-real-id";
+    private static final String FAKE_DIFF_ID = "not-a-real-diff-id";
+    private static final String FAKE_REVISION_ID = "not-a-real-revision-id";
 
     Differential differential;
 
@@ -43,12 +44,12 @@ public class DifferentialTest extends TestCase {
 
     @Test
     public void testFetchRevisionID() throws Exception {
-        assertEquals(FAKE_DIFF_ID, differential.getRevisionID(false));
+        assertEquals(FAKE_REVISION_ID, differential.getRevisionID(false));
     }
 
     @Test
     public void testGetPhabricatorLink() throws Exception {
-        assertTrue(differential.getPhabricatorLink("http://example.com").contains(FAKE_DIFF_ID));
+        assertTrue(differential.getPhabricatorLink("http://example.com").contains(FAKE_REVISION_ID));
     }
 
     @Test
@@ -86,8 +87,9 @@ public class DifferentialTest extends TestCase {
     @Test
     public void testGetSummaryMessage() throws Exception {
         PhabricatorPostbuildSummaryAction summary = differential.createSummary("http://example.com");
-        assertEquals("http://example.com/Dnot-a-real-id", summary.getUrl());
-        assertEquals("Dnot-a-real-id", summary.getRevisionID());
+        assertEquals("http://example.com/Dnot-a-real-revision-id", summary.getUrl());
+        assertEquals("not-a-real-diff-id", summary.getDiffID());
+        assertEquals("Dnot-a-real-revision-id", summary.getRevisionID());
         assertEquals("aiden", summary.getAuthorName());
         assertEquals("ai@uber.com", summary.getAuthorEmail());
     }
