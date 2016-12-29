@@ -31,15 +31,17 @@ import org.kohsuke.stapler.export.ExportedBean;
 public class PhabricatorPostbuildSummaryAction implements Action {
     private final String iconPath;
     private final String url;
+    private final String diffID;
     private final String revisionID;
     private final String authorName;
     private final String authorEmail;
     private final String commitMessage;
 
-    public PhabricatorPostbuildSummaryAction(String iconPath, String phabricatorLink, String revisionID,
+    public PhabricatorPostbuildSummaryAction(String iconPath, String phabricatorLink, String diffID, String revisionID,
                                              String authorName, String authorEmail, String commitMessage) {
         this.iconPath = iconPath;
         this.url = phabricatorLink;
+        this.diffID = diffID;
         this.revisionID = revisionID;
         this.authorName = authorName;
         this.authorEmail = authorEmail;
@@ -69,6 +71,10 @@ public class PhabricatorPostbuildSummaryAction implements Action {
 
     @Exported public String getRevisionID() {
         return revisionID;
+    }
+
+    @Exported public String getDiffID() {
+        return diffID;
     }
 
     @Exported public String getAuthorName() {
