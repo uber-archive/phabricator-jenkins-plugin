@@ -49,7 +49,7 @@ public class Differential {
         this.rawJSON = rawJSON;
     }
 
-    public String getDIffID() {
+    public String getDiffID() {
         String rawDiffId = (String) rawJSON.get("id");
         if (rawDiffId == null || rawDiffId.equals("")) {
             return null;
@@ -93,7 +93,7 @@ public class Differential {
         return new PhabricatorPostbuildSummaryAction(
                 "phabricator.png",
                 getPhabricatorLink(phabricatorURL),
-                getDIffID(),
+                getDiffID(),
                 getRevisionID(true),
                 getAuthorName(),
                 getAuthorEmail(),
