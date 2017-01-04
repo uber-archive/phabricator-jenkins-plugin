@@ -49,7 +49,7 @@
              description="Report lint violations by outputting them in Harbormaster-compatible JSON to this file">
       <f:textbox default=".phabricator-lint" />
     </f:entry>
-    <f:entry title="Maximum bytes of lint to read" field="lintSize">
+    <f:entry title="Maximum bytes of lint to read" field="lintFileSize">
       <f:textbox default="100000" />
     </f:entry>
   </f:optionalBlock>
