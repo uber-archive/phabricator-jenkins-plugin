@@ -133,8 +133,7 @@ Now that you have build status and optionally coverage data set up, check out so
 Development
 -----------
 
-Set up your Maven file according to
-https://wiki.jenkins-ci.org/display/JENKINS/Plugin+tutorial.
+Use gradle to perform various development related tasks. [More info](https://wiki.jenkins-ci.org/display/JENKINS/Gradle+JPI+Plugin)
 
 
 Testing
@@ -142,10 +141,10 @@ Testing
 
 Start up Jenkins with the plugin installed:
 ```bash
-mvn hpi:run
+./gradlew server
 ```
 
-Open your browser to your [local instance](http://localhost:8080/jenkins/).
+Open your browser to your [local instance](http://localhost:8080).
 
 Pull Requests
 -------------
