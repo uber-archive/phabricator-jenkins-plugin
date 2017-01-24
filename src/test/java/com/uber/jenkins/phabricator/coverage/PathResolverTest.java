@@ -35,10 +35,13 @@ import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class PathResolverTest {
-    @Parameterized.Parameter
     public List<String> candidates;
 
     private Stack<File> cleanupPaths;
+
+    public PathResolverTest(List<String> candidates) {
+        this.candidates = candidates;
+    }
 
     @Test
     public void testChoose() throws Exception {
@@ -81,11 +84,11 @@ public class PathResolverTest {
     }
 
     @Parameterized.Parameters
-    public static Collection<List<String>> data() {
-        return Arrays.asList(
-                new ArrayList<String>(),
-                Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/file"),
-                Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/dir/", "workspace/dir/file")
-        );
+    public static Collection<Object[]> data() {
+        Collection<Object[]> result = new ArrayList();
+        result.add(new Object[] { Collections.emptyList() });
+        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/file") });
+        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/dir/", "workspace/dir/file") });
+        return result;
     }
 }
