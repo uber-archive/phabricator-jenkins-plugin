@@ -3,8 +3,6 @@ target/
 .idea
 .DS_Store
 *.iml
-
 .gradle
 local.properties
-.DS_Store
 **build
