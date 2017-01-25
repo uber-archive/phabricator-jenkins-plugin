@@ -26,7 +26,7 @@ Table of Contents
 Requirements
 =============
 
-* [Arcanist](https://github.com/phacility/arcanist) is installed on the Jenkins nodes where the tests will be run (e.g. not just the master) an the `arc` binary is in `$PATH` or configured explicitly in the global settings.
+* [Arcanist](https://github.com/phacility/arcanist) is installed on the Jenkins nodes where the tests will be run (e.g. not just the master) the `arc` binary is in `$PATH` or configured explicitly in the global settings.
 
 Configuration
 =============
