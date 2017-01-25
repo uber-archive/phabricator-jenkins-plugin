@@ -9,6 +9,7 @@ if Harbormaster is not enabled).
 
 Table of Contents
 =================
+* [Requirements](#requirements)
 * [Configuration](#configuration)
   * [Phabricator Configuration](#phabricator-configuration)
   * [Jenkins Setup](#jenkins-setup)
@@ -20,6 +21,12 @@ Table of Contents
 * [Test Your Configuration](#test-your-configuration)
 * [Development](#development)
 * [Testing](#testing)
+
+
+Requirements
+=============
+
+* Arc available on Jenkins
 
 Configuration
 =============
