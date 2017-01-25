@@ -42,8 +42,11 @@ public class CoberturaXMLParserPatameterizedTest {
 
     private static final String TEST_COVERAGE_PYTHON = "python-coverage.xml";
 
-    @Parameterized.Parameter
     public Boolean createDirectory;
+
+    public CoberturaXMLParserPatameterizedTest(Boolean createDirectory) {
+        this.createDirectory = createDirectory;
+    }
 
     @Test
     public void testDetectCoverageRoot() throws Exception {
