@@ -25,7 +25,6 @@ import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
-import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
@@ -37,7 +36,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 public class PhabricatorNotifierTest extends BuildIntegrationTest {
@@ -167,6 +165,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.FAILURE, build.getResult());
+        assertLogContains("Sending build result to Harbormaster with PHID PHID-not-real, success: false", build);
     }
 
     @Test
