@@ -58,8 +58,8 @@ public class BuildResultProcessor {
     private final String phid;
     private final String buildUrl;
     private final boolean runHarbormaster;
-    private final Result buildResult;
     private final FilePath workspace;
+    private final AbstractBuild build;
     private String commentAction;
     private final CommentBuilder commenter;
     private UnitResults unitResults;
@@ -75,14 +75,17 @@ public class BuildResultProcessor {
         this.diffClient = diffClient;
         this.phid = phid;
         this.buildUrl = buildUrl;
-
-        this.buildResult = build.getResult();
+        this.build = build;
         this.workspace = build.getWorkspace();
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
             maximumCoverageDecreaseInPercent);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
+    }
+
+    public Result getBuildResult() {
+        return this.build.getResult();
     }
 
     /**
@@ -175,7 +178,7 @@ public class BuildResultProcessor {
             return;
         }
 
-        if (commentWithConsoleLinkOnFailure && buildResult.isWorseOrEqualTo(hudson.model.Result.UNSTABLE)) {
+        if (commentWithConsoleLinkOnFailure && getBuildResult().isWorseOrEqualTo(hudson.model.Result.UNSTABLE)) {
             commenter.addBuildFailureMessage();
         } else {
             commenter.addBuildLink();
@@ -190,7 +193,7 @@ public class BuildResultProcessor {
      * @return whether we were able to successfully send the result
      */
     public boolean processHarbormaster() {
-        final boolean harbormasterSuccess = buildResult.isBetterOrEqualTo(Result.SUCCESS);
+        final boolean harbormasterSuccess = getBuildResult().isBetterOrEqualTo(Result.SUCCESS);
 
         if (runHarbormaster) {
             logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
@@ -245,9 +248,9 @@ public class BuildResultProcessor {
             }
         } else {
             logger.info("uberalls", "Harbormaster integration not enabled for this build.");
-            if (buildResult.isBetterOrEqualTo(Result.SUCCESS)) {
+            if (getBuildResult().isBetterOrEqualTo(Result.SUCCESS)) {
                 commentAction = "resign";
-            } else if (buildResult.isWorseOrEqualTo(Result.UNSTABLE)) {
+            } else if (getBuildResult().isWorseOrEqualTo(Result.UNSTABLE)) {
                 commentAction = "reject";
             }
         }
