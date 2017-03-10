@@ -24,13 +24,20 @@ import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class ApplyPatchTask extends Task {
+
+    private static final DateFormat GIT_BRANCH_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+
     private final LauncherFactory starter;
     private final String baseCommit;
     private final String diffID;
@@ -112,9 +119,7 @@ public class ApplyPatchTask extends Task {
                 arcPatchParams.add("--nocommit");
             }
 
-            if (!createBranch) {
-                arcPatchParams.add("--nobranch");
-            }
+            arcPatchParams.add("--nobranch");
 
             if (patchWithForceFlag) {
                 arcPatchParams.add("--force");
@@ -125,8 +130,31 @@ public class ApplyPatchTask extends Task {
                     "patch",
                     conduitToken,
                     arcPatchParams.toArray(new String[arcPatchParams.size()]));
-
             exitCode = arc.callConduit(starter.launch(), logStream);
+
+            if (exitCode == 0 && (createBranch || createCommit)) {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                PrintStream printStream = new PrintStream(outputStream);
+                exitCode = starter.launch()
+                        .cmds(Arrays.asList(gitPath, "rev-parse", "--abbrev-ref", "HEAD"))
+                        .stdout(printStream)
+                        .join();
+                if (exitCode == 0) {
+                    String currentBranchName = new String(outputStream.toByteArray(), "UTF-8");
+                    if (currentBranchName.startsWith("arcpatch-D")) {
+                        // Rename branch to something that will not conflict when workspace is not cleared
+                        String branchName = String.format("diff_%s_%s", diffID, GIT_BRANCH_DATE_FORMAT.format(new Date()));
+                        exitCode = starter.launch()
+                                .cmds(Arrays.asList(gitPath, "branch", "-m", branchName))
+                                .stdout(logStream)
+                                .join();
+
+                        if (exitCode != 0) {
+                            info("Got non-zero exit code trying to rename branch " + currentBranchName + " to " + branchName + ": " + exitCode);
+                        }
+                    }
+                }
+            }
             this.result = exitCode == 0 ? Result.SUCCESS : Result.FAILURE;
         } catch (IOException e) {
             e.printStackTrace(logStream);
