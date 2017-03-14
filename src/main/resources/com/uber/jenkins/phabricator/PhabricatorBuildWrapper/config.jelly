@@ -20,4 +20,8 @@
            description="Skips running sanity checks (like base commit) when applying patch">
       <f:checkbox default="false" />
   </f:entry>
+  <f:entry title="Use Revision ID to patch" field="useRevisionId"
+             description="Use the revision ID to arc patch instead of the DIFF_ID and base commit">
+        <f:checkbox default="false" />
+    </f:entry>
 </j:jelly>

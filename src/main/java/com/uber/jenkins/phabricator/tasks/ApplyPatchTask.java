@@ -34,6 +34,7 @@ public class ApplyPatchTask extends Task {
     private final LauncherFactory starter;
     private final String baseCommit;
     private final String diffID;
+    private final String revisionId;
     private final PrintStream logStream;
     private final String conduitToken;
     private final String arcPath;
@@ -42,15 +43,17 @@ public class ApplyPatchTask extends Task {
     private final boolean skipForcedClean;
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
+    private final boolean useRevisionId;
 
     public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
-                          String diffID, String conduitToken, String arcPath,
+                          String diffID, String revisionId, String conduitToken, String arcPath,
                           String gitPath, boolean createCommit, boolean skipForcedClean,
-                          boolean createBranch, boolean patchWithForceFlag) {
+                          boolean createBranch, boolean patchWithForceFlag, boolean useRevisionId) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
         this.diffID = diffID;
+        this.revisionId = revisionId;
         this.conduitToken = conduitToken;
         this.arcPath = arcPath;
         this.gitPath = gitPath;
@@ -58,6 +61,7 @@ public class ApplyPatchTask extends Task {
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
+        this.useRevisionId = useRevisionId;
 
         this.logStream = logger.getStream();
     }
@@ -84,13 +88,16 @@ public class ApplyPatchTask extends Task {
     @Override
     protected void execute() {
         try {
-            int exitCode = starter.launch()
-                    .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
-                    .stdout(logStream)
-                    .join();
+            int exitCode;
+            if (!useRevisionId) {
+                exitCode = starter.launch()
+                        .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
+                        .stdout(logStream)
+                        .join();
 
-            if (exitCode != 0) {
-                info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
+                if (exitCode != 0) {
+                    info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
+                }
             }
 
             if (!skipForcedClean) {
@@ -107,7 +114,15 @@ public class ApplyPatchTask extends Task {
                     .cmds(Arrays.asList(gitPath, "submodule", "update", "--init", "--recursive"))
                     .join();
 
-            List<String> arcPatchParams = new ArrayList<String>(Arrays.asList("--diff", diffID));
+            List<String> arcPatchParams;
+
+            if (useRevisionId) {
+                arcPatchParams = new ArrayList<String>();
+                arcPatchParams.add(revisionId);
+            } else {
+                arcPatchParams = new ArrayList<String>(Arrays.asList("--diff", diffID));
+            }
+
             if (!createCommit) {
                 arcPatchParams.add("--nocommit");
             }

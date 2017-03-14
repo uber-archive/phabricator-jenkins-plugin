@@ -33,20 +33,10 @@ import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentialsImpl;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitResult;
-import hudson.EnvVars;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleProject;
-import hudson.plugins.cobertura.CoberturaPublisher;
-import hudson.plugins.cobertura.renderers.SourceEncoding;
-import hudson.slaves.EnvironmentVariablesNodeProperty;
-import hudson.tasks.Publisher;
-import hudson.tasks.junit.JUnitResultArchiver;
-import hudson.util.CopyOnWriteMap;
+
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -64,7 +54,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import hudson.EnvVars;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
+import hudson.plugins.cobertura.CoberturaPublisher;
+import hudson.plugins.cobertura.renderers.SourceEncoding;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
+import hudson.tasks.Publisher;
+import hudson.tasks.junit.JUnitResultArchiver;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -79,6 +85,7 @@ public class TestUtils {
     public static final String JUNIT_XML = "junit-test.xml";
 
     public static final String TEST_DIFFERENTIAL_ID = "123";
+    public static final String TEST_REVISION_ID = "D456";
     public static final String TEST_CONDUIT_TOKEN = "notarealtoken";
     public static final String TEST_PHID = "PHID-not-real";
     public static final String TEST_CREDENTIALS_ID = "not-a-real-uuid-for-credentials";

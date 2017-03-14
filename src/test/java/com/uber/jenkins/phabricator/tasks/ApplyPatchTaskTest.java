@@ -20,14 +20,20 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
+import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import static org.junit.Assert.assertEquals;
 
 public class ApplyPatchTaskTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -51,19 +57,69 @@ public class ApplyPatchTaskTest {
         assertEquals(Task.Result.FAILURE, task.run());
     }
 
+    @Test
+    public void testArcPatchWithoutRevisionId() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Logger logger = new Logger(new PrintStream(baos));
+        ApplyPatchTask task = new ApplyPatchTask(
+                logger,
+                TestUtils.createLauncherFactory(j),
+                TestUtils.TEST_SHA,
+                TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_REVISION_ID,
+                TestUtils.TEST_CONDUIT_TOKEN,
+                "echo",
+                "true",
+                false,
+                false,
+                false,
+                false,
+                false
+        );
+        task.run();
+        assertEquals("patch --diff 123 --nocommit --nobranch --conduit-token=notarealtoken\n",
+                new String(baos.toByteArray()));
+    }
+
+    @Test
+    public void testArcPatchWithRevisionId() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Logger logger = new Logger(new PrintStream(baos));
+        ApplyPatchTask task = new ApplyPatchTask(
+                logger,
+                TestUtils.createLauncherFactory(j),
+                TestUtils.TEST_SHA,
+                TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_REVISION_ID,
+                TestUtils.TEST_CONDUIT_TOKEN,
+                "echo",
+                "true",
+                false,
+                false,
+                false,
+                false,
+                true
+        );
+        task.run();
+        assertEquals("patch D456 --nocommit --nobranch --conduit-token=notarealtoken\n",
+                new String(baos.toByteArray()));
+    }
+
     private ApplyPatchTask getTask(String arcPath, String gitPath) throws Exception {
         return new ApplyPatchTask(
                 TestUtils.getDefaultLogger(),
                 TestUtils.createLauncherFactory(j),
                 TestUtils.TEST_SHA,
                 TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_REVISION_ID,
                 TestUtils.TEST_CONDUIT_TOKEN,
                 arcPath,
-                gitPath, // git path
-                false, // createCommit
-                false, // skipForcedClean
-                false, // createBranch
-                false  // patchWithForceFlag
+                gitPath,
+                false,
+                false,
+                false,
+                false,
+                false
         );
     }
 }
