@@ -74,7 +74,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
                                    boolean createBranch, boolean patchWithForceFlag,
                                    boolean useRevisionId) {
         this.createCommit = createCommit;
-        this.applyToMaster = applyToMaster;
+        this.applyToMaster = applyToMaster || useRevisionId; // Always use origin/master when useRevisionId is true
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;

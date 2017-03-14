@@ -88,16 +88,13 @@ public class ApplyPatchTask extends Task {
     @Override
     protected void execute() {
         try {
-            int exitCode;
-            if (!useRevisionId) {
-                exitCode = starter.launch()
-                        .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
-                        .stdout(logStream)
-                        .join();
+            int exitCode = starter.launch()
+                    .cmds(Arrays.asList(gitPath, "reset", "--hard", baseCommit))
+                    .stdout(logStream)
+                    .join();
 
-                if (exitCode != 0) {
-                    info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
-                }
+            if (exitCode != 0) {
+                info("Got non-zero exit code resetting to base commit " + baseCommit + ": " + exitCode);
             }
 
             if (!skipForcedClean) {
