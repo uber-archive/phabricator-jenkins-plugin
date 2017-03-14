@@ -1,7 +1,7 @@
 plugins {
   id 'java'
   id 'checkstyle'
-  id 'org.jenkins-ci.jpi' version '0.21.0'
+  id 'org.jenkins-ci.jpi' version '0.22.0'
   id 'net.saliman.cobertura' version '2.4.0'
   id 'com.github.kt3k.coveralls' version '2.7.1'
 }

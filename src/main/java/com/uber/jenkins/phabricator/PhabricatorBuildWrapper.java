@@ -66,16 +66,19 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean skipForcedClean;
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
+    private final boolean useRevisionId;
 
     @DataBoundConstructor
     public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
                                    boolean skipForcedClean,
-                                   boolean createBranch, boolean patchWithForceFlag) {
+                                   boolean createBranch, boolean patchWithForceFlag,
+                                   boolean useRevisionId) {
         this.createCommit = createCommit;
-        this.applyToMaster = applyToMaster;
+        this.applyToMaster = applyToMaster || useRevisionId; // Always use origin/master when useRevisionId is true
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
+        this.useRevisionId = useRevisionId;
     }
 
     /** {@inheritDoc} */
@@ -148,9 +151,9 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         final String conduitToken = this.getConduitToken(build.getParent(), logger);
         Task.Result result = new ApplyPatchTask(
-                logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
+                logger, starter, baseCommit, diffID, diff.getRevisionID(true), conduitToken, getArcPath(),
                 DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch,
-                patchWithForceFlag
+                patchWithForceFlag, useRevisionId
         ).run();
 
         if (result != Task.Result.SUCCESS) {

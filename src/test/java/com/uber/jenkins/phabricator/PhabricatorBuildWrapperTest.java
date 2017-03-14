@@ -22,15 +22,25 @@ package com.uber.jenkins.phabricator;
 
 import com.google.common.collect.Lists;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.model.*;
+
 import net.sf.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.FreeStyleBuild;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
+import hudson.model.Result;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     private PhabricatorBuildWrapper wrapper;
@@ -39,6 +49,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     public void setUp() throws Exception {
         p = createProject();
         wrapper = new PhabricatorBuildWrapper(
+                false,
                 false,
                 false,
                 false,
