@@ -157,7 +157,7 @@ class CommentBuilder {
      * Add a build link to the comment
      */
     public void addBuildLink() {
-        comment.append(String.format(" %s for more details.", buildURL));
+        comment.append(String.format("\n\nSee %s for more details.", buildURL));
     }
 
     /**
