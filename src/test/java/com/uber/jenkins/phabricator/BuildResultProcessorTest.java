@@ -148,8 +148,6 @@ public class BuildResultProcessorTest {
                 "\"line\": 20," +
                 "\"char\": 30}\n";
 
-        final Counter counter = new Counter();
-
         ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
             @Override
             public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
