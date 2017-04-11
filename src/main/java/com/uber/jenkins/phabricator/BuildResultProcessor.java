@@ -300,4 +300,8 @@ public class BuildResultProcessor {
     public UnitResults getUnitResults() {
         return unitResults;
     }
+
+    public LintResults getLintResults() {
+        return lintResults;
+    }
 }

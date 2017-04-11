@@ -51,6 +51,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class BuildResultProcessorTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -131,7 +132,38 @@ public class BuildResultProcessorTest {
         runProcessLintViolationsTest(content, conduitAPIClient);
     }
 
-    private void runProcessLintViolationsTest(String lintFileContent, ConduitAPIClient conduitAPIClient) throws Exception {
+    @Test
+    public void testProcessLintViolationsWithNonJsonLines() throws Exception {
+        String content = "{\"name\": \"Syntax Error\"," +
+                "\"code\": \"EXAMPLE\"," +
+                "\"severity\": \"error\"," +
+                "\"path\": \"path/to/example\"," +
+                "\"line\": 17," +
+                "\"char\": 3}\n" +
+                "{This is not json}\n" +
+                "{\"name\": \"Syntax Error\"," +
+                "\"code\": \"EXAMPLE\"," +
+                "\"severity\": \"error\"," +
+                "\"path\": \"path/to/example\"," +
+                "\"line\": 20," +
+                "\"char\": 30}\n";
+
+        final Counter counter = new Counter();
+
+        ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
+            @Override
+            public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
+                // Do nothing.
+                return new JSONObject();
+            }
+        };
+
+        BuildResultProcessor buildResultProcessor = runProcessLintViolationsTest(content, conduitAPIClient);
+        assertEquals(2, buildResultProcessor.getLintResults().getResults().size());
+    }
+
+    private BuildResultProcessor runProcessLintViolationsTest(String lintFileContent, ConduitAPIClient conduitAPIClient)
+            throws Exception {
         final String fileName = ".phabricator-lint";
         project.getBuildersList().add(echoBuilder(fileName, lintFileContent));
         FreeStyleBuild build = getBuild();
@@ -149,6 +181,7 @@ public class BuildResultProcessorTest {
         );
         processor.processLintResults(fileName, "1000");
         processor.processHarbormaster();
+        return processor;
     }
 
     private Builder echoBuilder(final String fileName, final String content) {
