@@ -155,12 +155,14 @@ public class BuildResultProcessor {
 
                 String lint;
                 while ((lint = reader.readLine()) != null) {
-                    JSONObject json = JSONObject.fromObject(lint);
-                    lintResults.add(LintResult.fromJsonObject(json));
+                    try {
+                        JSONObject json = JSONObject.fromObject(lint);
+                        lintResults.add(LintResult.fromJsonObject(json));
+                    } catch (JSONException e) {
+                        e.printStackTrace(logger.getStream());
+                    }
                 }
             }
-        } catch (JSONException e) {
-            e.printStackTrace(logger.getStream());
         } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
         } catch (IOException e) {
