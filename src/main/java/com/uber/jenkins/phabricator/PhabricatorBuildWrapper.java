@@ -80,6 +80,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
+        this.workDir = null;
+        this.scmType = "git";
     }
 
     @DataBoundSetter
