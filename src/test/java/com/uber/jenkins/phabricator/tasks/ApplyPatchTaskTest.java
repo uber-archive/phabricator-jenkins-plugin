@@ -39,6 +39,19 @@ public class ApplyPatchTaskTest {
     }
 
     @Test
+    public void testApplyPatchForSvnWithValidArc() throws Exception {
+        ApplyPatchTask task = new ApplyPatchTask(
+                TestUtils.getDefaultLogger(),
+                TestUtils.createLauncherFactory(j),
+                TestUtils.TEST_SHA,
+                TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_CONDUIT_TOKEN,
+                "echo", "true", false, false, false, false, "svn");
+        Task.Result result = task.run();
+        assertEquals(Task.Result.SUCCESS, result);
+    }
+
+    @Test
     public void testApplyPatchWithInvalidArc() throws Exception {
         ApplyPatchTask task = getTask("false", "echo");
         Task.Result result = task.run();
