@@ -4,6 +4,7 @@
 
 * Abort existing builds when a new build referencing same diff is scheduled (Gautam Korlam)
 * Add a gateway option - used as an override to url in Conduit credentials
+* Add Subversion support (Li-Wen Hsu)
 
 ### 1.9.7 (2016/08/09)
 
