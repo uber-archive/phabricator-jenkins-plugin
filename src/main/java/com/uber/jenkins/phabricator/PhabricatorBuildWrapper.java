@@ -232,6 +232,13 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         }
     }
 
+    protected Object readResolve() {
+        if (scmType == null) {
+            scmType = "git";
+        }
+        return this;
+    }
+
     private void addShortText(final AbstractBuild build) {
         build.addAction(PhabricatorPostbuildAction.createShortText("master", null));
     }
