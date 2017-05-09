@@ -29,6 +29,7 @@ import java.util.Set;
 public abstract class CoverageProvider {
     private AbstractBuild<?, ?> build;
     private Set<String> includeFileNames;
+    private String coverageReportPattern;
 
     /**
      * Set the list of file names to get coverage metrics for
@@ -52,6 +53,18 @@ public abstract class CoverageProvider {
 
     protected AbstractBuild getBuild() {
         return build;
+    }
+
+    /**
+     * Set the coverage report pattern to scan for
+     * @param coverageReportPattern The coverage report pattern to scan for
+     */
+    public void setCoverageReportPattern(String coverageReportPattern) {
+        this.coverageReportPattern = coverageReportPattern;
+    }
+
+    String getCoverageReportPattern() {
+        return coverageReportPattern;
     }
 
     public abstract Map<String, List<Integer>> readLineCoverage();

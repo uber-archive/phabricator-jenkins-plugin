@@ -28,6 +28,10 @@
             description="Fail builds if coverage is below this threshold. Should be a negative number i.e. -5.0 as percent">
         <f:textbox default="0" />
     </f:entry>
+    <f:entry title="Coverage report pattern" field="coverageReportPattern"
+             description="The coverage xml report pattern. Use this if any jenkins coverage plugins are not applied.">
+      <f:textbox default="" />
+    </f:entry>
   </f:optionalBlock>
 
   <f:optionalBlock field="customComment" name="customComment" title="Add Custom Comment" inline="true" checked="${instance.isCustomComment()}">

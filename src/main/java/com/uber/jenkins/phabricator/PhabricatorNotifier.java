@@ -77,12 +77,13 @@ public class PhabricatorNotifier extends Notifier {
     private final String lintFile;
     private final String lintFileSize;
     private final double coverageThreshold;
+    private final String coverageReportPattern;
     private UberallsClient uberallsClient;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
-                               double coverageThreshold,
+                               double coverageThreshold, String coverageReportPattern,
                                boolean preserveFormatting, String commentFile, String commentSize,
                                boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
                                String lintFile, String lintFileSize) {
@@ -98,6 +99,7 @@ public class PhabricatorNotifier extends Notifier {
         this.customComment = customComment;
         this.processLint = processLint;
         this.coverageThreshold = coverageThreshold;
+        this.coverageReportPattern = coverageReportPattern;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -312,6 +314,7 @@ public class PhabricatorNotifier extends Notifier {
 
         coverage.setBuild(build);
         coverage.setIncludeFileNames(includeFileNames);
+        coverage.setCoverageReportPattern(coverageReportPattern);
         if (coverage.hasCoverage()) {
             return coverage;
         } else {

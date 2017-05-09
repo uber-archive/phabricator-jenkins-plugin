@@ -39,6 +39,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 public class PhabricatorNotifierTest extends BuildIntegrationTest {
+
+    private static final String COVERAGE_REPORT_FILTER = "**/coverage*.xml, **/cobertura*.xml";
+
     private PhabricatorNotifier notifier;
 
     @Before
@@ -49,6 +52,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 false,
                 0.0,
+                COVERAGE_REPORT_FILTER,
                 true,
                 ".phabricator-comment",
                 "1001",
@@ -272,6 +276,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 false,
                 false,
                 0.0,
+                COVERAGE_REPORT_FILTER,
                 true,
                 ".phabricator-comment",
                 "1000",
@@ -314,6 +319,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
             true,
             true,
             threshold,
+            COVERAGE_REPORT_FILTER,
             true,
             ".phabricator-comment",
             "1001",
