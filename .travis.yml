@@ -23,6 +23,4 @@ cache:
     - $HOME/.gradle/wrapper/
 
 addons:
-  hosts:
-    - phabplugintesthost
   hostname: phabplugintesthost
