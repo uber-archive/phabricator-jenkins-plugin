@@ -21,3 +21,8 @@ cache:
   directories:
     - $HOME/.gradle/caches/modules-2/
     - $HOME/.gradle/wrapper/
+
+addons:
+  hosts:
+    - phabplugintesthost
+  hostname: phabplugintesthost
