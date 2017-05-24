@@ -12,7 +12,7 @@ matrix:
       env: TASKS="cobertura coveralls"
 
 script:
-  - ./gradlew clean $TASKS
+  - ./gradlew clean $TASKS --no-daemon
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -21,3 +21,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/modules-2/
     - $HOME/.gradle/wrapper/
+
+addons:
+  hostname: phabplugintesthost

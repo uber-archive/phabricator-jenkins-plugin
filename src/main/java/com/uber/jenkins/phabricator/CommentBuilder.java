@@ -95,14 +95,20 @@ class CommentBuilder {
             comment.append("Coverage remained the same (" + lineCoverageDisplay + "%)");
         }
 
-        // If coverage change is less than zero and dips below a certain threshold fail the build
-        if (coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(maximumCoverageDecreaseInPercent)) {
-            passCoverage = false;
-        }
-
         comment.append(" when pulling **" + branchName + "** into ");
         comment.append(baseCommit.substring(0, 7));
         comment.append(".");
+
+        // If coverage change is less than zero and dips below a certain threshold fail the build
+        if (coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(maximumCoverageDecreaseInPercent)) {
+            passCoverage = false;
+            String message = "Build failed because coverage decreased more than allowed " +
+                             Math.abs(maximumCoverageDecreaseInPercent) + "%";
+            logger.info(UBERALLS_TAG, message);
+            comment.append("\n");
+            comment.append(message);
+            comment.append(".");
+        }
 
         return passCoverage;
     }
