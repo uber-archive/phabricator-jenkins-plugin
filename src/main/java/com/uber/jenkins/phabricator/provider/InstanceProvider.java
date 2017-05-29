@@ -31,7 +31,7 @@ public class InstanceProvider<T> {
     private final String pluginName;
 
     /**
-     * Encapsulate lazilly loading a concrete implementation when a plugin is available
+     * Encapsulate lazily loading a concrete implementation when a plugin is available
      * @param jenkins the instance of Jenkins
      * @param pluginName the name of the plugin, e.g. "cobertura" or "junit" (maven name)
      * @param className the concrete class name (com.uber.phabricator...)

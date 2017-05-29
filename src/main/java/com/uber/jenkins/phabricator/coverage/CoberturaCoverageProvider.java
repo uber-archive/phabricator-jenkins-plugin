@@ -49,7 +49,6 @@ import hudson.plugins.cobertura.targets.CoverageResult;
 public class CoberturaCoverageProvider extends CoverageProvider {
 
     private static final Logger LOGGER = Logger.getLogger(CoberturaCoverageProvider.class.getName());
-    private static final String COVERAGE_REPORT_FILTER = "**/coverage*.xml, **/cobertura*.xml";
 
     private CoverageResult mCoverageResult = null;
     private Map<String, List<Integer>> mLineCoverage = null;
@@ -158,7 +157,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
 
         if (moduleRoot != null) {
             try {
-                List<FilePath> reports = Arrays.asList(moduleRoot.list(COVERAGE_REPORT_FILTER));
+                List<FilePath> reports = Arrays.asList(moduleRoot.list(getCoverageReportPattern()));
 
                 int i = 0;
                 for (FilePath report : reports) {
