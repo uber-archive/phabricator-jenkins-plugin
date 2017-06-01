@@ -99,7 +99,7 @@ class CommentBuilder {
         comment.append(baseCommit.substring(0, 7));
         comment.append(".");
 
-        // If line coverage is less than allowed minimum, coverage change is less than zero and dips below 
+        // If line coverage is less than allowed minimum, coverage change is less than zero and dips below
         // a certain threshold fail the build
         if (isBuildFailingCoverageCheck(lineCoveragePercent, coverageDelta)) {
             passCoverage = false;
