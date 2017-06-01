@@ -33,16 +33,16 @@ class CommentBuilder {
     private final String buildURL;
     private final Result result;
     private final boolean preserveFormatting;
-    private final double maximumCoverageDecreaseInPercent;
+    private final CoverageCheckSettings coverageCheckSettings;
 
     public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
-                          boolean preserveFormatting, double maximumCoverageDecreaseInPercent) {
-        this.maximumCoverageDecreaseInPercent = maximumCoverageDecreaseInPercent;
+                          boolean preserveFormatting, CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
         this.buildURL = buildURL;
         this.preserveFormatting = preserveFormatting;
+        this.coverageCheckSettings = coverageCheckSettings;
         this.comment = new StringBuilder();
     }
 
@@ -99,11 +99,14 @@ class CommentBuilder {
         comment.append(baseCommit.substring(0, 7));
         comment.append(".");
 
-        // If coverage change is less than zero and dips below a certain threshold fail the build
-        if (coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(maximumCoverageDecreaseInPercent)) {
+        // If line coverage is less than allowed minimum, coverage change is less than zero and dips below 
+        // a certain threshold fail the build
+        if (isBuildFailingCoverageCheck(lineCoveragePercent, coverageDelta)) {
             passCoverage = false;
-            String message = "Build failed because coverage decreased more than allowed " +
-                             Math.abs(maximumCoverageDecreaseInPercent) + "%";
+            String message = "Build failed because coverage is lower than minimum " +
+                             coverageCheckSettings.getMinCoverageInPercent() +
+                             "% and decreased more than allowed " +
+                             Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()) + "%";
             logger.info(UBERALLS_TAG, message);
             comment.append("\n");
             comment.append(message);
@@ -111,6 +114,11 @@ class CommentBuilder {
         }
 
         return passCoverage;
+    }
+
+    private boolean isBuildFailingCoverageCheck(double lineCoveragePercent, double coverageDelta) {
+        return coverageCheckSettings.isCoverageCheckEnabled() && lineCoveragePercent < coverageCheckSettings.getMinCoverageInPercent() &&
+               coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent());
     }
 
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {

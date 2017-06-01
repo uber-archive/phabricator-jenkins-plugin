@@ -1,3 +1,4 @@
+
 // Copyright (c) 2015 Uber
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -69,7 +70,7 @@ public class BuildResultProcessorTest {
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
                 true,
-                0.0
+                new CoverageCheckSettings(true, 0.0, 100.0)
         );
         project = j.createFreeStyleProject();
     }
@@ -175,7 +176,7 @@ public class BuildResultProcessorTest {
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
                 true,
-                0.0
+                new CoverageCheckSettings(true, 0.0, 100.0)
         );
         processor.processLintResults(fileName, "1000");
         processor.processHarbormaster();
