@@ -52,6 +52,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 false,
                 0.0,
+                0.0,
                 COVERAGE_REPORT_FILTER,
                 true,
                 ".phabricator-comment",
@@ -173,10 +174,10 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testPassBuildOnDecreasedCoverageGreaterThanMaxPercent() throws Exception {
+    public void testPassBuildOnDecreasedCoverageButGreaterThanMinPercent() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
-        notifier = getDecreasedLineCoverageNotifier(-5.0);
+        notifier = getNotifierWithCoverageCheck(0.0, 90.0);
 
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
             "  \"sha\": \"deadbeef\",\n" +
@@ -276,6 +277,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 false,
                 false,
                 0.0,
+                0.0,
                 COVERAGE_REPORT_FILTER,
                 true,
                 ".phabricator-comment",
@@ -313,12 +315,17 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         p.getPublishersList().add(notifier);
     }
 
-    protected PhabricatorNotifier getDecreasedLineCoverageNotifier(double threshold) {
+    private PhabricatorNotifier getDecreasedLineCoverageNotifier(double threshold) {
+        return getNotifierWithCoverageCheck(threshold, 100.0);
+    }
+
+    private PhabricatorNotifier getNotifierWithCoverageCheck(double maxCoverageDecrease, double minCoverage) {
         return new PhabricatorNotifier(
             false,
             true,
             true,
-            threshold,
+            maxCoverageDecrease,
+            minCoverage,
             COVERAGE_REPORT_FILTER,
             true,
             ".phabricator-comment",

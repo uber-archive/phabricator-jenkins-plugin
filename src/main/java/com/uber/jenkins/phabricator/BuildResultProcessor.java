@@ -69,7 +69,7 @@ public class BuildResultProcessor {
     public BuildResultProcessor(
             Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
             String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting,
-            double maximumCoverageDecreaseInPercent) {
+            CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -80,7 +80,7 @@ public class BuildResultProcessor {
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
-            maximumCoverageDecreaseInPercent);
+            coverageCheckSettings);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 

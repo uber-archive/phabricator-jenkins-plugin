@@ -67,7 +67,7 @@ public class PhabricatorNotifier extends Notifier {
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
-    private final boolean coverageCheck;
+    private final CoverageCheckSettings coverageCheckSettings;
     private final boolean commentWithConsoleLinkOnFailure;
     private final boolean preserveFormatting;
     private final String commentFile;
@@ -76,20 +76,19 @@ public class PhabricatorNotifier extends Notifier {
     private final boolean processLint;
     private final String lintFile;
     private final String lintFileSize;
-    private final double coverageThreshold;
     private final String coverageReportPattern;
     private UberallsClient uberallsClient;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
-                               double coverageThreshold, String coverageReportPattern,
+                               double coverageThreshold, double minCoverageThreshold, String coverageReportPattern,
                                boolean preserveFormatting, String commentFile, String commentSize,
                                boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
                                String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
-        this.coverageCheck = coverageCheck;
+        this.coverageCheckSettings = new CoverageCheckSettings(coverageCheck, coverageThreshold, minCoverageThreshold);
         this.commentFile = commentFile;
         this.commentSize = commentSize;
         this.lintFile = lintFile;
@@ -98,7 +97,6 @@ public class PhabricatorNotifier extends Notifier {
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
         this.processLint = processLint;
-        this.coverageThreshold = coverageThreshold;
         this.coverageReportPattern = coverageReportPattern;
     }
 
@@ -223,12 +221,12 @@ public class PhabricatorNotifier extends Notifier {
             coverageResult,
             buildUrl,
             preserveFormatting,
-            coverageThreshold
+            coverageCheckSettings
         );
 
         if (uberallsEnabled) {
             boolean passBuildOnUberalls = resultProcessor.processParentCoverage(uberallsClient);
-            if (!passBuildOnUberalls && coverageCheck) {
+            if (!passBuildOnUberalls) {
                 build.setResult(Result.FAILURE);
             }
         }
@@ -358,7 +356,7 @@ public class PhabricatorNotifier extends Notifier {
 
     @SuppressWarnings("UnusedDeclaration")
     public boolean isCoverageCheck() {
-        return coverageCheck;
+        return coverageCheckSettings.isCoverageCheckEnabled();
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -378,7 +376,12 @@ public class PhabricatorNotifier extends Notifier {
 
     @SuppressWarnings("UnusedDeclaration")
     public double getCoverageThreshold() {
-        return coverageThreshold;
+        return coverageCheckSettings.getMaxCoverageDecreaseInPercent();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public double getMinCoverageThreshold() {
+        return coverageCheckSettings.getMinCoverageInPercent();
     }
 
     @SuppressWarnings("UnusedDeclaration")
