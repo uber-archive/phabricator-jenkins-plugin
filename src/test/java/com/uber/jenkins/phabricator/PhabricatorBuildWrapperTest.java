@@ -56,17 +56,6 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testRoundTripConfiguration() throws Exception {
-        addBuildStep();
-
-        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
-
-        PhabricatorBuildWrapper after = p.getBuildWrappersList().get(PhabricatorBuildWrapper.class);
-        j.assertEqualBeans(wrapper, after,
-                "createCommit,applyToMaster,createBranch");
-    }
-
-    @Test
     public void testNoParameterBuild() throws Exception {
         addBuildStep();
 

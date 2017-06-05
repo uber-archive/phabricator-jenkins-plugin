@@ -186,7 +186,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return null;
         }
 
-        return new Environment(){
+        return new Environment() {
             @Override
             public void buildEnvVars(Map<String, String> env) {
                 EnvVars envVars = new EnvVars(env);
