@@ -61,8 +61,10 @@ dependencies {
 }
 
 configurations.all {
-  resolutionStrategy {
-    force 'org.apache.httpcomponents:httpclient:4.3:tests'
+  if (it.name.toLowerCase().contains("test")) {
+    resolutionStrategy {
+      force 'org.apache.httpcomponents:httpclient:4.3:tests'
+    }
   }
 }
 
