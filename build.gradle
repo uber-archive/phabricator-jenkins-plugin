@@ -1,9 +1,9 @@
 plugins {
   id 'java'
   id 'checkstyle'
-  id 'org.jenkins-ci.jpi' version '0.21.0'
+  id 'org.jenkins-ci.jpi' version '0.22.0'
   id 'net.saliman.cobertura' version '2.4.0'
-  id 'com.github.kt3k.coveralls' version '2.7.1'
+  id 'com.github.kt3k.coveralls' version '2.8.1'
 }
 
 group = 'org.jenkins-ci.plugins'
@@ -42,8 +42,8 @@ jenkinsPlugin {
 }
 
 dependencies {
-  compile 'org.apache.httpcomponents:httpcore:4.4.1'
-  compile 'org.apache.httpcomponents:httpclient:4.4.1'
+  compile 'org.apache.httpcomponents:httpcore:4.4.6'
+  compile 'org.apache.httpcomponents:httpclient:4.5.3'
   jenkinsPlugins 'org.jenkins-ci.plugins:credentials:1.22@jar'
 
   optionalJenkinsPlugins 'org.jenkins-ci.plugins:junit:1.6@jar'
