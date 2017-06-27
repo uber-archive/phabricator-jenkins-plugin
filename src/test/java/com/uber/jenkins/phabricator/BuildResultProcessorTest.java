@@ -135,19 +135,10 @@ public class BuildResultProcessorTest {
 
     @Test
     public void testProcessLintViolationsWithNonJsonLines() throws Exception {
-        String content = "{\"name\": \"Syntax Error\"," +
-                "\"code\": \"EXAMPLE\"," +
-                "\"severity\": \"error\"," +
-                "\"path\": \"path/to/example\"," +
-                "\"line\": 17," +
-                "\"char\": 3}\n" +
-                "{This is not json}\n" +
-                "{\"name\": \"Syntax Error\"," +
-                "\"code\": \"EXAMPLE\"," +
-                "\"severity\": \"error\"," +
-                "\"path\": \"path/to/example\"," +
-                "\"line\": 20," +
-                "\"char\": 30}\n";
+        String content = "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n" +
+                "Features should only be in memory when they are attached.\" }\n" +
+                "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"App.java\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n" +
+                "Features should only be in memory when they are attached.\" }\n";
 
         ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
             @Override

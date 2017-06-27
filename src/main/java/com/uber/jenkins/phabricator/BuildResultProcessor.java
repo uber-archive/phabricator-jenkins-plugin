@@ -152,12 +152,14 @@ public class BuildResultProcessor {
             if (input != null && input.length() > 0) {
                 lintResults = new LintResults();
                 BufferedReader reader = new BufferedReader(new StringReader(input));
-
-                String lint;
-                while ((lint = reader.readLine()) != null) {
+                String lint = "";
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lint += line;
                     try {
                         JSONObject json = JSONObject.fromObject(lint);
                         lintResults.add(LintResult.fromJsonObject(json));
+                        lint = "";
                     } catch (JSONException e) {
                         e.printStackTrace(logger.getStream());
                     }
