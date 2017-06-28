@@ -47,22 +47,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     @Before
     public void setUp() throws IOException {
         p = createProject();
-        notifier = new PhabricatorNotifier(
-                false,
-                true,
-                false,
-                0.0,
-                0.0,
-                COVERAGE_REPORT_FILTER,
-                true,
-                ".phabricator-comment",
-                "1001",
-                false,
-                true,
-                true,
-                ".phabricator-lint",
-                "10000"
-        );
+        notifier = getDefaultTestNotifierWithCoverageReportPattern(COVERAGE_REPORT_FILTER);
     }
 
     @Test
@@ -234,6 +219,17 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testPostCoverageWithoutPublisherWithNullReportPattern() throws Exception {
+        notifier = getDefaultTestNotifierWithCoverageReportPattern(null);
+
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("No cobertura results found", build);
+    }
+
+    @Test
     public void testPostUnit() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.JUNIT_XML, JUnitTestProvider.class, "go-torch-junit.xml");
         p.getPublishersList().add(TestUtils.getDefaultXUnitPublisher());
@@ -325,6 +321,25 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
             true,
             ".phabricator-lint",
             "10000"
+        );
+    }
+
+    private PhabricatorNotifier getDefaultTestNotifierWithCoverageReportPattern(String coverageReportPattern) {
+        return new PhabricatorNotifier(
+                false,
+                true,
+                false,
+                0.0,
+                0.0,
+                coverageReportPattern,
+                true,
+                ".phabricator-comment",
+                "1001",
+                false,
+                true,
+                true,
+                ".phabricator-lint",
+                "10000"
         );
     }
 }

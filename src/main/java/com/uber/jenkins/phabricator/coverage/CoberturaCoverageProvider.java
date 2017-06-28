@@ -155,9 +155,10 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         final File buildCoberturaDir = build.getRootDir();
         FilePath buildTarget = new FilePath(buildCoberturaDir);
 
-        if (moduleRoot != null) {
+        String coverageReportPattern = getCoverageReportPattern();
+        if (moduleRoot != null && coverageReportPattern != null) {
             try {
-                List<FilePath> reports = Arrays.asList(moduleRoot.list(getCoverageReportPattern()));
+                List<FilePath> reports = Arrays.asList(moduleRoot.list(coverageReportPattern));
 
                 int i = 0;
                 for (FilePath report : reports) {
