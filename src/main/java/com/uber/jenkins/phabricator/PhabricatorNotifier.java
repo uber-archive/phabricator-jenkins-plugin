@@ -385,6 +385,11 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @SuppressWarnings("UnusedDeclaration")
+    public String getCoverageReportPattern() {
+        return coverageReportPattern;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
     public boolean isPreserveFormatting() {
         return preserveFormatting;
     }
