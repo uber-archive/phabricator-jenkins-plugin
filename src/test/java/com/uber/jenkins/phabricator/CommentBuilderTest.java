@@ -136,6 +136,27 @@ public class CommentBuilderTest {
     }
 
     @Test
+    public void testProcessWithoutCoverageCheckSettings() {
+        CommentBuilder commenter = new CommentBuilder(
+            logger,
+            Result.SUCCESS,
+            TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f), // 50% drop
+            FAKE_BUILD_URL,
+            false,
+            null // coverageCheckSettings
+        );
+
+        boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
+            TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
+        String comment = commenter.getComment();
+
+        // Should not fail if we don't have coverageCheckSettings.
+        assertTrue(passCoverage);
+        assertThat(comment, containsString("decreased (-50.000%)"));
+        assertFalse(comment.contains("Build failed because coverage is lower"));
+    }
+
+    @Test
     public void testProcessBuildResultSuccess() {
         commenter.processBuildResult(false, false, true);
         assertTrue(

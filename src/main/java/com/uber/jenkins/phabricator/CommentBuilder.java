@@ -117,8 +117,10 @@ class CommentBuilder {
     }
 
     private boolean isBuildFailingCoverageCheck(double lineCoveragePercent, double coverageDelta) {
-        return coverageCheckSettings.isCoverageCheckEnabled() && lineCoveragePercent < coverageCheckSettings.getMinCoverageInPercent() &&
-               coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent());
+        return (coverageCheckSettings != null
+            && coverageCheckSettings.isCoverageCheckEnabled()
+            && lineCoveragePercent < coverageCheckSettings.getMinCoverageInPercent()
+            && coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()));
     }
 
     void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {
