@@ -24,6 +24,7 @@ jenkinsPlugin {
   url = 'https://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Differential+Plugin'
   gitHubUrl = 'https://github.com/uber/phabricator-jenkins-plugin'
   shortName = 'phabricator-plugin'
+  maskClasses = 'org.apache.http.'
 
   developers {
     developer {
