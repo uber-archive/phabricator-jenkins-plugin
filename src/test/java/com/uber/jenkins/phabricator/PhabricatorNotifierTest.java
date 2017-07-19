@@ -219,8 +219,22 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testPostCoverageWithoutPublisherWithNullReportPattern() throws Exception {
-        notifier = getDefaultTestNotifierWithCoverageReportPattern(null);
+    public void testPostCoverageWithoutPublisherWithEmptyReportPattern() throws Exception {
+        String[] emptyPatterns = {null, ""};
+        for (String emptyPattern : emptyPatterns) {
+            notifier = getDefaultTestNotifierWithCoverageReportPattern(emptyPattern);
+
+            TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+
+            FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+            assertEquals(Result.SUCCESS, build.getResult());
+            assertLogContains("Publishing coverage data to Harbormaster for 3 files", build);
+        }
+    }
+
+    @Test
+    public void testPostCoverageWithoutPublisherWithNoFilesMatchingReportPattern() throws Exception {
+        notifier = getDefaultTestNotifierWithCoverageReportPattern("*.html");
 
         TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
 
