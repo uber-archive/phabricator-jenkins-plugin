@@ -24,13 +24,18 @@ import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,8 +52,19 @@ public class CoberturaXMLParser {
     private static final String NODE_NAME_LINE = "line";
     private static final String NODE_NUMBER = "number";
     private static final String NODE_HITS = "hits";
+    private static final String EMPTY_XML = "<?xml version='1.0' encoding='UTF-8'?>";
+    private static final Logger LOGGER = Logger.getLogger(CoberturaXMLParser.class.getName());
+    private static final Map<String, String> dtdMap = new HashMap<String, String>();
+
     private final FilePath workspace;
     private final Set<String> includeFileNames;
+
+    static {
+        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-01.dtd1", "coverage-01.dtd");
+        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-02.dtd1", "coverage-02.dtd");
+        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-03.dtd1", "coverage-03.dtd");
+        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-04.dtd1", "coverage-04.dtd");
+    }
 
     CoberturaXMLParser(FilePath workspace, Set<String> includeFileNames) {
         this.workspace = workspace;
@@ -66,6 +82,18 @@ public class CoberturaXMLParser {
             try {
                 is = new FileInputStream(file);
                 db = dbf.newDocumentBuilder();
+                db.setEntityResolver(new EntityResolver() {
+                    @Override
+                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                        String res = dtdMap.get(systemId);
+                        if (res != null) {
+                            return new InputSource(this.getClass().getResourceAsStream(res));
+                        } else {
+                            LOGGER.log(Level.WARNING, "Unknown DTD systemID \"" + systemId + "\", skipping download by returning empty DTD");
+                            return new InputSource(new StringReader(EMPTY_XML));
+                        }
+                    }
+                });
                 Document doc = db.parse(is);
                 NodeList classes = doc.getElementsByTagName(TAG_NAME_CLASS);
                 List<String> sourceDirs = getSourceDirs(doc);
