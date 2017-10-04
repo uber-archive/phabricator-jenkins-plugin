@@ -89,6 +89,7 @@ public class CoberturaXMLParser {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Map<NodeList, List<String>> coverageData = new HashMap<NodeList, List<String>>();
+
         for (File file : files) {
             InputStream is = null;
             try {
