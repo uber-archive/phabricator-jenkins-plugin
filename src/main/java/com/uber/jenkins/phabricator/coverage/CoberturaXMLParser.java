@@ -41,6 +41,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.common.collect.ImmutableMap;
+
 import hudson.FilePath;
 
 public class CoberturaXMLParser {
@@ -54,17 +56,15 @@ public class CoberturaXMLParser {
     private static final String NODE_HITS = "hits";
     private static final String EMPTY_XML = "<?xml version='1.0' encoding='UTF-8'?>";
     private static final Logger LOGGER = Logger.getLogger(CoberturaXMLParser.class.getName());
-    private static final Map<String, String> dtdMap = new HashMap<String, String>();
+    private static final Map<String, String> dtdMap = ImmutableMap.<String, String>builder()
+        .put("http://cobertura.sourceforge.net/xml/coverage-01.dtd1", "coverage-01.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-02.dtd1", "coverage-02.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-03.dtd1", "coverage-03.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd1", "coverage-04.dtd")
+        .build();
 
     private final FilePath workspace;
     private final Set<String> includeFileNames;
-
-    static {
-        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-01.dtd1", "coverage-01.dtd");
-        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-02.dtd1", "coverage-02.dtd");
-        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-03.dtd1", "coverage-03.dtd");
-        dtdMap.put("http://cobertura.sourceforge.net/xml/coverage-04.dtd1", "coverage-04.dtd");
-    }
 
     CoberturaXMLParser(FilePath workspace, Set<String> includeFileNames) {
         this.workspace = workspace;
