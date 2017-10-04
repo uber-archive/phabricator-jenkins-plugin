@@ -63,6 +63,19 @@ public class CoberturaXMLParser {
         .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd1", "coverage-04.dtd")
         .build();
 
+    private static final EntityResolver entityResolver = new EntityResolver() {
+        @Override
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+            String res = dtdMap.get(systemId);
+            if (res != null) {
+                return new InputSource(this.getClass().getResourceAsStream(res));
+            } else {
+                LOGGER.log(Level.WARNING, "Unknown DTD systemID \"" + systemId + "\", skipping download by returning empty DTD");
+                return new InputSource(new StringReader(EMPTY_XML));
+            }
+        }
+    };
+
     private final FilePath workspace;
     private final Set<String> includeFileNames;
 
@@ -76,24 +89,12 @@ public class CoberturaXMLParser {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Map<NodeList, List<String>> coverageData = new HashMap<NodeList, List<String>>();
-
         for (File file : files) {
             InputStream is = null;
             try {
                 is = new FileInputStream(file);
                 db = dbf.newDocumentBuilder();
-                db.setEntityResolver(new EntityResolver() {
-                    @Override
-                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-                        String res = dtdMap.get(systemId);
-                        if (res != null) {
-                            return new InputSource(this.getClass().getResourceAsStream(res));
-                        } else {
-                            LOGGER.log(Level.WARNING, "Unknown DTD systemID \"" + systemId + "\", skipping download by returning empty DTD");
-                            return new InputSource(new StringReader(EMPTY_XML));
-                        }
-                    }
-                });
+                db.setEntityResolver(entityResolver);
                 Document doc = db.parse(is);
                 NodeList classes = doc.getElementsByTagName(TAG_NAME_CLASS);
                 List<String> sourceDirs = getSourceDirs(doc);
