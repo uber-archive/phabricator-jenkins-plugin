@@ -5,6 +5,7 @@ matrix:
   fast_finish: true
   include:
     - jdk: openjdk7
+      dist: precise
       env: TASKS="check"
     - jdk: oraclejdk7
       env: TASKS="check"
