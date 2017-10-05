@@ -6,7 +6,8 @@ matrix:
   include:
     - jdk: openjdk7
       env: TASKS="check"
-    - jdk: oraclejdk7
+      dist: precise
+    - jdk: oraclejdk8
       env: TASKS="check"
     - jdk: oraclejdk8
       env: TASKS="cobertura coveralls"
