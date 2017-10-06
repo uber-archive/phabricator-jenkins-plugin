@@ -57,10 +57,10 @@ public class CoberturaXMLParser {
     private static final String EMPTY_XML = "<?xml version='1.0' encoding='UTF-8'?>";
     private static final Logger LOGGER = Logger.getLogger(CoberturaXMLParser.class.getName());
     private static final Map<String, String> dtdMap = ImmutableMap.<String, String>builder()
-        .put("http://cobertura.sourceforge.net/xml/coverage-01.dtd1", "coverage-01.dtd")
-        .put("http://cobertura.sourceforge.net/xml/coverage-02.dtd1", "coverage-02.dtd")
-        .put("http://cobertura.sourceforge.net/xml/coverage-03.dtd1", "coverage-03.dtd")
-        .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd1", "coverage-04.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-01.dtd", "coverage-01.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-02.dtd", "coverage-02.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-03.dtd", "coverage-03.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd", "coverage-04.dtd")
         .build();
 
     private static final EntityResolver entityResolver = new EntityResolver() {
