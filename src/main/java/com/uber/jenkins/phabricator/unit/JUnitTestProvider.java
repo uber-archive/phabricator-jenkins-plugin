@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator.unit;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.SuiteResult;
 import hudson.tasks.junit.TestResult;
@@ -75,7 +75,7 @@ public class JUnitTestProvider extends UnitTestProvider {
     }
 
     private TestResult getJUnitResults() {
-        AbstractBuild build = getBuild();
+        Run<?, ?> build = getBuild();
 
         TestResultAction jUnitAction = build.getAction(TestResultAction.class);
         if (jUnitAction == null) {

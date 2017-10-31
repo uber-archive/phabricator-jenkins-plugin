@@ -30,11 +30,14 @@ import com.uber.jenkins.phabricator.coverage.CoverageProvider;
 import com.uber.jenkins.phabricator.coverage.FakeCoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Run;
 import hudson.tasks.Builder;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -44,6 +47,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -63,7 +67,8 @@ public class BuildResultProcessorTest {
     public void setUp() throws IOException {
         processor = new BuildResultProcessor(
                 TestUtils.getDefaultLogger(),
-                mock(AbstractBuild.class),
+                mock(Run.class),
+                new FilePath(new File("")),
                 mock(Differential.class),
                 mock(DifferentialClient.class),
                 TestUtils.TEST_PHID,
@@ -161,6 +166,7 @@ public class BuildResultProcessorTest {
         BuildResultProcessor processor = new BuildResultProcessor(
                 TestUtils.getDefaultLogger(),
                 build,
+                build.getWorkspace(),
                 mock(Differential.class),
                 new DifferentialClient(null, conduitAPIClient),
                 TestUtils.TEST_PHID,

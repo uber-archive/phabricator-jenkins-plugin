@@ -20,23 +20,23 @@
 
 package com.uber.jenkins.phabricator.unit;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 
 /**
  * Provides an interface for plugins that have unit test results
  */
 public abstract class UnitTestProvider {
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
 
     /**
      * Set the owning build for this provider
      * @param build The build that is associated with the current run
      */
-    public void setBuild(AbstractBuild<?, ?> build) {
+    public void setBuild(Run<?, ?> build) {
         this.build = build;
     }
 
-    protected AbstractBuild getBuild() {
+    protected Run<?, ?> getBuild() {
         return build;
     }
 

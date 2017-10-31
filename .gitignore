@@ -6,3 +6,4 @@ target/
 .gradle
 local.properties
 **build
+/bin/

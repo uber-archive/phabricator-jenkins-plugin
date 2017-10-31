@@ -35,17 +35,22 @@ import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
+import hudson.AbortException;
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep;
+
 import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -55,7 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class PhabricatorNotifier extends Notifier {
+public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
 
     private static final String JUNIT_PLUGIN_NAME = "junit";
@@ -105,8 +110,8 @@ public class PhabricatorNotifier extends Notifier {
     }
 
     @Override
-    public final boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher,
-                                 final BuildListener listener) throws InterruptedException, IOException {
+    public final void perform(final Run<?, ?> build, FilePath workspace, final Launcher launcher,
+                                 final TaskListener listener) throws InterruptedException, IOException {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
@@ -128,7 +133,7 @@ public class PhabricatorNotifier extends Notifier {
                 if (cause instanceof PhabricatorCauseOfInterruption) {
                     logger.warn(ABORT_TAG, "Skipping notification step since this build was interrupted"
                             + " by a newer build with the same differential revision");
-                    return true;
+                    return;
                 }
             }
         }
@@ -144,7 +149,7 @@ public class PhabricatorNotifier extends Notifier {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            coverageProvider = getCoverageProvider(build, listener, Collections.<String>emptySet());
+            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.<String>emptySet());
             CodeCoverageMetrics coverageResult = null;
             if (coverageProvider != null) {
                 coverageResult = coverageProvider.getMetrics();
@@ -160,7 +165,7 @@ public class PhabricatorNotifier extends Notifier {
 
             // Ignore the result.
             nonDifferentialBuildTask.run();
-            return true;
+            return;
         }
 
         ConduitAPIClient conduitClient;
@@ -169,7 +174,7 @@ public class PhabricatorNotifier extends Notifier {
         } catch (ConduitAPIException e) {
             e.printStackTrace(logger.getStream());
             logger.warn(CONDUIT_TAG, e.getMessage());
-            return false;
+            throw new AbortException();
         }
 
         final String buildUrl = environment.get("BUILD_URL");
@@ -183,7 +188,11 @@ public class PhabricatorNotifier extends Notifier {
                     build.getResult(),
                     buildUrl
             ).run();
-            return result == Task.Result.SUCCESS;
+            if (result == Task.Result.SUCCESS) {
+                return;
+            } else {
+                throw new AbortException();
+            }
         }
 
         DifferentialClient diffClient = new DifferentialClient(diffID, conduitClient);
@@ -194,7 +203,7 @@ public class PhabricatorNotifier extends Notifier {
             e.printStackTrace(logger.getStream());
             logger.warn(CONDUIT_TAG, "Unable to fetch differential from Conduit API");
             logger.warn(CONDUIT_TAG, e.getMessage());
-            return true;
+            return;
         }
 
         if (needsDecoration) {
@@ -206,7 +215,7 @@ public class PhabricatorNotifier extends Notifier {
             includeFileNames.add(FilenameUtils.getName(file));
         }
 
-        coverageProvider = getCoverageProvider(build, listener, includeFileNames);
+        coverageProvider = getCoverageProvider(build, workspace, listener, includeFileNames);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
@@ -215,6 +224,7 @@ public class PhabricatorNotifier extends Notifier {
         BuildResultProcessor resultProcessor = new BuildResultProcessor(
             logger,
             build,
+            workspace,
             diff,
             diffClient,
             environment.get(PhabricatorPlugin.PHID_FIELD),
@@ -247,14 +257,12 @@ public class PhabricatorNotifier extends Notifier {
 
         // Fail the build if we can't report to Harbormaster
         if (!resultProcessor.processHarbormaster()) {
-            return false;
+            throw new AbortException();
         }
 
         resultProcessor.processRemoteComment(commentFile, commentSize);
 
         resultProcessor.sendComment(commentWithConsoleLinkOnFailure);
-
-        return true;
     }
 
     protected UberallsClient getUberallsClient(Logger logger, String gitUrl, String branch) {
@@ -291,9 +299,15 @@ public class PhabricatorNotifier extends Notifier {
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
-    private CoverageProvider getCoverageProvider(AbstractBuild build, BuildListener listener,
+    private CoverageProvider getCoverageProvider(Run<?, ?> build, FilePath workspace, TaskListener listener,
                                                  Set<String> includeFileNames) {
-        if (!build.getResult().isBetterOrEqualTo(Result.UNSTABLE)) {
+        Result buildResult = null;
+        if (build.getResult() == null) {
+            buildResult = Result.SUCCESS;
+        } else {
+            buildResult = build.getResult();
+        }
+        if (!buildResult.isBetterOrEqualTo(Result.UNSTABLE)) {
             return null;
         }
 
@@ -311,6 +325,7 @@ public class PhabricatorNotifier extends Notifier {
         }
 
         coverage.setBuild(build);
+        coverage.setWorkspace(workspace);
         coverage.setIncludeFileNames(includeFileNames);
         coverage.setCoverageReportPattern(coverageReportPattern);
         if (coverage.hasCoverage()) {
@@ -321,7 +336,7 @@ public class PhabricatorNotifier extends Notifier {
         }
     }
 
-    private UnitTestProvider getUnitProvider(AbstractBuild build, BuildListener listener) {
+    private UnitTestProvider getUnitProvider(Run<?, ?> build, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
 
         InstanceProvider<UnitTestProvider> provider = new InstanceProvider<UnitTestProvider>(

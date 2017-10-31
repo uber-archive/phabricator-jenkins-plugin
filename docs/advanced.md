@@ -80,3 +80,18 @@ avoid confusion. Please note that builds on the same diff triggered by the same 
 
 Also note that if you pass additional arguments to your harbormaster request they may need to be included in the `ABORT_ON_REVISION_ID` field as well. A good example is when you use the same CI job to build multiple targets on a single diff. So for example, if the jenkins request params have
 `TARGET=some_target`, then to ensure other targets are not cancelled for the same diff, you may want to set `ABORT_ON_REVISION_ID=some_target_${buildable.revision}`.
+
+Pipeline
+--------
+
+Typically the Phabricator Notifier is used as a reporting step in a Jenkins Pipeline. The test result collector step must be run before the Notifier.
+
+```groovy
+stage ('report') {
+    //...
+    // junit()
+    step([$class: 'PhabricatorNotifier', commentOnSuccess: true, commentWithConsoleLinkOnFailure: true])
+    //...
+}
+
+```

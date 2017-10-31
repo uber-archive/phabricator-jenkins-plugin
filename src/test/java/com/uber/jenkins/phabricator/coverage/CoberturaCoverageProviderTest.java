@@ -87,7 +87,6 @@ public class CoberturaCoverageProviderTest {
     public void testGetMetricsWithBuildActionResult() throws Exception {
         FreeStyleBuild build = getBuild();
         build.addAction(CoberturaBuildAction.load(
-                build,
                 getMockResult(),
                 null,
                 null,
@@ -95,7 +94,9 @@ public class CoberturaCoverageProviderTest {
                 false,
                 false,
                 false,
-                false
+                false,
+                false,
+                0
         ));
         provider.setBuild(build);
         assertTrue(provider.hasCoverage());
@@ -111,6 +112,7 @@ public class CoberturaCoverageProviderTest {
         Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE).toURI());
         FileUtils.copyFile(testCoverageFile.toFile(), new File(build.getWorkspace().getRemote(), "coverage.xml"));
         provider.setBuild(build);
+        provider.setWorkspace(build.getWorkspace());
         assertTrue(provider.hasCoverage());
 
         CodeCoverageMetrics metrics = provider.getMetrics();
@@ -126,6 +128,7 @@ public class CoberturaCoverageProviderTest {
         File cov = new File(remoteBuild.getWorkspace().getRemote(), "coverage.xml");
         FileUtils.copyFile(testCoverageFile.toFile(), cov);
         provider.setBuild(remoteBuild);
+        provider.setWorkspace(remoteBuild.getWorkspace());
         assertTrue(provider.hasCoverage());
 
         CodeCoverageMetrics metrics = provider.getMetrics();
@@ -149,6 +152,7 @@ public class CoberturaCoverageProviderTest {
         IOUtils.copy(in, out);
         out.close();
         provider.setBuild(build);
+        provider.setWorkspace(build.getWorkspace());
 
         Map<String, List<Integer>> coverage = provider.readLineCoverage();
 
