@@ -118,6 +118,21 @@ public class CoberturaXMLParser {
             NodeList classes = entry.getKey();
             List<String> sourceDirs = entry.getValue();
 
+            // Collect all filenames
+            List<String> fileNames = new LinkedList<String>();
+            for (int i = 0; i < classes.getLength(); i++) {
+                Node classNode = classes.item(i);
+                String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
+
+                if (includeFileNames != null && !includeFileNames.contains(FilenameUtils.getName(fileName))) {
+                    continue;
+                }
+                fileNames.add(fileName);
+            }
+
+            // Make multiple guesses on which of the `sourceDirs` contains files in question
+            Map<String, String> detectedSourceRoots = new PathResolver(workspace, sourceDirs).chooseMulti(fileNames);
+
             // Loop over all files in the coverage report
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);

@@ -19,11 +19,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.FilePath;
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
@@ -106,9 +108,9 @@ public class CoberturaCoverageProviderTest {
 
     @Test
     public void testGetMetricsWithoutBuildActionResult() throws Exception {
-        FreeStyleBuild build = getBuild();
+        FreeStyleBuild build = getExecutedBuild();
         Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE).toURI());
-        FileUtils.copyFile(testCoverageFile.toFile(), new File(build.getRootDir(), "coverage.xml"));
+        FileUtils.copyFile(testCoverageFile.toFile(), new File(build.getWorkspace().getRemote(), "coverage.xml"));
         provider.setBuild(build);
         assertTrue(provider.hasCoverage());
 
@@ -119,33 +121,30 @@ public class CoberturaCoverageProviderTest {
 
     @Test
     public void testGetMetricsWithoutBuildActionResultDeletesFilesFromMasterAfter() throws Exception {
-        FreeStyleBuild build = getBuild();
+        FreeStyleProject project = j.createFreeStyleProject();
+        FreeStyleBuild remoteBuild = project.scheduleBuild2(0).get(100, TimeUnit.MINUTES);
         Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE).toURI());
-        File workspaceCopy = new File(build.getRootDir(), "coverage.xml");
-        FileUtils.copyFile(testCoverageFile.toFile(), workspaceCopy);
-        provider.setBuild(build);
+        File cov = new File(remoteBuild.getWorkspace().getRemote(), "coverage.xml");
+        FileUtils.copyFile(testCoverageFile.toFile(), cov);
+        provider.setBuild(remoteBuild);
         assertTrue(provider.hasCoverage());
 
         CodeCoverageMetrics metrics = provider.getMetrics();
         assertNotNull(metrics);
-        assertFalse(workspaceCopy.exists());
+        assertFalse(new File(project.getLastBuild().getRootDir(), "coverage.xml").exists());
     }
 
     @Test
     public void testGetLineCoverageNull() throws Exception {
-        FreeStyleProject project = j.createFreeStyleProject();
-        FreeStyleBuild build = new FreeStyleBuild(project);
-        provider.setBuild(build);
+        provider.setBuild(getExecutedBuild());
         assertNull(provider.readLineCoverage());
     }
 
     @Test
     public void testGetLineCoverageWithFile() throws Exception {
-        FreeStyleProject project = j.createFreeStyleProject();
-        FreeStyleBuild build = new FreeStyleBuild(project);
+        FreeStyleBuild build = getExecutedBuild();
 
-        File coverageFile = new File(build.getRootDir(), "coverage0.xml");
-        assertTrue(build.getRootDir().mkdirs());
+        File coverageFile = new File(build.getWorkspace().getRemote(), "coverage0.xml");
         InputStream in = getClass().getResourceAsStream("go-torch-coverage.xml");
         OutputStream out = new BufferedOutputStream(new FileOutputStream(coverageFile));
         IOUtils.copy(in, out);
@@ -188,5 +187,9 @@ public class CoberturaCoverageProviderTest {
 
     private FreeStyleBuild getBuild() throws IOException {
         return new FreeStyleBuild(j.createFreeStyleProject());
+    }
+
+    private FreeStyleBuild getExecutedBuild() throws Exception {
+        return j.createFreeStyleProject().scheduleBuild2(0).get(100, TimeUnit.MINUTES);
     }
 }
