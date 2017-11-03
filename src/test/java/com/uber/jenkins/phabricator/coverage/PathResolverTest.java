@@ -70,14 +70,8 @@ public class PathResolverTest {
 
         Map<String, String> chosen = new PathResolver(new FilePath(tmpDir), dirs).choose(filenames);
 
-        if (candidates.isEmpty()) {
-            for (String filename : filenames) {
-                assertNull(chosen.get(filename));
-            }
-        } else {
-            for (String filename  : filenames) {
-                assertEquals(expectedResult.get(filename), chosen.get(filename));
-            }
+        for (String filename  : filenames) {
+            assertEquals(expectedResult.get(filename), chosen.get(filename));
         }
     }
 
