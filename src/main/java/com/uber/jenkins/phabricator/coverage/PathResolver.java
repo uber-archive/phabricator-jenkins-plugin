@@ -26,10 +26,14 @@ import jenkins.MasterToSlaveFileCallable;
 
 import java.io.IOException;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class PathResolver {
     private final FilePath root;
@@ -41,57 +45,26 @@ public class PathResolver {
     }
 
     /**
-     * Using the workspace's root FilePath and a file that is presumed to exist on the node running the tests,
+     * Using the workspace's root FilePath and files that is presumed to exist on the node running the tests,
      * recurse over the `sources` provided by Cobertura and look for a combination where the file exists.
      *
      * This is a heuristic, and not perfect, to overcome changes to Python's coverage.py module which introduced
      * additional `source` directories in version 4.0.3
+     *
+     * Returns map where key is filename and value - sourceDirectory
      */
-    public String choose(String filename) {
-        String result = null;
+
+    public Map<String, String> choose(List<String> filenames) {
         try {
             if (candidates.size() > 0) {
-                return root.act(new PathResolverChooseMultiCallable(candidates, new LinkedList<String).(filename)).get(filename);
+                return root.act(new PathResolverChooseMultiCallable(candidates, filenames));
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return null;
-    }
-
-    /**
-     * Using the workspace's root FilePath and files that is presumed to exist on the node running the tests,
-     * recurse over the `sources` provided by Cobertura and look for a combination where the file exists.
-     *
-     * This is a heuristic, and not perfect, to overcome changes to Python's coverage.py module which introduced
-     * additional `source` directories in version 4.0.3
-     */
-
-    public Map<String, String> chooseMulti(List<String> filenames) {
-       return new HashMap<String, String>();
-    }
-
-    private static final class PathResolverChooseCallable extends MasterToSlaveFileCallable<String> {
-        private final List<String> candidates;
-        private final String filename;
-
-        private PathResolverChooseCallable(List<String> candidates, String filename) {
-            this.candidates = candidates;
-            this.filename = filename;
-        }
-
-        public String invoke(File f, VirtualChannel channel) {
-            for (String sourceDir : candidates) {
-                File candidate = new File(f, sourceDir);
-                candidate = new File(candidate, filename);
-                if (candidate.exists()) {
-                    return sourceDir;
-                }
-            }
-            return null;
-        }
+        return Collections.emptyMap();
     }
 
     private static final class PathResolverChooseMultiCallable extends MasterToSlaveFileCallable<Map<String, String>> {
@@ -104,7 +77,7 @@ public class PathResolver {
         }
 
         public Map<String, String> invoke(File f, VirtualChannel channel) {
-            Map<String, String> res = new HashMap<String, String>();
+            Map<String, String> res = new HashMap<String, String>(filenames.size());
             for (String filename : filenames) {
                 for (String sourceDir : candidates) {
                     File candidate = new File(f, sourceDir);

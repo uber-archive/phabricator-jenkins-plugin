@@ -118,7 +118,7 @@ public class CoberturaXMLParser {
             NodeList classes = entry.getKey();
             List<String> sourceDirs = entry.getValue();
 
-            // Collect all filenames
+            // Collect all filenames in coverage report
             List<String> fileNames = new LinkedList<String>();
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
@@ -131,7 +131,7 @@ public class CoberturaXMLParser {
             }
 
             // Make multiple guesses on which of the `sourceDirs` contains files in question
-            Map<String, String> detectedSourceRoots = new PathResolver(workspace, sourceDirs).chooseMulti(fileNames);
+            Map<String, String> detectedSourceRoots = new PathResolver(workspace, sourceDirs).choose(fileNames);
 
             // Loop over all files in the coverage report
             for (int i = 0; i < classes.getLength(); i++) {
@@ -142,9 +142,7 @@ public class CoberturaXMLParser {
                     continue;
                 }
 
-                // Make a guess on which of the `sourceDirs` contains the file in question
-                String detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
-                fileName = join(detectedSourceRoot, fileName);
+                fileName = join(detectedSourceRoots.get(fileName), fileName);
 
                 SortedMap<Integer, Integer> hitCounts = internalCounts.get(fileName);
                 if (hitCounts == null) {

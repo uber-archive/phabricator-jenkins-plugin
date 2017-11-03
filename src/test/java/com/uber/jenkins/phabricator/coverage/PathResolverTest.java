@@ -20,7 +20,9 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+
 import hudson.FilePath;
 import org.junit.After;
 import org.junit.Before;
@@ -36,11 +38,15 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class PathResolverTest {
     public List<String> candidates;
+    public List<String> filenames;
+    public Map<String, String> expectedResult;
 
     private Stack<File> cleanupPaths;
 
-    public PathResolverTest(List<String> candidates) {
+    public PathResolverTest(List<String> candidates, List<String> filenames, Map<String, String> expectedResult) {
         this.candidates = candidates;
+        this.filenames = filenames;
+        this.expectedResult = expectedResult;
     }
 
     @Test
@@ -62,12 +68,16 @@ public class PathResolverTest {
             cleanupPaths.push(file);
         }
 
-        String chosen = new PathResolver(new FilePath(tmpDir), dirs).choose("dir/file");
+        Map<String, String> chosen = new PathResolver(new FilePath(tmpDir), dirs).choose(filenames);
 
         if (candidates.isEmpty()) {
-            assertNull(chosen);
+            for (String filename : filenames) {
+                assertNull(chosen.get(filename));
+            }
         } else {
-            assertEquals("workspace/", chosen);
+            for (String filename  : filenames) {
+                assertEquals(expectedResult.get(filename), chosen.get(filename));
+            }
         }
     }
 
@@ -86,9 +96,10 @@ public class PathResolverTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         Collection<Object[]> result = new ArrayList();
-        result.add(new Object[] { Collections.emptyList() });
-        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/file") });
-        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/dir/", "workspace/dir/file") });
+        result.add(new Object[] { Collections.emptyList(), Arrays.asList("dir/file"), ImmutableMap.<String, String>of()});
+        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/file"), Arrays.asList("dir/file"), ImmutableMap.<String, String>of("dir/file", "workspace/") });
+        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/dir/", "workspace/dir/file"), Arrays.asList("dir/file"), ImmutableMap.<String, String>of("dir/file", "workspace/")});
+        result.add(new Object[] { Arrays.asList("workspace/", "workspace/dir/", "workspace/dir/dir/", "workspace/dir/file", "workspace2/dir/", "workspace2/dir/file2"), Arrays.asList("dir/file", "file2"), ImmutableMap.<String, String>of("dir/file", "workspace/", "file2", "workspace2/dir/") });
         return result;
     }
 }
