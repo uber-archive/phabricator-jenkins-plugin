@@ -119,7 +119,7 @@ public class CoberturaXMLParser {
             List<String> sourceDirs = entry.getValue();
 
             // Collect all filenames in coverage report
-            List<String> fileNames = new LinkedList<String>();
+            List<String> fileNames = new ArrayList<String>();
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
                 String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
