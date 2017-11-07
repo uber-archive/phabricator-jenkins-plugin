@@ -24,6 +24,7 @@ import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.FilePath;
 
+import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 
 import static java.lang.Integer.parseInt;
@@ -75,7 +76,7 @@ public class RemoteFileFetcher {
             maxLength = (int)source.length();
         }
         byte[] buffer = new byte[maxLength];
-        source.read().read(buffer, 0, maxLength);
+        IOUtils.read(source.read(), buffer);
 
         return new String(buffer);
     }

@@ -36,6 +36,7 @@ import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import org.apache.commons.lang.StringUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -76,15 +77,20 @@ public class RemoteFileFetcherTest {
 
     @Test
     public void testSingleFile() throws Exception {
-        testWithContent("hello, world");
+        testWithContent("hello, world", "1000");
     }
 
     @Test
     public void testUTF8File() throws Exception {
-        testWithContent("こんにちは世界");
+        testWithContent("こんにちは世界", "1000");
     }
 
-    private void testWithContent(String content) throws Exception {
+    @Test
+    public void testLargeFile() throws Exception {
+        testWithContent(StringUtils.repeat("a", 10000), "10000");
+    }
+
+    private void testWithContent(String content, String len) throws Exception {
         final String fileName = "just-a-test.txt";
         project.getBuildersList().add(echoBuilder(fileName, content));
         FreeStyleBuild build = getBuild();
@@ -93,7 +99,7 @@ public class RemoteFileFetcherTest {
                 build.getWorkspace(),
                 logger,
                 fileName,
-                "1000"
+                len
         );
 
         assertEquals(content, fetcher.getRemoteFile());
@@ -102,7 +108,7 @@ public class RemoteFileFetcherTest {
                 build.getWorkspace(),
                 logger,
                 "*.txt",
-                "1000"
+                len
         );
 
         assertEquals(content, fetcher.getRemoteFile());
