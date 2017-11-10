@@ -118,7 +118,9 @@ public class CoberturaXMLParser {
             NodeList classes = entry.getKey();
             List<String> sourceDirs = entry.getValue();
 
-            // Loop over all files in the coverage report
+            // Collect all filenames in coverage report
+            List<String> fileNames = new ArrayList<String>();
+            List<NodeList> childNodes = new ArrayList<NodeList>();
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
                 String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
@@ -126,17 +128,24 @@ public class CoberturaXMLParser {
                 if (includeFileNames != null && !includeFileNames.contains(FilenameUtils.getName(fileName))) {
                     continue;
                 }
+                fileNames.add(fileName);
+                childNodes.add(classNode.getChildNodes());
+            }
 
-                // Make a guess on which of the `sourceDirs` contains the file in question
-                String detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
-                fileName = join(detectedSourceRoot, fileName);
+            // Make multiple guesses on which of the `sourceDirs` contains files in question
+            Map<String, String> detectedSourceRoots = new PathResolver(workspace, sourceDirs).choose(fileNames);
+
+            // Loop over all files which are needed for coverage report
+            for (int i = 0; i < fileNames.size(); i++) {
+                String fileName = fileNames.get(i);
+                fileName = join(detectedSourceRoots.get(fileName), fileName);
 
                 SortedMap<Integer, Integer> hitCounts = internalCounts.get(fileName);
                 if (hitCounts == null) {
                     hitCounts = new TreeMap<Integer, Integer>();
                 }
 
-                NodeList children = classNode.getChildNodes();
+                NodeList children = childNodes.get(i);
                 for (int j = 0; j < children.getLength(); j++) {
                     Node child = children.item(j);
 
