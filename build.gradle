@@ -19,7 +19,7 @@ tasks.withType(JavaCompile) {
 }
 
 jenkinsPlugin {
-  coreVersion = '1.609.2'
+  coreVersion = '2.6'
   displayName = 'Phabricator Differential Plugin'
   url = 'https://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Differential+Plugin'
   gitHubUrl = 'https://github.com/uber/phabricator-jenkins-plugin'
@@ -56,9 +56,9 @@ dependencies {
     exclude module: 'hamcrest-core'
   }
 
-  jenkinsTest 'org.jenkins-ci.main:jenkins-war:1.609.2@war'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-war:2.6@war'
   jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
-  jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:1.609.2@jar'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:2.6@jar'
 }
 
 configurations.all {
