@@ -69,7 +69,7 @@ public class BuildResultProcessor {
     public BuildResultProcessor(
             Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
             String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting,
-            double maximumCoverageDecreaseInPercent) {
+            CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
         this.diff = diff;
         this.diffClient = diffClient;
@@ -80,7 +80,7 @@ public class BuildResultProcessor {
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
-            maximumCoverageDecreaseInPercent);
+            coverageCheckSettings);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
@@ -152,15 +152,19 @@ public class BuildResultProcessor {
             if (input != null && input.length() > 0) {
                 lintResults = new LintResults();
                 BufferedReader reader = new BufferedReader(new StringReader(input));
-
-                String lint;
-                while ((lint = reader.readLine()) != null) {
-                    JSONObject json = JSONObject.fromObject(lint);
-                    lintResults.add(LintResult.fromJsonObject(json));
+                String lint = "";
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lint += line;
+                    try {
+                        JSONObject json = JSONObject.fromObject(lint);
+                        lintResults.add(LintResult.fromJsonObject(json));
+                        lint = "";
+                    } catch (JSONException e) {
+                        e.printStackTrace(logger.getStream());
+                    }
                 }
             }
-        } catch (JSONException e) {
-            e.printStackTrace(logger.getStream());
         } catch (InterruptedException e) {
             e.printStackTrace(logger.getStream());
         } catch (IOException e) {
@@ -299,5 +303,9 @@ public class BuildResultProcessor {
 
     public UnitResults getUnitResults() {
         return unitResults;
+    }
+
+    public LintResults getLintResults() {
+        return lintResults;
     }
 }

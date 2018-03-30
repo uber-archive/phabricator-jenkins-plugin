@@ -24,17 +24,24 @@ import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import com.google.common.collect.ImmutableMap;
 
 import hudson.FilePath;
 
@@ -47,6 +54,28 @@ public class CoberturaXMLParser {
     private static final String NODE_NAME_LINE = "line";
     private static final String NODE_NUMBER = "number";
     private static final String NODE_HITS = "hits";
+    private static final String EMPTY_XML = "<?xml version='1.0' encoding='UTF-8'?>";
+    private static final Logger LOGGER = Logger.getLogger(CoberturaXMLParser.class.getName());
+    private static final Map<String, String> dtdMap = ImmutableMap.<String, String>builder()
+        .put("http://cobertura.sourceforge.net/xml/coverage-01.dtd", "coverage-01.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-02.dtd", "coverage-02.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-03.dtd", "coverage-03.dtd")
+        .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd", "coverage-04.dtd")
+        .build();
+
+    private static final EntityResolver entityResolver = new EntityResolver() {
+        @Override
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+            String res = dtdMap.get(systemId);
+            if (res != null) {
+                return new InputSource(this.getClass().getResourceAsStream(res));
+            } else {
+                LOGGER.log(Level.WARNING, "Unknown DTD systemID \"" + systemId + "\", skipping download by returning empty DTD");
+                return new InputSource(new StringReader(EMPTY_XML));
+            }
+        }
+    };
+
     private final FilePath workspace;
     private final Set<String> includeFileNames;
 
@@ -66,6 +95,7 @@ public class CoberturaXMLParser {
             try {
                 is = new FileInputStream(file);
                 db = dbf.newDocumentBuilder();
+                db.setEntityResolver(entityResolver);
                 Document doc = db.parse(is);
                 NodeList classes = doc.getElementsByTagName(TAG_NAME_CLASS);
                 List<String> sourceDirs = getSourceDirs(doc);
@@ -88,7 +118,9 @@ public class CoberturaXMLParser {
             NodeList classes = entry.getKey();
             List<String> sourceDirs = entry.getValue();
 
-            // Loop over all files in the coverage report
+            // Collect all filenames in coverage report
+            List<String> fileNames = new ArrayList<String>();
+            List<NodeList> childNodes = new ArrayList<NodeList>();
             for (int i = 0; i < classes.getLength(); i++) {
                 Node classNode = classes.item(i);
                 String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
@@ -96,17 +128,24 @@ public class CoberturaXMLParser {
                 if (includeFileNames != null && !includeFileNames.contains(FilenameUtils.getName(fileName))) {
                     continue;
                 }
+                fileNames.add(fileName);
+                childNodes.add(classNode.getChildNodes());
+            }
 
-                // Make a guess on which of the `sourceDirs` contains the file in question
-                String detectedSourceRoot = new PathResolver(workspace, sourceDirs).choose(fileName);
-                fileName = join(detectedSourceRoot, fileName);
+            // Make multiple guesses on which of the `sourceDirs` contains files in question
+            Map<String, String> detectedSourceRoots = new PathResolver(workspace, sourceDirs).choose(fileNames);
+
+            // Loop over all files which are needed for coverage report
+            for (int i = 0; i < fileNames.size(); i++) {
+                String fileName = fileNames.get(i);
+                fileName = join(detectedSourceRoots.get(fileName), fileName);
 
                 SortedMap<Integer, Integer> hitCounts = internalCounts.get(fileName);
                 if (hitCounts == null) {
                     hitCounts = new TreeMap<Integer, Integer>();
                 }
 
-                NodeList children = classNode.getChildNodes();
+                NodeList children = childNodes.get(i);
                 for (int j = 0; j < children.getLength(); j++) {
                     Node child = children.item(j);
 

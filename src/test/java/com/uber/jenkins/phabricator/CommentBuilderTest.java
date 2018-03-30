@@ -97,13 +97,63 @@ public class CommentBuilderTest {
     }
 
     @Test
-    public void testProcessWithDecrease() {
+    public void testProcessWithDecreaseFailingTheBuild() {
         CodeCoverageMetrics fiftyPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f);
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, fiftyPercentDrop);
-        commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),  TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
+        CommentBuilder commenter = createCommenter(Result.SUCCESS, fiftyPercentDrop, false, -10.0f);
+        boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
+                                                               TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
 
+        assertFalse(passCoverage);
         assertThat(comment, containsString("decreased (-50.000%)"));
+        assertThat(comment, containsString("Build failed because coverage is lower than minimum 100.0% and decreased more than allowed 10.0%."));
+    }
+
+    @Test
+    public void testProcessWithDecreaseNotFailingTheBuild() {
+        CodeCoverageMetrics fivePercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 95.0f);
+        CommentBuilder commenter = createCommenter(Result.SUCCESS, fivePercentDrop, false, -10.0f);
+        boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
+                                                               TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
+        String comment = commenter.getComment();
+
+        assertTrue(passCoverage);
+        assertThat(comment, containsString("decreased (-5.000%)"));
+        assertFalse(comment.contains("Build failed because coverage is lower than minimum 100.0% and decreased more than allowed 10.0%."));
+    }
+
+    @Test
+    public void testProcessWithDecreaseButHigherThanMinNotFailingTheBuild() {
+        CodeCoverageMetrics fifteenPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 85.0f);
+        CommentBuilder commenter = createCommenter(Result.SUCCESS, fifteenPercentDrop, false, -10.0f, 80.0f);
+        boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
+                                                               TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
+        String comment = commenter.getComment();
+
+        assertTrue(passCoverage);
+        assertThat(comment, containsString("decreased (-15.000%)"));
+        assertFalse(comment.contains("Build failed because coverage is lower than minimum 80.0% and decreased more than allowed 10.0%."));
+    }
+
+    @Test
+    public void testProcessWithoutCoverageCheckSettings() {
+        CommentBuilder commenter = new CommentBuilder(
+            logger,
+            Result.SUCCESS,
+            TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f), // 50% drop
+            FAKE_BUILD_URL,
+            false,
+            null // coverageCheckSettings
+        );
+
+        boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
+            TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
+        String comment = commenter.getComment();
+
+        // Should not fail if we don't have coverageCheckSettings.
+        assertTrue(passCoverage);
+        assertThat(comment, containsString("decreased (-50.000%)"));
+        assertFalse(comment.contains("Build failed because coverage is lower"));
     }
 
     @Test
@@ -203,6 +253,17 @@ public class CommentBuilderTest {
     }
 
     private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage, boolean preserveFormatting) {
-        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL, preserveFormatting, 0.0);
+        return createCommenter(result, coverage, preserveFormatting, 0.0);
+    }
+
+    private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage, boolean preserveFormatting,
+                                           double maxCoverageDecreaseInPercent) {
+        return createCommenter(result, coverage, preserveFormatting, maxCoverageDecreaseInPercent, 100.0);
+    }
+
+    private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage, boolean preserveFormatting,
+                                           double maxCoverageDecreaseInPercent, double minCoverageInPercent) {
+        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL, preserveFormatting,
+                                  new CoverageCheckSettings(true, maxCoverageDecreaseInPercent, minCoverageInPercent));
     }
 }

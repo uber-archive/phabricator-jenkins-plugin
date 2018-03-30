@@ -18,10 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.uber.jenkins.phabricator.conduit;
+package com.uber.jenkins.phabricator;
 
-class ArcanistUsageException extends Exception {
-    ArcanistUsageException(String message) {
-        super(message);
+public class CoverageCheckSettings {
+    private final boolean coverageCheckEnabled;
+    private final double maxCoverageDecreaseInPercent;
+    private final double minCoverageInPercent;
+
+    public CoverageCheckSettings(boolean coverageCheckEnabled,
+                                 double maxCoverageDecreaseInPercent,
+                                 double minCoverageInPercent) {
+        this.coverageCheckEnabled = coverageCheckEnabled;
+        this.maxCoverageDecreaseInPercent = maxCoverageDecreaseInPercent;
+        this.minCoverageInPercent = minCoverageInPercent;
+    }
+
+    public boolean isCoverageCheckEnabled() {
+        return coverageCheckEnabled;
+    }
+
+    public double getMaxCoverageDecreaseInPercent() {
+        return maxCoverageDecreaseInPercent;
+    }
+
+    public double getMinCoverageInPercent() {
+        return minCoverageInPercent;
     }
 }

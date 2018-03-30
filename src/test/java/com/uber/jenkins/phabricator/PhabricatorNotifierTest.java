@@ -39,25 +39,15 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 public class PhabricatorNotifierTest extends BuildIntegrationTest {
+
+    private static final String COVERAGE_REPORT_FILTER = "**/coverage*.xml, **/cobertura*.xml";
+
     private PhabricatorNotifier notifier;
 
     @Before
     public void setUp() throws IOException {
         p = createProject();
-        notifier = new PhabricatorNotifier(
-                false,
-                true,
-                false,
-                0.0,
-                true,
-                ".phabricator-comment",
-                "1001",
-                false,
-                true,
-                true,
-                ".phabricator-lint",
-                "10000"
-        );
+        notifier = getDefaultTestNotifierWithCoverageReportPattern(COVERAGE_REPORT_FILTER);
     }
 
     @Test
@@ -73,16 +63,6 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertTrue(notifier.isProcessLint());
         assertEquals(".phabricator-lint", notifier.getLintFile());
         assertEquals("10000", notifier.getLintFileSize());
-    }
-
-    @Test
-    public void testRoundTripConfiguration() throws Exception {
-        addBuildStep();
-        j.submit(j.createWebClient().getPage(p, "configure").getFormByName("config"));
-
-        PhabricatorNotifier after = p.getPublishersList().get(PhabricatorNotifier.class);
-        j.assertEqualBeans(notifier, after,
-                "commentOnSuccess,uberallsEnabled,commentWithConsoleLinkOnFailure,commentFile,commentSize");
     }
 
     @Test
@@ -169,10 +149,10 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
-    public void testPassBuildOnDecreasedCoverageGreaterThanMaxPercent() throws Exception {
+    public void testPassBuildOnDecreasedCoverageButGreaterThanMinPercent() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
-        notifier = getDecreasedLineCoverageNotifier(-5.0);
+        notifier = getNotifierWithCoverageCheck(0.0, 90.0);
 
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
             "  \"sha\": \"deadbeef\",\n" +
@@ -239,6 +219,31 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     }
 
     @Test
+    public void testPostCoverageWithoutPublisherWithEmptyReportPattern() throws Exception {
+        String[] emptyPatterns = {null, ""};
+        for (String emptyPattern : emptyPatterns) {
+            notifier = getDefaultTestNotifierWithCoverageReportPattern(emptyPattern);
+
+            TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+
+            FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+            assertEquals(Result.SUCCESS, build.getResult());
+            assertLogContains("Publishing coverage data to Harbormaster for 3 files", build);
+        }
+    }
+
+    @Test
+    public void testPostCoverageWithoutPublisherWithNoFilesMatchingReportPattern() throws Exception {
+        notifier = getDefaultTestNotifierWithCoverageReportPattern("*.html");
+
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("No cobertura results found", build);
+    }
+
+    @Test
     public void testPostUnit() throws Exception {
         TestUtils.addCopyBuildStep(p, TestUtils.JUNIT_XML, JUnitTestProvider.class, "go-torch-junit.xml");
         p.getPublishersList().add(TestUtils.getDefaultXUnitPublisher());
@@ -272,6 +277,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 false,
                 false,
                 0.0,
+                0.0,
+                COVERAGE_REPORT_FILTER,
                 true,
                 ".phabricator-comment",
                 "1000",
@@ -308,12 +315,18 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         p.getPublishersList().add(notifier);
     }
 
-    protected PhabricatorNotifier getDecreasedLineCoverageNotifier(double threshold) {
+    private PhabricatorNotifier getDecreasedLineCoverageNotifier(double threshold) {
+        return getNotifierWithCoverageCheck(threshold, 100.0);
+    }
+
+    private PhabricatorNotifier getNotifierWithCoverageCheck(double maxCoverageDecrease, double minCoverage) {
         return new PhabricatorNotifier(
             false,
             true,
             true,
-            threshold,
+            maxCoverageDecrease,
+            minCoverage,
+            COVERAGE_REPORT_FILTER,
             true,
             ".phabricator-comment",
             "1001",
@@ -322,6 +335,25 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
             true,
             ".phabricator-lint",
             "10000"
+        );
+    }
+
+    private PhabricatorNotifier getDefaultTestNotifierWithCoverageReportPattern(String coverageReportPattern) {
+        return new PhabricatorNotifier(
+                false,
+                true,
+                false,
+                0.0,
+                0.0,
+                coverageReportPattern,
+                true,
+                ".phabricator-comment",
+                "1001",
+                false,
+                true,
+                true,
+                ".phabricator-lint",
+                "10000"
         );
     }
 }

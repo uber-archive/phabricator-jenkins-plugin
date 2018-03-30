@@ -21,12 +21,20 @@
   <f:optionalBlock field="uberallsEnabled" name="uberallsEnabled" title="Enable Uberalls" checked="${instance.isUberallsEnabled()}" inline="true"
            description="Enable code coverage reporting">
     <f:entry title="Fail on decreased coverage" field="coverageCheck"
-            description="Fail the build if coverage percentage goes down from last build">
+            description="Fail the build if coverage percentage is lower than minimum threshold and goes down from last build">
       <f:checkbox default="false" />
     </f:entry>
     <f:entry title="Coverage failure threshold" field="coverageThreshold"
-            description="Fail builds if coverage is below this threshold. Should be a negative number i.e. -5.0 as percent">
+            description="Fail builds if coverage change is below this threshold. Should be a negative number i.e. -5.0 as percent. This check will be performed only if overall coverage is lower than minimum threshold defined below">
         <f:textbox default="0" />
+    </f:entry>
+    <f:entry title="Minimum line coverage threshold" field="minCoverageThreshold"
+            description="If line coverage is higher than this threshold - drop in coverage will not fail the build. Should be a positive number i.e. 85.0 as percent">
+        <f:textbox default="100" />
+    </f:entry>
+    <f:entry title="Coverage report pattern" field="coverageReportPattern"
+             description="The coverage xml report pattern. Use this if any jenkins coverage plugins are not applied.">
+      <f:textbox default="**/coverage*.xml, **/cobertura*.xml" />
     </f:entry>
   </f:optionalBlock>
 

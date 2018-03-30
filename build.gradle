@@ -1,9 +1,9 @@
 plugins {
   id 'java'
   id 'checkstyle'
-  id 'org.jenkins-ci.jpi' version '0.21.0'
+  id 'org.jenkins-ci.jpi' version '0.22.0'
   id 'net.saliman.cobertura' version '2.4.0'
-  id 'com.github.kt3k.coveralls' version '2.7.1'
+  id 'com.github.kt3k.coveralls' version '2.8.1'
 }
 
 group = 'org.jenkins-ci.plugins'
@@ -19,11 +19,12 @@ tasks.withType(JavaCompile) {
 }
 
 jenkinsPlugin {
-  coreVersion = '1.609.2'
+  coreVersion = '2.6'
   displayName = 'Phabricator Differential Plugin'
   url = 'https://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Differential+Plugin'
   gitHubUrl = 'https://github.com/uber/phabricator-jenkins-plugin'
   shortName = 'phabricator-plugin'
+  maskClasses = 'org.apache.http.'
 
   developers {
     developer {
@@ -42,8 +43,7 @@ jenkinsPlugin {
 }
 
 dependencies {
-  compile 'org.apache.httpcomponents:httpcore:4.4.1'
-  compile 'org.apache.httpcomponents:httpclient:4.4.1'
+  compile 'org.apache.httpcomponents:httpclient:4.5.3'
   jenkinsPlugins 'org.jenkins-ci.plugins:credentials:1.22@jar'
 
   optionalJenkinsPlugins 'org.jenkins-ci.plugins:junit:1.6@jar'
@@ -56,14 +56,16 @@ dependencies {
     exclude module: 'hamcrest-core'
   }
 
-  jenkinsTest 'org.jenkins-ci.main:jenkins-war:1.609.2@war'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-war:2.6@war'
   jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
-  jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:1.609.2@jar'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:2.6@jar'
 }
 
 configurations.all {
-  resolutionStrategy {
-    force 'org.apache.httpcomponents:httpclient:4.3:tests'
+  if (it.name.toLowerCase().contains("test")) {
+    resolutionStrategy {
+      force 'org.apache.httpcomponents:httpclient:4.3:tests'
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+
 // Copyright (c) 2015 Uber
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,6 +52,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class BuildResultProcessorTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -68,7 +70,7 @@ public class BuildResultProcessorTest {
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
                 true,
-                0.0
+                new CoverageCheckSettings(true, 0.0, 100.0)
         );
         project = j.createFreeStyleProject();
     }
@@ -103,41 +105,73 @@ public class BuildResultProcessorTest {
 
     @Test
     public void testProcessLintViolations() throws Exception {
-        String content = "{\"name\": \"Syntax Error\",\"code\": \"EXAMPLE\",\"severity\": \"error\",\"path\": \"path/to/example\",\"line\": 17,\"char\": 3}";
+        String content = "{\"name\": \"Syntax Error\"," +
+                "\"code\": \"EXAMPLE\"," +
+                "\"severity\": \"error\"," +
+                "\"path\": \"path/to/example\"," +
+                "\"line\": 17," +
+                "\"char\": 3}";
         final LintResult result = new LintResult("Syntax Error", "EXAMPLE", "error", "path/to/example", 17, 3, "");
 
+        ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
+            @Override
+            public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
+                if (action == "harbormaster.sendmessage") {
+                    JSONObject json = (JSONObject) ((JSONArray) params.get("lint")).get(0);
+                    JSONObject parsed = result.toHarbormaster();
+                    assertNotNull(parsed);
+                    assertNotNull(json);
+                    for (String key : (Set<String>) params.keySet()) {
+                        assertEquals("mismatch in expected json key: " + key, parsed.get(key), json.get(key));
+                    }
+                    return result.toHarbormaster();
+                }
+                return new JSONObject();
+            }
+        };
+
+        runProcessLintViolationsTest(content, conduitAPIClient);
+    }
+
+    @Test
+    public void testProcessLintViolationsWithNonJsonLines() throws Exception {
+        String content = "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n" +
+                "Features should only be in memory when they are attached.\" }\n" +
+                "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"App.java\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n" +
+                "Features should only be in memory when they are attached.\" }\n";
+
+        ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
+            @Override
+            public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
+                // Do nothing.
+                return new JSONObject();
+            }
+        };
+
+        BuildResultProcessor buildResultProcessor = runProcessLintViolationsTest(content, conduitAPIClient);
+        assertEquals(2, buildResultProcessor.getLintResults().getResults().size());
+    }
+
+    private BuildResultProcessor runProcessLintViolationsTest(String lintFileContent, ConduitAPIClient conduitAPIClient)
+            throws Exception {
         final String fileName = ".phabricator-lint";
-        project.getBuildersList().add(echoBuilder(fileName, content));
+        project.getBuildersList().add(echoBuilder(fileName, lintFileContent));
         FreeStyleBuild build = getBuild();
 
         BuildResultProcessor processor = new BuildResultProcessor(
                 TestUtils.getDefaultLogger(),
                 build,
                 mock(Differential.class),
-                new DifferentialClient(null, new ConduitAPIClient(null, null) {
-                    @Override
-                    public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
-                        if (action == "harbormaster.sendmessage") {
-                            JSONObject json = (JSONObject) ((JSONArray) params.get("lint")).get(0);
-                            JSONObject parsed = result.toHarbormaster();
-                            assertNotNull(parsed);
-                            assertNotNull(json);
-                            for (String key : (Set<String>) params.keySet()) {
-                                assertEquals("mismatch in expected json key: " + key, parsed.get(key), json.get(key));
-                            }
-                            return result.toHarbormaster();
-                        }
-                        return new JSONObject();
-                    }
-                }),
+                new DifferentialClient(null, conduitAPIClient),
                 TestUtils.TEST_PHID,
                 mock(CodeCoverageMetrics.class),
                 TestUtils.TEST_BASE_URL,
                 true,
-                0.0
+                new CoverageCheckSettings(true, 0.0, 100.0)
         );
         processor.processLintResults(fileName, "1000");
         processor.processHarbormaster();
+        return processor;
     }
 
     private Builder echoBuilder(final String fileName, final String content) {

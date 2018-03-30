@@ -33,16 +33,16 @@ class CommentBuilder {
     private final String buildURL;
     private final Result result;
     private final boolean preserveFormatting;
-    private final double maximumCoverageDecreaseInPercent;
+    private final CoverageCheckSettings coverageCheckSettings;
 
-    public CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
-                          boolean preserveFormatting, double maximumCoverageDecreaseInPercent) {
-        this.maximumCoverageDecreaseInPercent = maximumCoverageDecreaseInPercent;
+    CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
+                          boolean preserveFormatting, CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
         this.buildURL = buildURL;
         this.preserveFormatting = preserveFormatting;
+        this.coverageCheckSettings = coverageCheckSettings;
         this.comment = new StringBuilder();
     }
 
@@ -50,7 +50,7 @@ class CommentBuilder {
      * Get the final comment to post to Phabricator
      * @return
      */
-    public String getComment() {
+    String getComment() {
         return comment.toString();
     }
 
@@ -58,7 +58,7 @@ class CommentBuilder {
      * Determine whether to attempt to process coverage
      * @return
      */
-    public boolean hasCoverageAvailable() {
+    boolean hasCoverageAvailable() {
         return currentCoverage != null && currentCoverage.getLineCoveragePercent() > 0.0f;
     }
 
@@ -70,7 +70,7 @@ class CommentBuilder {
      *
      * @return boolean if we fail coverage reporting from threshold
      */
-    public boolean processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
+    boolean processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
         boolean passCoverage = true;
         if (parentCoverage == null) {
             logger.info(UBERALLS_TAG, "unable to find coverage for parent commit");
@@ -95,19 +95,35 @@ class CommentBuilder {
             comment.append("Coverage remained the same (" + lineCoverageDisplay + "%)");
         }
 
-        // If coverage change is less than zero and dips below a certain threshold fail the build
-        if (coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(maximumCoverageDecreaseInPercent)) {
-            passCoverage = false;
-        }
-
         comment.append(" when pulling **" + branchName + "** into ");
         comment.append(baseCommit.substring(0, 7));
         comment.append(".");
 
+        // If line coverage is less than allowed minimum, coverage change is less than zero and dips below
+        // a certain threshold fail the build
+        if (isBuildFailingCoverageCheck(lineCoveragePercent, coverageDelta)) {
+            passCoverage = false;
+            String message = "Build failed because coverage is lower than minimum " +
+                             coverageCheckSettings.getMinCoverageInPercent() +
+                             "% and decreased more than allowed " +
+                             Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()) + "%";
+            logger.info(UBERALLS_TAG, message);
+            comment.append("\n");
+            comment.append(message);
+            comment.append(".");
+        }
+
         return passCoverage;
     }
 
-    public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {
+    private boolean isBuildFailingCoverageCheck(double lineCoveragePercent, double coverageDelta) {
+        return (coverageCheckSettings != null
+            && coverageCheckSettings.isCoverageCheckEnabled()
+            && lineCoveragePercent < coverageCheckSettings.getMinCoverageInPercent()
+            && coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()));
+    }
+
+    void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {
         if (result == Result.SUCCESS) {
             if (comment.length() == 0 && (commentOnSuccess || !runHarbormaster)) {
                 comment.append("Build is green");
@@ -129,7 +145,7 @@ class CommentBuilder {
      * Add user-defined content via a .phabricator-comment file
      * @param customComment the contents of the file
      */
-    public void addUserComment(String customComment) {
+    void addUserComment(String customComment) {
         if (CommonUtils.isBlank(customComment)) {
             return;
         }
@@ -149,21 +165,21 @@ class CommentBuilder {
      * Determine if there exists a comment already
      * @return
      */
-    public boolean hasComment() {
+    boolean hasComment() {
         return comment.length() > 0;
     }
 
     /**
      * Add a build link to the comment
      */
-    public void addBuildLink() {
-        comment.append(String.format("\n\nSee %s for more details.", buildURL));
+    void addBuildLink() {
+        comment.append(String.format("\n\n %s for more details.", buildURL));
     }
 
     /**
      * Add a build failure message to the comment
      */
-    public void addBuildFailureMessage() {
+    void addBuildFailureMessage() {
         comment.append(String.format("\n\nLink to build: %s", buildURL));
         comment.append(String.format("\nSee console output for more information: %sconsole", buildURL));
     }
