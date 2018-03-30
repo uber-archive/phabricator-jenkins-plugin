@@ -27,6 +27,7 @@ import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -143,7 +144,11 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         FreeStyleBuild upstream = buildWithConduit(getFetchDiffResponse(), null, null, true);
         assertNull(PhabricatorBuildWrapper.getUpstreamRun(build));
 
-        build.getAction(CauseAction.class).getCauses().add((new Cause.UpstreamCause(upstream)));
+        List<Cause> causes = build.getAction(CauseAction.class).getCauses();
+        ArrayList<Cause> newCauses = new ArrayList<Cause>(causes);
+        newCauses.add((new Cause.UpstreamCause(upstream)));
+        build.replaceAction(new CauseAction(newCauses));
+
         assertEquals(upstream, PhabricatorBuildWrapper.getUpstreamRun(build));
     }
 
