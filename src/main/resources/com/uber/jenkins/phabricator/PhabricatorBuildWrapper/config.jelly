@@ -24,6 +24,10 @@
            description="Skips running sanity checks (like base commit) when applying patch">
       <f:checkbox default="false" />
   </f:entry>
+  <f:entry title="Skip 'arc patch' completely" field="skipApplyPatch"
+           description="Skips applying patch but keep other functionality like adding build metadata from phabricator">
+      <f:checkbox default="false" />
+  </f:entry>
   <f:entry title="Work directory" field="workDir"
            description="Directory arc works at">
       <f:textbox default="" />

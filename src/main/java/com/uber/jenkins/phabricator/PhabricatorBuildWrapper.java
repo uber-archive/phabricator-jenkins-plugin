@@ -68,18 +68,21 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private final boolean skipForcedClean;
     private final boolean createBranch;
     private final boolean patchWithForceFlag;
+    private final boolean skipApplyPatch;
     private String workDir;
     private String scmType;
 
     @DataBoundConstructor
     public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
                                    boolean skipForcedClean,
-                                   boolean createBranch, boolean patchWithForceFlag) {
+                                   boolean createBranch, boolean patchWithForceFlag,
+                                   boolean skipApplyPatch) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
         this.patchWithForceFlag = patchWithForceFlag;
+        this.skipApplyPatch = skipApplyPatch;
         this.workDir = null;
         this.scmType = "git";
     }
@@ -163,27 +166,31 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             return null;
         }
 
-        String baseCommit = "origin/master";
-        if (!applyToMaster) {
-            baseCommit = diff.getBaseCommit();
-        }
-
-        final String conduitToken = this.getConduitToken(build.getParent(), logger);
-        Task.Result result = new ApplyPatchTask(
-                logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
-                DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch,
-                patchWithForceFlag, scmType
-        ).run();
-
-        if (result != Task.Result.SUCCESS) {
-            logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
-            Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false, null, null, null).run();
-            if (failureResult != Task.Result.SUCCESS) {
-                // such failure, very broke
-                logger.warn("arcanist", "Unable to notify harbormaster of patch failure");
+        if (skipApplyPatch) {
+            logger.info("arcanist", "Skipping applying arc patch as configured in job");
+        } else {
+            String baseCommit = "origin/master";
+            if (!applyToMaster) {
+                baseCommit = diff.getBaseCommit();
             }
-            // Indicate failure
-            return null;
+
+            final String conduitToken = this.getConduitToken(build.getParent(), logger);
+            Task.Result result = new ApplyPatchTask(
+                    logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
+                    DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch,
+                    patchWithForceFlag, scmType
+            ).run();
+
+            if (result != Task.Result.SUCCESS) {
+                logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
+                Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false, null, null, null).run();
+                if (failureResult != Task.Result.SUCCESS) {
+                    // such failure, very broke
+                    logger.warn("arcanist", "Unable to notify harbormaster of patch failure");
+                }
+                // Indicate failure
+                return null;
+            }
         }
 
         return new Environment() {
@@ -278,6 +285,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     @SuppressWarnings("unused")
     public boolean isPatchWithForceFlag() {
         return patchWithForceFlag;
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isSkipApplyPatch() {
+        return skipApplyPatch;
     }
 
     @SuppressWarnings("unused")

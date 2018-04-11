@@ -44,6 +44,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
                 false,
                 false,
                 false,
+                false,
                 false
         );
         wrapper.getDescriptor().setArcPath("echo");
@@ -54,6 +55,7 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         assertFalse(wrapper.isCreateCommit());
         assertFalse(wrapper.isApplyToMaster());
         assertFalse(wrapper.isPatchWithForceFlag());
+        assertFalse(wrapper.isSkipApplyPatch());
     }
 
     @Test
@@ -150,6 +152,24 @@ public class PhabricatorBuildWrapperTest extends BuildIntegrationTest {
         build.replaceAction(new CauseAction(newCauses));
 
         assertEquals(upstream, PhabricatorBuildWrapper.getUpstreamRun(build));
+    }
+
+    @Test
+    public void skipApplyPatchDoesNotFailPatching() throws Exception {
+        p = createProject();
+        wrapper = new PhabricatorBuildWrapper(
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+        );
+        wrapper.getDescriptor().setArcPath("false");
+        p.getBuildWrappersList().add(wrapper);
+        FreeStyleBuild build = p.scheduleBuild2(0).get();
+        Result result = build.getResult();
+        assertSuccessfulBuild(result);
     }
 
     @Override
