@@ -73,10 +73,14 @@ public class DifferentialClient {
         try {
             response = query.getJSONObject("result");
         } catch (JSONException e) {
-            throw new ConduitAPIException(
-                    String.format("No 'result' object found in conduit call: (%s) %s",
-                            e.getMessage(),
-                            query.toString(2)));
+            try {
+                response = query.getJSONObject("response");
+            } catch (JSONException e) {
+                throw new ConduitAPIException(
+                        String.format("No 'result' or 'response' object found in conduit call: (%s) %s",
+                                e.getMessage(),
+                                query.toString(2)));
+            }
         }
         try {
             return response.getJSONObject(diffID);
