@@ -47,6 +47,8 @@ public class UberallsClient {
     public static final String CLASSES_COVERAGE_KEY = "classesCoverage";
     public static final String METHOD_COVERAGE_KEY = "methodCoverage";
     public static final String LINE_COVERAGE_KEY = "lineCoverage";
+    public static final String LINES_COVERED_KEY = "linesCovered";
+    public static final String LINES_TESTED_KEY = "linesTested";
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
 
     private static final String TAG = "uberalls-client";
@@ -86,6 +88,8 @@ public class UberallsClient {
                     ((Double) coverage.getDouble(CLASSES_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(METHOD_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(LINE_COVERAGE_KEY)).floatValue(),
+                    ((Double) coverage.getDouble(LINES_COVERED_KEY)).floatValue(),
+                    ((Double) coverage.getDouble(LINES_TESTED_KEY)).floatValue(),
                     ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue());
         } catch (Exception e) {
             e.printStackTrace(logger.getStream());
@@ -105,6 +109,8 @@ public class UberallsClient {
             params.put(CLASSES_COVERAGE_KEY, codeCoverageMetrics.getClassesCoveragePercent());
             params.put(METHOD_COVERAGE_KEY, codeCoverageMetrics.getMethodCoveragePercent());
             params.put(LINE_COVERAGE_KEY, codeCoverageMetrics.getLineCoveragePercent());
+            params.put(LINES_COVERED_KEY, codeCoverageMetrics.getLinesCovered());
+            params.put(LINES_TESTED_KEY, codeCoverageMetrics.getLinesTested());
             params.put(CONDITIONAL_COVERAGE_KEY, codeCoverageMetrics.getConditionalCoveragePercent());
 
             try {
