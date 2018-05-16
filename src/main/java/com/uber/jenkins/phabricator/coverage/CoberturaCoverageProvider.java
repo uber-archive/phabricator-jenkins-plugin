@@ -38,6 +38,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.plugins.cobertura.Ratio;
 import hudson.plugins.cobertura.targets.CoverageMetric;
 import hudson.plugins.cobertura.targets.CoverageResult;
@@ -96,7 +97,8 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     }
 
     private void computeCoverage() {
-        AbstractBuild build = getBuild();
+        Run<?, ?> build = getBuild();
+        FilePath workspace = getWorkspace();
         if (build == null) {
             mHasComputedCoverage = true;
             return;
@@ -114,7 +116,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         }
 
         // Fallback to scanning for the reports
-        copyCoverageToJenkinsMaster(build);
+        copyCoverageToJenkinsMaster(build, workspace);
         File[] reports = getCoberturaReports(build);
         CoverageResult result = null;
         if (reports != null) {
@@ -142,17 +144,14 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     }
 
     private void computeLineCoverage() {
-        FilePath workspace = getBuild().getWorkspace();
+        FilePath workspace = getWorkspace();
         File[] reports = getCoberturaReports(getBuild());
         CoberturaXMLParser parser = new CoberturaXMLParser(workspace, getIncludeFileNames());
         mLineCoverage = parseReports(parser, reports);
     }
 
-    private void copyCoverageToJenkinsMaster(AbstractBuild build) {
-        final FilePath[] moduleRoots = build.getModuleRoots();
-        final boolean multipleModuleRoots =
-                moduleRoots != null && moduleRoots.length > 1;
-        final FilePath moduleRoot = multipleModuleRoots ? build.getWorkspace() : build.getModuleRoot();
+    private void copyCoverageToJenkinsMaster(Run<?, ?> build, FilePath workspace) {
+        final FilePath moduleRoot = workspace;
         final File buildCoberturaDir = build.getRootDir();
         FilePath buildTarget = new FilePath(buildCoberturaDir);
 
@@ -225,7 +224,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         return ratio.getPercentageFloat();
     }
 
-    private File[] getCoberturaReports(AbstractBuild build) {
+    private File[] getCoberturaReports(Run<?, ?> build) {
         return build.getRootDir().listFiles(CoberturaPublisher.COBERTURA_FILENAME_FILTER);
     }
 }

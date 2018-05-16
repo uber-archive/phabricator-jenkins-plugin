@@ -20,14 +20,16 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public abstract class CoverageProvider {
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
+    private FilePath workspace;
     private Set<String> includeFileNames;
     private String coverageReportPattern;
 
@@ -47,12 +49,20 @@ public abstract class CoverageProvider {
      * Set the owning build for this provider
      * @param build The build that is associated with the current run
      */
-    public void setBuild(AbstractBuild<?, ?> build) {
+    public void setBuild(Run<?, ?> build) {
         this.build = build;
     }
 
-    protected AbstractBuild getBuild() {
+    protected Run<?, ?> getBuild() {
         return build;
+    }
+
+    public void setWorkspace(FilePath workspace) {
+        this.workspace = workspace;
+    }
+
+    protected FilePath getWorkspace() {
+        return workspace;
     }
 
     /**

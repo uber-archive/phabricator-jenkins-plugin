@@ -23,18 +23,14 @@ package com.uber.jenkins.phabricator.conduit;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildAction;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 
-import hudson.EnvVars;
-import hudson.model.AbstractBuild;
-
+import hudson.model.Run;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Differential {
@@ -78,7 +74,7 @@ public class Differential {
         }
     }
 
-    public void decorate(AbstractBuild build, String phabricatorURL) {
+    public void decorate(Run<?, ?> build, String phabricatorURL) {
         // Add a badge next to the build
         build.addAction(PhabricatorPostbuildAction.createShortText(
                 getRevisionID(true),

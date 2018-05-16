@@ -37,8 +37,8 @@ import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -59,7 +59,7 @@ public class BuildResultProcessor {
     private final String buildUrl;
     private final boolean runHarbormaster;
     private final FilePath workspace;
-    private final AbstractBuild build;
+    private final Run<?, ?> build;
     private String commentAction;
     private final CommentBuilder commenter;
     private UnitResults unitResults;
@@ -67,7 +67,7 @@ public class BuildResultProcessor {
     private LintResults lintResults;
 
     public BuildResultProcessor(
-            Logger logger, AbstractBuild build, Differential diff, DifferentialClient diffClient,
+            Logger logger, Run<?, ?> build, FilePath workspace, Differential diff, DifferentialClient diffClient,
             String phid, CodeCoverageMetrics coverageResult, String buildUrl, boolean preserveFormatting,
             CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
@@ -76,7 +76,7 @@ public class BuildResultProcessor {
         this.phid = phid;
         this.buildUrl = buildUrl;
         this.build = build;
-        this.workspace = build.getWorkspace();
+        this.workspace = workspace;
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
@@ -85,7 +85,11 @@ public class BuildResultProcessor {
     }
 
     public Result getBuildResult() {
-        return this.build.getResult();
+        if (this.build.getResult() == null) {
+            return Result.SUCCESS;
+        } else {
+            return this.build.getResult();
+        }
     }
 
     /**
