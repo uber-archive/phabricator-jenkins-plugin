@@ -82,7 +82,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     private final String lintFile;
     private final String lintFileSize;
     private final String coverageReportPattern;
-    private UberallsClient uberallsClient;
+    private transient UberallsClient uberallsClient;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
