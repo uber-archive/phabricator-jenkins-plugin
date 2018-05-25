@@ -325,7 +325,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
      */
     private String getArcPath() {
         final String providedPath = getDescriptor().getArcPath();
-        if (CommonUtils.isBlank(providedPath)) {
+        
+        if (CommonUtils.isBlank(providedPath) || Files.notExists(providedPath)) {
             return "arc";
         }
         return providedPath;
