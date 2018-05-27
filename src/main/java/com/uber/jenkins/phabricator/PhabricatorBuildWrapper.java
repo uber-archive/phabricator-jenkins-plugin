@@ -51,6 +51,7 @@ import hudson.util.RunList;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.nio.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
