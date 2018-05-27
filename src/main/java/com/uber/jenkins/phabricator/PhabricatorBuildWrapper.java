@@ -51,7 +51,7 @@ import hudson.util.RunList;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import java.nio.*;
+import java.nio.file.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -327,7 +327,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private String getArcPath() {
         final String providedPath = getDescriptor().getArcPath();
         
-        if (CommonUtils.isBlank(providedPath) || Files.notExists(providedPath)) {
+        if (CommonUtils.isBlank(providedPath) || Files.notExists(Paths.get(providedPath))) {
             return "arc";
         }
         return providedPath;
