@@ -26,14 +26,12 @@ import hudson.model.Run;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public abstract class CoverageProvider {
     private Run<?, ?> build;
     private FilePath workspace;
     private Set<String> includeFileNames;
     private String coverageReportPattern;
-    protected Logger logger;
 
     /**
      * Set the list of file names to get coverage metrics for
@@ -95,8 +93,4 @@ public abstract class CoverageProvider {
     }
 
     protected abstract CodeCoverageMetrics getCoverageMetrics();
-
-    public void setLogger(Logger logger) {
-        this.logger = logger;
-    }
 }
