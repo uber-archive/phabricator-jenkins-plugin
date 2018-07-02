@@ -70,6 +70,14 @@ public abstract class Task {
     }
 
     /**
+     * Prints stack trace
+     * @param e the exception to log
+     */
+    protected void printStackTrace(Exception e) {
+        e.printStackTrace(logger.getStream());
+    }
+
+    /**
      * Gets the task's tag.
      * @return A string representation of this task's tag.
      */

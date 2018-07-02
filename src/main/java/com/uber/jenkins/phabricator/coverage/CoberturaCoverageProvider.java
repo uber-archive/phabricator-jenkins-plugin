@@ -20,12 +20,17 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.cobertura.CoberturaCoverageParser;
 import hudson.plugins.cobertura.CoberturaPublisher;
-
+import hudson.plugins.cobertura.Ratio;
+import hudson.plugins.cobertura.targets.CoverageMetric;
+import hudson.plugins.cobertura.targets.CoverageResult;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,15 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.Run;
-import hudson.plugins.cobertura.Ratio;
-import hudson.plugins.cobertura.targets.CoverageMetric;
-import hudson.plugins.cobertura.targets.CoverageResult;
 
 /**
  * Provide Cobertura coverage data
@@ -87,11 +83,11 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         try {
             return parser.parse(reports);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
         } catch (SAXException e) {
-            e.printStackTrace();
+            e.printStackTrace(logger.getStream());
         }
         return null;
     }
@@ -146,7 +142,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     private void computeLineCoverage() {
         FilePath workspace = getWorkspace();
         File[] reports = getCoberturaReports(getBuild());
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, getIncludeFileNames());
+        CoberturaXMLParser parser = new CoberturaXMLParser(logger, workspace, getIncludeFileNames());
         mLineCoverage = parseReports(parser, reports);
     }
 
@@ -170,10 +166,10 @@ public class CoberturaCoverageProvider extends CoverageProvider {
                     i++;
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
                 LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
                 LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
             }
         }

@@ -324,6 +324,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             return null;
         }
 
+        coverage.setLogger(logger);
         coverage.setBuild(build);
         coverage.setWorkspace(workspace);
         coverage.setIncludeFileNames(includeFileNames);
