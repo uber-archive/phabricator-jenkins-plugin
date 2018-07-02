@@ -83,11 +83,11 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         try {
             return parser.parse(reports);
         } catch (IOException e) {
-            e.printStackTrace(logger.getStream());
+            e.printStackTrace();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace(logger.getStream());
+            e.printStackTrace();
         } catch (SAXException e) {
-            e.printStackTrace(logger.getStream());
+            e.printStackTrace();
         }
         return null;
     }
@@ -142,7 +142,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     private void computeLineCoverage() {
         FilePath workspace = getWorkspace();
         File[] reports = getCoberturaReports(getBuild());
-        CoberturaXMLParser parser = new CoberturaXMLParser(logger, workspace, getIncludeFileNames());
+        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, getIncludeFileNames());
         mLineCoverage = parseReports(parser, reports);
     }
 
@@ -166,10 +166,10 @@ public class CoberturaCoverageProvider extends CoverageProvider {
                     i++;
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace(logger.getStream());
+                e.printStackTrace();
                 LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
             } catch (IOException e) {
-                e.printStackTrace(logger.getStream());
+                e.printStackTrace();
                 LOGGER.log(Level.WARNING, "Unable to copy coverage to " + buildTarget);
             }
         }
