@@ -45,6 +45,7 @@ public class ApplyPatchTaskTest {
                 TestUtils.createLauncherFactory(j),
                 TestUtils.TEST_SHA,
                 TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_CONDUIT_URL,
                 TestUtils.TEST_CONDUIT_TOKEN,
                 "echo", "true", false, false, false, false, "svn");
         Task.Result result = task.run();
@@ -70,6 +71,7 @@ public class ApplyPatchTaskTest {
                 TestUtils.createLauncherFactory(j),
                 TestUtils.TEST_SHA,
                 TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_CONDUIT_URL,
                 TestUtils.TEST_CONDUIT_TOKEN,
                 arcPath,
                 gitPath, // git path
