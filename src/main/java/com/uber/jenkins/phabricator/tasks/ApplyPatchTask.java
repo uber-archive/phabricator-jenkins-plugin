@@ -23,12 +23,15 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.utils.Logger;
+import hudson.model.Computer;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class ApplyPatchTask extends Task {
     private final LauncherFactory starter;
@@ -54,7 +57,7 @@ public class ApplyPatchTask extends Task {
         this.baseCommit = baseCommit;
         this.diffID = diffID;
         this.conduitToken = conduitToken;
-        this.arcPath = arcPath;
+        this.arcPath = isWindows() ? arcPath + ".bat" : arcPath;
         this.gitPath = gitPath;
         this.createCommit = createCommit;
         this.skipForcedClean = skipForcedClean;
@@ -144,6 +147,26 @@ public class ApplyPatchTask extends Task {
             e.printStackTrace(logStream);
             this.result = Result.FAILURE;
         }
+    }
+
+    /**
+     * @return true if the current executor is on Windows
+     */
+    private boolean isWindows() {
+        try {
+            Computer remoteComputer = Computer.currentComputer();
+            if (remoteComputer != null) {
+                Map<Object, Object> remoteProperties = remoteComputer.getSystemProperties();
+                if (remoteProperties.containsKey("os.name")) {
+                    return StringUtils.startsWithIgnoreCase(remoteProperties.get("os.name").toString(), "Windows");
+                }
+            }
+        } catch (IOException e) {
+            info("IOException attempting to determine whether the OS is Windows.\n" + e.getMessage());
+        } catch (InterruptedException e) {
+            info("InterruptedException attempting to determine whether the OS is Windows.\n" + e.getMessage());
+        }
+        return false;
     }
 
     /**
