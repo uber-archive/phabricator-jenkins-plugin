@@ -47,6 +47,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Publisher> {
     private String credentialsID;
     private String uberallsURL;
+    private boolean blueOceanURI;
 
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
@@ -102,5 +103,13 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
 
     public void setUberallsURL(String value) {
         uberallsURL = value;
+    }
+
+    public boolean getBlueOceanURI() {
+        return blueOceanURI;
+    }
+
+    public void setBlueOceanURI(boolean value) {
+        blueOceanURI = value;
     }
 }

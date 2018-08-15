@@ -177,7 +177,17 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             throw new AbortException();
         }
 
-        final String buildUrl = environment.get("BUILD_URL");
+        String whichBuildUrl;
+
+        if (getDescriptor().getBlueOceanURI()) {
+            whichBuildUrl = environment.get("RUN_DISPLAY_URL");
+        }
+        else {
+            whichBuildUrl = environment.get("BUILD_URL");
+        }
+
+        // Still do finalization to prevent manipulation
+        final String buildUrl = whichBuildUrl;
 
         if (!isDifferential) {
             // Process harbormaster for non-differential builds
