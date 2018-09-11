@@ -175,8 +175,9 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
             }
 
             final String conduitToken = this.getConduitToken(build.getParent(), logger);
+            final String conduitUrl = this.getPhabricatorURL(build.getParent());
             Task.Result result = new ApplyPatchTask(
-                    logger, starter, baseCommit, diffID, conduitToken, getArcPath(),
+                    logger, starter, baseCommit, diffID, conduitUrl, conduitToken, getArcPath(),
                     DEFAULT_GIT_PATH, createCommit, skipForcedClean, createBranch,
                     patchWithForceFlag, scmType
             ).run();

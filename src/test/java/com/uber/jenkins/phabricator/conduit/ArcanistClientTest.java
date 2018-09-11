@@ -33,7 +33,7 @@ public class ArcanistClientTest {
 
     @Test
     public void testEcho() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "hello", null);
+        ArcanistClient client = new ArcanistClient("echo", "hello", null, null);
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);
@@ -41,7 +41,7 @@ public class ArcanistClientTest {
 
     @Test
     public void testEchoWithToken() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "tokentest", "notarealtoken");
+        ArcanistClient client = new ArcanistClient("echo", "tokentest", "testurl", "notarealtoken");
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);

@@ -35,6 +35,7 @@ public class ApplyPatchTask extends Task {
     private final String baseCommit;
     private final String diffID;
     private final PrintStream logStream;
+    private final String conduitUrl;
     private final String conduitToken;
     private final String arcPath;
     private final boolean createCommit;
@@ -45,14 +46,15 @@ public class ApplyPatchTask extends Task {
     private final String scmType;
 
     public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
-                          String diffID, String conduitToken, String arcPath,
-                          String gitPath, boolean createCommit, boolean skipForcedClean,
-                          boolean createBranch, boolean patchWithForceFlag,
-                          String scmType) {
+                          String diffID, String conduitUrl, String conduitToken,
+                          String arcPath, String gitPath, boolean createCommit,
+                          boolean skipForcedClean, boolean createBranch,
+                          boolean patchWithForceFlag, String scmType) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
         this.diffID = diffID;
+        this.conduitUrl = conduitUrl;
         this.conduitToken = conduitToken;
         this.arcPath = arcPath;
         this.gitPath = gitPath;
@@ -132,6 +134,7 @@ public class ApplyPatchTask extends Task {
             ArcanistClient arc = new ArcanistClient(
                     arcPath,
                     "patch",
+                    conduitUrl,
                     conduitToken,
                     arcPatchParams.toArray(new String[arcPatchParams.size()]));
 
