@@ -55,8 +55,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -66,6 +68,8 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     private static final String JUNIT_PLUGIN_NAME = "junit";
     private static final String JUNIT_CLASS_NAME = "com.uber.jenkins.phabricator.unit.JUnitTestProvider";
     private static final String COBERTURA_PLUGIN_NAME = "cobertura";
+    private static final String JACOCO_PLUGIN_NAME = "jacoco";
+    private static final String JACOCO_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.JacocoCoverageProvider";
     private static final String ABORT_TAG = "abort";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
@@ -312,46 +316,58 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
 
         Logger logger = new Logger(listener.getLogger());
-        InstanceProvider<CoverageProvider> provider = new InstanceProvider<CoverageProvider>(
-                Jenkins.getInstance(),
-                COBERTURA_PLUGIN_NAME,
-                COBERTURA_CLASS_NAME,
-                logger
-        );
-        CoverageProvider coverage = provider.getInstance();
+        List<CoverageProvider> coverageProviders = new ArrayList<CoverageProvider>();
 
-        if (coverage == null) {
-            return null;
+        CoverageProvider coberturaCoverage = makeProvider(COBERTURA_PLUGIN_NAME, COBERTURA_CLASS_NAME, logger);
+        if (coberturaCoverage != null) {
+            coverageProviders.add(coberturaCoverage);
         }
 
-        coverage.setBuild(build);
-        coverage.setWorkspace(workspace);
-        coverage.setIncludeFileNames(includeFileNames);
-        coverage.setCoverageReportPattern(coverageReportPattern);
-        if (coverage.hasCoverage()) {
-            return coverage;
-        } else {
-            logger.info(UBERALLS_TAG, "No cobertura results found");
-            return null;
+        CoverageProvider jacocoCoverage = makeProvider(JACOCO_PLUGIN_NAME, JACOCO_CLASS_NAME, logger);
+        if (jacocoCoverage != null) {
+            coverageProviders.add(jacocoCoverage);
         }
+
+        for (Iterator<CoverageProvider> i = coverageProviders.iterator(); i.hasNext(); ) {
+            CoverageProvider coverageProvider = i.next();
+            coverageProvider.setBuild(build);
+            coverageProvider.setWorkspace(workspace);
+            coverageProvider.setIncludeFileNames(includeFileNames);
+            coverageProvider.setCoverageReportPattern(coverageReportPattern);
+
+            if (!coverageProvider.hasCoverage()) {
+                i.remove();
+            }
+        }
+        if (!coverageProviders.isEmpty()) {
+            CoverageProvider provider = coverageProviders.get(0);
+            logger.info(UBERALLS_TAG, "Selected Coverage Provider: " + provider);
+            return provider;
+        }
+
+        logger.info(UBERALLS_TAG, "No coverage results found");
+        return null;
     }
 
     private UnitTestProvider getUnitProvider(Run<?, ?> build, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
 
-        InstanceProvider<UnitTestProvider> provider = new InstanceProvider<UnitTestProvider>(
-                Jenkins.getInstance(),
-                JUNIT_PLUGIN_NAME,
-                JUNIT_CLASS_NAME,
-                logger
-        );
-
-        UnitTestProvider unitProvider = provider.getInstance();
+        UnitTestProvider unitProvider = makeProvider(JUNIT_PLUGIN_NAME, JUNIT_CLASS_NAME, logger);
         if (unitProvider == null) {
             return null;
         }
         unitProvider.setBuild(build);
         return unitProvider;
+    }
+
+    private <T> T makeProvider(String pluginName, String className, Logger logger) {
+        InstanceProvider<T> instanceProvider = new InstanceProvider<T>(
+                Jenkins.getInstance(),
+                pluginName,
+                className,
+                logger
+        );
+        return instanceProvider.getInstance();
     }
 
     @SuppressWarnings("UnusedDeclaration")

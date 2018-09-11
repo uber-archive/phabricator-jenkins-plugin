@@ -240,7 +240,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.SUCCESS, build.getResult());
-        assertLogContains("No cobertura results found", build);
+        assertLogContains("No coverage results found", build);
     }
 
     @Test
