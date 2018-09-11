@@ -124,14 +124,14 @@ public class UberallsClient {
                 }
                 return true;
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
             } catch (HttpResponseException e) {
                 // e.g. 404, pass
                 logger.info(TAG, "HTTP Response error recording metrics: " + e);
             } catch (ClientProtocolException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
             }
         }
 

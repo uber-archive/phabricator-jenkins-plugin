@@ -60,10 +60,10 @@ public class SendHarbormasterResultTask extends Task {
                 sendMessage(null, null, null);
             }
         } catch (ConduitAPIException e) {
-            e.printStackTrace();
+            printStackTrace(e);
             failTask();
         } catch (IOException e) {
-            e.printStackTrace();
+            printStackTrace(e);
             failTask();
         }
     }

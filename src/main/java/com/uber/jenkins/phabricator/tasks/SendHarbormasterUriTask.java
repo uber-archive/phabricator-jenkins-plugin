@@ -60,10 +60,10 @@ public class SendHarbormasterUriTask extends Task {
                 this.result = Result.SUCCESS;
             }
         } catch (ConduitAPIException e) {
-            e.printStackTrace();
+            printStackTrace(e);
             this.result = Result.FAILURE;
         } catch (IOException e) {
-            e.printStackTrace();
+            printStackTrace(e);
             this.result = Result.FAILURE;
         }
     }
