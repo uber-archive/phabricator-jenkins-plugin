@@ -185,8 +185,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
         if (getDescriptor().getIsBlueOceanEnabled()) {
             whichBuildUrl = environment.get("RUN_DISPLAY_URL");
-        }
-        else {
+        } else {
             whichBuildUrl = environment.get("BUILD_URL");
         }
 
