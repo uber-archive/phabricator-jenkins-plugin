@@ -24,14 +24,17 @@ import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
+import com.uber.jenkins.phabricator.coverage.JacocoCoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.provider.InstanceProvider;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialHarbormasterTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
+import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -63,13 +66,6 @@ import java.util.List;
 import java.util.Set;
 
 public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
-    public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
-
-    private static final String JUNIT_PLUGIN_NAME = "junit";
-    private static final String JUNIT_CLASS_NAME = "com.uber.jenkins.phabricator.unit.JUnitTestProvider";
-    private static final String COBERTURA_PLUGIN_NAME = "cobertura";
-    private static final String JACOCO_PLUGIN_NAME = "jacoco";
-    private static final String JACOCO_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.JacocoCoverageProvider";
     private static final String ABORT_TAG = "abort";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
@@ -327,12 +323,12 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         Logger logger = new Logger(listener.getLogger());
         List<CoverageProvider> coverageProviders = new ArrayList<CoverageProvider>();
 
-        CoverageProvider coberturaCoverage = makeProvider(COBERTURA_PLUGIN_NAME, COBERTURA_CLASS_NAME, logger);
+        CoverageProvider coberturaCoverage = InstanceProvider.getCoberturaCoverageProvider(logger);
         if (coberturaCoverage != null) {
             coverageProviders.add(coberturaCoverage);
         }
 
-        CoverageProvider jacocoCoverage = makeProvider(JACOCO_PLUGIN_NAME, JACOCO_CLASS_NAME, logger);
+        CoverageProvider jacocoCoverage = InstanceProvider.getJacocoCoverageProvider(logger);
         if (jacocoCoverage != null) {
             coverageProviders.add(jacocoCoverage);
         }
@@ -361,22 +357,12 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     private UnitTestProvider getUnitProvider(Run<?, ?> build, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
 
-        UnitTestProvider unitProvider = makeProvider(JUNIT_PLUGIN_NAME, JUNIT_CLASS_NAME, logger);
+        UnitTestProvider unitProvider = InstanceProvider.getUnitTestProvider(logger);
         if (unitProvider == null) {
             return null;
         }
         unitProvider.setBuild(build);
         return unitProvider;
-    }
-
-    private <T> T makeProvider(String pluginName, String className, Logger logger) {
-        InstanceProvider<T> instanceProvider = new InstanceProvider<T>(
-                Jenkins.getInstance(),
-                pluginName,
-                className,
-                logger
-        );
-        return instanceProvider.getInstance();
     }
 
     @SuppressWarnings("UnusedDeclaration")
