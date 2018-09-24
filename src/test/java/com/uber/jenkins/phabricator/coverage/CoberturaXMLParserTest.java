@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import hudson.FilePath;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -51,19 +50,17 @@ public class CoberturaXMLParserTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private FilePath workspace;
     private Set<String> includeFileNames;
 
     @Before
     public void setUp() {
-        workspace = new FilePath(temporaryFolder.getRoot());
         includeFileNames = null;
     }
 
     @Test
     public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException,
             URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, includeFileNames);
+        CoberturaXMLParser parser = new CoberturaXMLParser(includeFileNames);
 
         File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
         File testCoverageFile2 = getResource(TEST_COVERAGE_FILE_2);
@@ -87,7 +84,7 @@ public class CoberturaXMLParserTest {
     @Test
     public void testGetLineCoverageWhenOneFileOverwriteTheOther()
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, includeFileNames);
+        CoberturaXMLParser parser = new CoberturaXMLParser(includeFileNames);
 
         // In `TEST_COVERAGE_FILE`, line 212 has 1 hit
         File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
@@ -104,7 +101,7 @@ public class CoberturaXMLParserTest {
     @Test
     public void testGetLineCoverageWithIncludes()
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, Collections.singleton("main.go"));
+        CoberturaXMLParser parser = new CoberturaXMLParser(Collections.singleton("github.com/uber/go-torch/main.go"));
 
         File testCoverageFile = getResource(TEST_COVERAGE_FILE);
 

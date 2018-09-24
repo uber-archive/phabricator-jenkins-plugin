@@ -54,7 +54,7 @@ public class CoberturaXMLParserPatameterizedTest {
         File example = new File(tmpDir, "example");
 
         try {
-            CoberturaXMLParser parser = new CoberturaXMLParser(new FilePath(tmpDir), null);
+            CoberturaXMLParser parser = new CoberturaXMLParser(null);
 
             if (createDirectory) {
                 example.mkdir();

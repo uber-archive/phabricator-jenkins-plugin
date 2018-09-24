@@ -142,7 +142,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     private void computeLineCoverage() {
         FilePath workspace = getWorkspace();
         File[] reports = getCoberturaReports(getBuild());
-        CoberturaXMLParser parser = new CoberturaXMLParser(workspace, getIncludeFileNames());
+        CoberturaXMLParser parser = new CoberturaXMLParser(getIncludeFileNames());
         mLineCoverage = parseReports(parser, reports);
     }
 
