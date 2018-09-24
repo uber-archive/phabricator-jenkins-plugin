@@ -31,11 +31,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PathResolver {
+class PathResolver {
     private final FilePath root;
     private final List<String> candidates;
 
-    public PathResolver(FilePath root, List<String> candidates) {
+    PathResolver(FilePath root, List<String> candidates) {
         this.root = root;
         this.candidates = candidates;
     }
@@ -50,7 +50,7 @@ public class PathResolver {
      * Returns map where key is filename and value - sourceDirectory
      */
 
-    public Map<String, String> choose(List<String> filenames) {
+    Map<String, String> choose(List<String> filenames) {
         try {
             if (candidates.size() > 0) {
                 return root.act(new PathResolverChooseMultiCallable(candidates, filenames));
