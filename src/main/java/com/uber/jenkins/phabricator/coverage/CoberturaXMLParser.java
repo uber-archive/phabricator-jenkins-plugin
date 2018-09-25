@@ -20,8 +20,9 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.io.FilenameUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
@@ -33,19 +34,22 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.google.common.collect.ImmutableMap;
-
-import hudson.FilePath;
-
-public class CoberturaXMLParser {
+public final class CoberturaXMLParser {
 
     private static final String TAG_NAME_CLASS = "class";
     private static final String NODE_FILENAME = "filename";
@@ -56,11 +60,11 @@ public class CoberturaXMLParser {
     private static final String EMPTY_XML = "<?xml version='1.0' encoding='UTF-8'?>";
     private static final Logger LOGGER = Logger.getLogger(CoberturaXMLParser.class.getName());
     private static final Map<String, String> dtdMap = ImmutableMap.<String, String>builder()
-        .put("http://cobertura.sourceforge.net/xml/coverage-01.dtd", "coverage-01.dtd")
-        .put("http://cobertura.sourceforge.net/xml/coverage-02.dtd", "coverage-02.dtd")
-        .put("http://cobertura.sourceforge.net/xml/coverage-03.dtd", "coverage-03.dtd")
-        .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd", "coverage-04.dtd")
-        .build();
+            .put("http://cobertura.sourceforge.net/xml/coverage-01.dtd", "coverage-01.dtd")
+            .put("http://cobertura.sourceforge.net/xml/coverage-02.dtd", "coverage-02.dtd")
+            .put("http://cobertura.sourceforge.net/xml/coverage-03.dtd", "coverage-03.dtd")
+            .put("http://cobertura.sourceforge.net/xml/coverage-04.dtd", "coverage-04.dtd")
+            .build();
 
     private static final EntityResolver entityResolver = new EntityResolver() {
         @Override
@@ -69,29 +73,23 @@ public class CoberturaXMLParser {
             if (res != null) {
                 return new InputSource(this.getClass().getResourceAsStream(res));
             } else {
-                LOGGER.log(Level.WARNING, "Unknown DTD systemID \"" + systemId + "\", skipping download by returning empty DTD");
+                LOGGER.log(Level.WARNING,
+                        "Unknown DTD systemID \"" + systemId + "\", skipping download by returning empty DTD");
                 return new InputSource(new StringReader(EMPTY_XML));
             }
         }
     };
 
-    private final Set<String> includeFiles;
-    private final Set<String> includeFileNames = new HashSet<String>();
+    private CoberturaXMLParser() {}
 
-    CoberturaXMLParser(Set<String> includeFiles) {
-        this.includeFiles = includeFiles != null ? includeFiles : Collections.<String>emptySet();
-        for(String includeFile: this.includeFiles) {
-            includeFileNames.add(FilenameUtils.getName(includeFile));
-        }
-    }
-
-    Map<String, List<Integer>> parse(File... files) throws ParserConfigurationException, SAXException,
+    static Map<String, List<Integer>> parse(Map<String, String> includeFiles, File... reports) throws
+            ParserConfigurationException, SAXException,
             IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Set<NodeList> coverageData = new HashSet<NodeList>();
 
-        for (File file : files) {
+        for (File file : reports) {
             InputStream is = null;
             try {
                 is = new FileInputStream(file);
@@ -105,10 +103,10 @@ public class CoberturaXMLParser {
             }
         }
 
-        return parse(coverageData);
+        return parse(coverageData, includeFiles);
     }
 
-    private Map<String, List<Integer>> parse(Set<NodeList> coverageData) {
+    private static Map<String, List<Integer>> parse(Set<NodeList> coverageData, Map<String, String> includeFiles) {
         Map<String, SortedMap<Integer, Integer>> internalCounts = new HashMap<String, SortedMap<Integer, Integer>>();
 
         // Each entry in the map is an XML list of classes (files) mapped to its possible source roots
@@ -120,8 +118,9 @@ public class CoberturaXMLParser {
                 Node classNode = classes.item(i);
                 String fileName = classNode.getAttributes().getNamedItem(NODE_FILENAME).getTextContent();
 
-                if (includeFiles.isEmpty() || includeFiles.contains(fileName) || includeFileNames.contains(fileName)) {
-                    fileNames.add(fileName);
+                String finalFileName = CoverageProvider.getRelativePathFromProjectRoot(includeFiles, fileName);
+                if (finalFileName != null) {
+                    fileNames.add(finalFileName);
                     childNodes.add(classNode.getChildNodes());
                 }
             }
@@ -160,7 +159,7 @@ public class CoberturaXMLParser {
         return computeLineCoverage(internalCounts);
     }
 
-    private Map<String, List<Integer>> computeLineCoverage(Map<String, SortedMap<Integer, Integer>> internalCounts) {
+    private static Map<String, List<Integer>> computeLineCoverage(Map<String, SortedMap<Integer, Integer>> internalCounts) {
         Map<String, List<Integer>> lineCoverage = new HashMap<String, List<Integer>>();
         for (Map.Entry<String, SortedMap<Integer, Integer>> entry : internalCounts.entrySet()) {
             List<Integer> sortedCounts = new ArrayList<Integer>();
@@ -178,7 +177,7 @@ public class CoberturaXMLParser {
         return lineCoverage;
     }
 
-    private int getIntValue(Node node, String attributeName) {
+    private static int getIntValue(Node node, String attributeName) {
         return Integer.parseInt(node.getAttributes().getNamedItem(attributeName).getTextContent());
     }
 }

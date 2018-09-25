@@ -20,12 +20,15 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class FakeCoverageProvider extends CoverageProvider {
+
     private final Map<String, List<Integer>> coverage;
 
     public FakeCoverageProvider(Map<String, List<Integer>> coverage) {
+        super(null, null, null);
         this.coverage = coverage;
     }
 

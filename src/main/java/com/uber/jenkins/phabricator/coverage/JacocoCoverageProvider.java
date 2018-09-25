@@ -1,7 +1,19 @@
 package com.uber.jenkins.phabricator.coverage;
 
 import com.google.common.annotations.VisibleForTesting;
-import hudson.FilePath;
+
+import org.jacoco.core.analysis.IClassCoverage;
+import org.jacoco.core.analysis.ICounter;
+import org.jacoco.core.analysis.ILine;
+import org.jacoco.core.analysis.IPackageCoverage;
+import org.jacoco.core.analysis.ISourceNode;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import hudson.model.AbstractBuild;
 import hudson.model.Project;
 import hudson.model.Run;
@@ -9,22 +21,6 @@ import hudson.plugins.jacoco.ExecutionFileLoader;
 import hudson.plugins.jacoco.JacocoBuildAction;
 import hudson.plugins.jacoco.JacocoPublisher;
 import hudson.plugins.jacoco.report.CoverageReport;
-import hudson.remoting.VirtualChannel;
-import jenkins.MasterToSlaveFileCallable;
-import org.apache.tools.ant.DirectoryScanner;
-import org.jacoco.core.analysis.ICounter;
-import org.jacoco.core.analysis.ILine;
-import org.jacoco.core.analysis.IPackageCoverage;
-import org.jacoco.core.analysis.ISourceFileCoverage;
-import org.jacoco.core.analysis.ISourceNode;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides Jacoco coverage data
@@ -34,6 +30,12 @@ public class JacocoCoverageProvider extends CoverageProvider {
 
     private static final int PERCENTAGE_UNAVAILABLE = -1;
 
+    public JacocoCoverageProvider(
+            Run<?, ?> build,
+            Map<String, String> includeFiles, String coverageReportPattern) {
+        super(build, includeFiles, coverageReportPattern);
+    }
+
     @Override
     public boolean hasCoverage() {
         CoverageReport result = getCoverageResult();
@@ -41,6 +43,10 @@ public class JacocoCoverageProvider extends CoverageProvider {
     }
 
     private CoverageReport getCoverageResult() {
+        if (build == null) {
+            return null;
+        }
+
         JacocoBuildAction jacocoAction = getJacocoBuildAction();
         if (jacocoAction == null) {
             return null;
@@ -49,20 +55,11 @@ public class JacocoCoverageProvider extends CoverageProvider {
     }
 
     private JacocoBuildAction getJacocoBuildAction() {
-        Run<?, ?> build = getBuild();
-        if (build == null) {
-            return null;
-        }
-
         return build.getAction(JacocoBuildAction.class);
     }
 
     private JacocoPublisher getJacocoPublisher() {
-        Run<?, ?> run = getBuild();
-        if (run == null) {
-            return null;
-        }
-        Project<?,?> project = (Project<?,?>) ((AbstractBuild) run).getProject();
+        Project<?, ?> project = (Project<?, ?>) ((AbstractBuild) build).getProject();
         return (JacocoPublisher) project.getPublisher(JacocoPublisher.DESCRIPTOR);
     }
 
@@ -79,26 +76,26 @@ public class JacocoCoverageProvider extends CoverageProvider {
             return null;
         }
 
-        PathResolver pathResolver = new PathResolver(getWorkspace(), getSourceDirs());
         HashMap<String, List<Integer>> lineCoverage = new HashMap<String, List<Integer>>();
 
         String[] includes = null;
         if (jacocoPublisher.getInclusionPattern() != null) {
-            includes = new String[]{ jacocoPublisher.getInclusionPattern() };
+            includes = new String[] {jacocoPublisher.getInclusionPattern()};
         }
 
         String[] excludes = null;
         if (jacocoPublisher.getExclusionPattern() != null) {
-            excludes = new String[]{jacocoPublisher.getExclusionPattern()};
+            excludes = new String[] {jacocoPublisher.getExclusionPattern()};
         }
 
         try {
             ExecutionFileLoader executionFileLoader = jacocoAction.getJacocoReport().parse(includes, excludes);
             for (IPackageCoverage packageCoverage : executionFileLoader.getBundleCoverage().getPackages()) {
-                for (ISourceFileCoverage fileCoverage : packageCoverage.getSourceFiles()) {
-                    String relativePathFromProjectRoot = getRelativePathFromProjectRoot(pathResolver, fileCoverage);
+                for (IClassCoverage classCoverage : packageCoverage.getClasses()) {
+                    String relativePathFromProjectRoot = getRelativePathFromProjectRoot(
+                            classCoverage.getSourceFileName());
                     if (relativePathFromProjectRoot != null) {
-                        lineCoverage.put(relativePathFromProjectRoot, getPerLineCoverage(fileCoverage));
+                        lineCoverage.put(relativePathFromProjectRoot, getPerLineCoverage(classCoverage));
                     }
                 }
             }
@@ -110,28 +107,7 @@ public class JacocoCoverageProvider extends CoverageProvider {
         return lineCoverage;
     }
 
-    private static String getRelativePathFromProjectRoot(PathResolver pathResolver, ISourceFileCoverage fileCoverage) {
-        String relativeSourcePath = fileCoverage.getPackageName() + "/" + fileCoverage.getName();
-        Map<String, String> stringMap = pathResolver.choose(Collections.singletonList(relativeSourcePath));
-        String dirPath = stringMap.get(relativeSourcePath);
-        if (dirPath == null) {
-            return null;
-        }
-        return dirPath + "/" + relativeSourcePath;
-    }
-
-    private List<String> getSourceDirs() {
-        JacocoPublisher jacocoPublisher = getJacocoPublisher();
-        FilePath[] dirPaths = resolveDirPaths(getWorkspace(), jacocoPublisher.getSourcePattern());
-
-        List<String> relativePaths = new ArrayList<String>();
-        for (FilePath dirPath : dirPaths) {
-            relativePaths.add(makeRelative(dirPath.getRemote()));
-        }
-        return relativePaths;
-    }
-
-    private static List<Integer> getPerLineCoverage(ISourceFileCoverage fileCoverage) {
+    private static List<Integer> getPerLineCoverage(ISourceNode fileCoverage) {
         List<Integer> perLineCoverages = new ArrayList<Integer>();
 
         if (fileCoverage.getFirstLine() == ISourceNode.UNKNOWN_LINE ||
@@ -187,44 +163,4 @@ public class JacocoCoverageProvider extends CoverageProvider {
                 branchCoverage
         );
     }
-
-    private String makeRelative(String srcDir) {
-        return srcDir.replaceFirst(getWorkspace() + "/", "");
-    }
-
-    // From Jacoco Jenkins plugin
-    private static FilePath[] resolveDirPaths(FilePath workspace, final String input) {
-        FilePath[] directoryPaths = null;
-        try {
-            directoryPaths = workspace.act(new MasterToSlaveFileCallable<FilePath[]>() {
-                static final long serialVersionUID = 1552178457453558870L;
-
-                public FilePath[] invoke(File f, VirtualChannel channel) throws IOException {
-                    FilePath base = new FilePath(f);
-                    ArrayList<FilePath> localDirectoryPaths = new ArrayList<FilePath>();
-                    String[] includes = input.split(",");
-                    DirectoryScanner ds = new DirectoryScanner();
-
-                    ds.setIncludes(includes);
-                    ds.setCaseSensitive(false);
-                    ds.setBasedir(f);
-                    ds.scan();
-                    String[] dirs = ds.getIncludedDirectories();
-
-                    for (String dir : dirs) {
-                        localDirectoryPaths.add(base.child(dir));
-                    }
-                    FilePath[] lfp = {};//trick to have an empty array as a parameter, so the returned array will contain the elements
-                    return localDirectoryPaths.toArray(lfp);
-                }
-            });
-
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        } catch (IOException io) {
-            io.printStackTrace();
-        }
-        return directoryPaths;
-    }
-
 }

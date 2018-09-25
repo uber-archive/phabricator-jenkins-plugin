@@ -2,18 +2,7 @@ package com.uber.jenkins.phabricator.coverage;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import hudson.FilePath;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.jacoco.JacocoBuildAction;
-import hudson.plugins.jacoco.JacocoHealthReportThresholds;
-import hudson.plugins.jacoco.JacocoPublisher;
-import hudson.plugins.jacoco.JacocoReportDir;
-import hudson.plugins.jacoco.model.Coverage;
-import hudson.plugins.jacoco.report.CoverageReport;
-import org.junit.Before;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +20,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.jacoco.JacocoBuildAction;
+import hudson.plugins.jacoco.JacocoHealthReportThresholds;
+import hudson.plugins.jacoco.JacocoPublisher;
+import hudson.plugins.jacoco.JacocoReportDir;
+import hudson.plugins.jacoco.model.Coverage;
+import hudson.plugins.jacoco.report.CoverageReport;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -46,13 +48,6 @@ public class JacocoCoverageProviderTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
-
-    private JacocoCoverageProvider provider;
-
-    @Before
-    public void setUp() {
-        provider = new JacocoCoverageProvider();
-    }
 
     @Test
     @WithoutJenkins
@@ -74,13 +69,14 @@ public class JacocoCoverageProviderTest {
     @Test
     @WithoutJenkins
     public void testGetMetricsNullBuild() {
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(null, null, null);
         assertNull(provider.getMetrics());
     }
 
     @Test
     @WithoutJenkins
     public final void testCoverageMetrics() {
-        Run mockRun = mock(Run.class);
+        Run mockRun = mock(AbstractBuild.class);
 
         JacocoBuildAction mockBuildAction = mock(JacocoBuildAction.class);
 
@@ -89,7 +85,7 @@ public class JacocoCoverageProviderTest {
         CoverageReport mockResult = getMockResult();
         when(mockBuildAction.getResult()).thenReturn(mockResult);
 
-        provider.setBuild(mockRun);
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(mockRun, null, null);
 
         assertTrue(provider.hasCoverage());
         assertEquals(75.0, provider.getCoverageMetrics().getLineCoveragePercent(), 0.1);
@@ -97,27 +93,28 @@ public class JacocoCoverageProviderTest {
 
     @Test
     public void testGetMetricsNoResult() throws IOException {
-        FreeStyleBuild build = getBuild();
-        provider.setBuild(build);
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(getEmptyBuild(), null, null);
+
         assertNull(provider.getMetrics());
         assertFalse(provider.hasCoverage());
     }
 
     @Test
     public void testGetMetricsWithResult() throws Exception {
-        FreeStyleBuild build = getExecutedJacocoBuild();
-        JacocoReportDir jacocoReportDir = createJacocoReportDir(build);
+        FreeStyleBuild executedJacocoBuild = getExecutedJacocoBuild();
+        JacocoReportDir jacocoReportDir = createJacocoReportDir(executedJacocoBuild);
 
-        JacocoBuildAction buildAction = JacocoBuildAction.load(build, new JacocoHealthReportThresholds(), TaskListener.NULL, jacocoReportDir, null, null);
-        build.replaceAction(buildAction);
+        JacocoBuildAction buildAction = JacocoBuildAction.load(executedJacocoBuild, new JacocoHealthReportThresholds(),
+                TaskListener.NULL, jacocoReportDir, null, null);
+        executedJacocoBuild.replaceAction(buildAction);
 
-        provider.setBuild(build);
-        provider.setWorkspace(build.getWorkspace());
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(executedJacocoBuild, Collections.singletonMap("Greet.java"
+                , JAVA_FILE_PATH), null);
 
         assertTrue(provider.hasCoverage());
         assertEquals(66.6, provider.getCoverageMetrics().getLineCoveragePercent(), 0.1);
 
-        FilePath sourcePath = build.getWorkspace().child(JAVA_FILE_PATH);
+        FilePath sourcePath = executedJacocoBuild.getWorkspace().child(JAVA_FILE_PATH);
         sourcePath.mkdirs();
         sourcePath.touch(0);
 
@@ -151,7 +148,7 @@ public class JacocoCoverageProviderTest {
         return jacocoReportDir;
     }
 
-    private FreeStyleBuild getBuild() throws IOException {
+    private FreeStyleBuild getEmptyBuild() throws IOException {
         return new FreeStyleBuild(j.createFreeStyleProject());
     }
 

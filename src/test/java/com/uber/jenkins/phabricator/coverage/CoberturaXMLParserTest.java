@@ -20,13 +20,11 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,7 +32,8 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -50,23 +49,15 @@ public class CoberturaXMLParserTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private Set<String> includeFileNames;
-
-    @Before
-    public void setUp() {
-        includeFileNames = null;
-    }
-
     @Test
     public void testGetLineCoverage() throws IOException, ParserConfigurationException, SAXException,
             URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(includeFileNames);
-
         File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
         File testCoverageFile2 = getResource(TEST_COVERAGE_FILE_2);
         File testCoverageFile3 = getResource(TEST_COVERAGE_FILE_3);
 
-        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile, testCoverageFile2, testCoverageFile3);
+        Map<String, List<Integer>> lineCoverage = CoberturaXMLParser.parse(null, testCoverageFile,
+                testCoverageFile2, testCoverageFile3);
         List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
         assertEquals(246, mainCoverage.size());
         assertNull(mainCoverage.get(0));
@@ -84,14 +75,13 @@ public class CoberturaXMLParserTest {
     @Test
     public void testGetLineCoverageWhenOneFileOverwriteTheOther()
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(includeFileNames);
-
         // In `TEST_COVERAGE_FILE`, line 212 has 1 hit
         File testCoverageFile = getResource(TEST_COVERAGE_FILE_1);
         // In `TEST_COVERAGE_FILE_OVERWRITE`, line 212 has 0 hit
         File testCoverageFileOverwrite = getResource(TEST_COVERAGE_FILE_OVERWRITE);
 
-        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile, testCoverageFileOverwrite);
+        Map<String, List<Integer>> lineCoverage = CoberturaXMLParser.parse(null, testCoverageFile,
+                testCoverageFileOverwrite);
         List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
 
         // Line 212 is recorded as hit
@@ -101,11 +91,11 @@ public class CoberturaXMLParserTest {
     @Test
     public void testGetLineCoverageWithIncludes()
             throws IOException, ParserConfigurationException, SAXException, URISyntaxException {
-        CoberturaXMLParser parser = new CoberturaXMLParser(Collections.singleton("github.com/uber/go-torch/main.go"));
-
         File testCoverageFile = getResource(TEST_COVERAGE_FILE);
 
-        Map<String, List<Integer>> lineCoverage = parser.parse(testCoverageFile);
+        Map<String, List<Integer>> lineCoverage = CoberturaXMLParser.parse(
+                Collections.singletonMap("main.go", "github.com/uber/go"
+                        + "-torch/main.go"), testCoverageFile);
         List<Integer> mainCoverage = lineCoverage.get("github.com/uber/go-torch/main.go");
         assertEquals(1, mainCoverage.get(212).longValue());
 

@@ -20,61 +20,32 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import hudson.FilePath;
-import hudson.model.Run;
+import org.apache.commons.io.FilenameUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.Run;
 
 public abstract class CoverageProvider {
-    private Run<?, ?> build;
-    private FilePath workspace;
-    private Set<String> includeFileNames;
-    private String coverageReportPattern;
 
-    /**
-     * Set the list of file names to get coverage metrics for
-     * @param includeFileNames The list of file names to get coverage metrics for
-     */
-    public void setIncludeFileNames(Set<String> includeFileNames) {
-        this.includeFileNames = includeFileNames;
-    }
+    private static final String DEFAULT_COVERAGE_REPORT_PATTERN = "**/coverage*.xml, **/cobertura*.xml";
 
-    protected Set<String> getIncludeFileNames() {
-        return includeFileNames;
-    }
+    final Run<?, ?> build;
+    final FilePath workspace;
+    final Map<String, String> includeFiles;
+    final String coverageReportPattern;
 
-    /**
-     * Set the owning build for this provider
-     * @param build The build that is associated with the current run
-     */
-    public void setBuild(Run<?, ?> build) {
+    CoverageProvider(Run<?, ?> build, Map<String, String> includeFiles, String coverageReportPattern) {
         this.build = build;
-    }
-
-    protected Run<?, ?> getBuild() {
-        return build;
-    }
-
-    public void setWorkspace(FilePath workspace) {
-        this.workspace = workspace;
-    }
-
-    protected FilePath getWorkspace() {
-        return workspace;
-    }
-
-    /**
-     * Set the coverage report pattern to scan for
-     * @param coverageReportPattern The coverage report pattern to scan for
-     */
-    public void setCoverageReportPattern(String coverageReportPattern) {
-        this.coverageReportPattern = coverageReportPattern;
-    }
-
-    String getCoverageReportPattern() {
-        return coverageReportPattern;
+        this.workspace = build != null ? ((AbstractBuild) build).getWorkspace() : null;
+        this.includeFiles = includeFiles;
+        this.coverageReportPattern =
+                coverageReportPattern != null ? coverageReportPattern : DEFAULT_COVERAGE_REPORT_PATTERN;
     }
 
     public abstract Map<String, List<Integer>> readLineCoverage();
@@ -85,11 +56,32 @@ public abstract class CoverageProvider {
      * Get the coverage metrics for the provider
      * @return The metrics, if any are available
      */
+    @Nullable
     public CodeCoverageMetrics getMetrics() {
         if (!hasCoverage()) {
             return null;
         }
         return getCoverageMetrics();
+    }
+
+    @Nullable
+    String getRelativePathFromProjectRoot(String file) {
+        return getRelativePathFromProjectRoot(includeFiles, file);
+    }
+
+    @Nullable
+    static String getRelativePathFromProjectRoot(Map<String, String> includeFiles, String file) {
+        String finalFile = null;
+        if (includeFiles == null || includeFiles.isEmpty()) {
+            finalFile = file;
+        } else {
+            String includedFileName = FilenameUtils.getName(file);
+            String foundFile = includeFiles.get(includedFileName);
+            if (foundFile != null) {
+                finalFile = foundFile;
+            }
+        }
+        return finalFile;
     }
 
     protected abstract CodeCoverageMetrics getCoverageMetrics();

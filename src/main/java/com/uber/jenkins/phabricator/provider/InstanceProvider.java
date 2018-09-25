@@ -27,6 +27,10 @@ import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.Logger;
 
+import java.util.Map;
+
+import hudson.FilePath;
+import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 public abstract class InstanceProvider<T> {
@@ -67,22 +71,26 @@ public abstract class InstanceProvider<T> {
 
     abstract T makeInstance();
 
-    public static CoverageProvider getCoberturaCoverageProvider(Logger logger) {
+    public static CoverageProvider getCoberturaCoverageProvider(
+            final Run<?, ?> build, final FilePath workspace,
+            final Map<String, String> includeFiles, final String coverageReportPattern, Logger logger) {
         return new InstanceProvider<CoverageProvider>(Jenkins.getInstance(),
                 COBERTURA_PLUGIN_NAME, logger) {
             @Override
             protected CoverageProvider makeInstance() {
-                return new CoberturaCoverageProvider();
+                return new CoberturaCoverageProvider(build, includeFiles, coverageReportPattern);
             }
         }.getInstance();
     }
 
-    public static CoverageProvider getJacocoCoverageProvider(Logger logger) {
+    public static CoverageProvider getJacocoCoverageProvider(
+            final Run<?, ?> build, final FilePath workspace,
+            final Map<String, String> includeFiles, final String coverageReportPattern, Logger logger) {
         return new InstanceProvider<CoverageProvider>(Jenkins.getInstance(),
                 JACOCO_PLUGIN_NAME, logger) {
             @Override
             protected CoverageProvider makeInstance() {
-                return new JacocoCoverageProvider();
+                return new JacocoCoverageProvider(build, includeFiles, coverageReportPattern);
             }
         }.getInstance();
     }

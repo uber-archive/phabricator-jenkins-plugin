@@ -23,12 +23,13 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
 
 public class NonDifferentialBuildTaskTest {
 
@@ -101,15 +102,6 @@ public class NonDifferentialBuildTaskTest {
         assertEquals(Task.Result.IGNORED,
                 new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
                         codeCoverageMetrics, true, "    ").run());
-    }
-
-    @Test
-    public void testInvalidCodeCoverageMetrics() {
-        codeCoverageMetrics = TestUtils.getCodeCoverageMetrics(
-                50.0f, 50.0f, 50.0f, 50.0f, -1.0f, 50.0f);
-        assertEquals(Task.Result.IGNORED,
-                new NonDifferentialBuildTask(TestUtils.getDefaultLogger(), uberallsClient,
-                        codeCoverageMetrics, true, TestUtils.TEST_SHA).run());
     }
 
     @Test
