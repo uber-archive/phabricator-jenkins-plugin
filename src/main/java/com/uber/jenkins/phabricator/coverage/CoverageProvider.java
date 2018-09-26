@@ -53,6 +53,7 @@ public abstract class CoverageProvider {
 
     /**
      * Get the coverage metrics for the provider
+     *
      * @return The metrics, if any are available
      */
     @Nullable
@@ -68,6 +69,15 @@ public abstract class CoverageProvider {
         return getRelativePathFromProjectRoot(includeFiles, file);
     }
 
+    /**
+     * Languages like Kotlin/Scala which can have multiple top level classes in a file. For such classes,
+     * (package path + source file name) will not match where they are actually present in the filesystem.
+     * So this method does two separate marches 1) with just file name and 2) with package name + sourcefile name.
+     * Multiple classes with same name and different packages will match correctly. In case a full match is not
+     * possible, we fall back to file name match. We only check against files included as part of a diff which means
+     * that the possibility of a bad match is very unlikely (only if two files with same name are touched as part of
+     * the diff), but that is the best we can accomplish.
+     */
     @Nullable
     static String getRelativePathFromProjectRoot(Set<String> includeFiles, String coverageFile) {
         if (includeFiles == null || includeFiles.isEmpty()) {
@@ -75,7 +85,7 @@ public abstract class CoverageProvider {
         } else {
             int maxMatch = 0;
             String maxMatchFile = coverageFile;
-            for (String includedFile: includeFiles) {
+            for (String includedFile : includeFiles) {
                 int currmatch = suffixMatch(includedFile, coverageFile);
                 if (currmatch > maxMatch) {
                     maxMatch = currmatch;
@@ -96,7 +106,8 @@ public abstract class CoverageProvider {
         }
 
         int rIndex = 1;
-        while (coverageFileSize - rIndex >=0 && coverageFile.charAt(coverageFileSize - rIndex) == changedFile.charAt(changedFileSize - rIndex)) {
+        while (coverageFileSize - rIndex >= 0 && coverageFile.charAt(coverageFileSize - rIndex) == changedFile.charAt(
+                changedFileSize - rIndex)) {
             rIndex++;
         }
         return rIndex - 1;

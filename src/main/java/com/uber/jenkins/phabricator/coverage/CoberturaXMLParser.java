@@ -109,7 +109,7 @@ public final class CoberturaXMLParser {
     private static Map<String, List<Integer>> parse(Set<NodeList> coverageData, Set<String> includeFiles) {
         Map<String, SortedMap<Integer, Integer>> internalCounts = new HashMap<String, SortedMap<Integer, Integer>>();
 
-        // Each entry in the map is an XML list of classes (files) mapped to its possible source roots
+        // Each entry in the set is an XML list of classes (files)
         for (NodeList classes : coverageData) {
             // Collect all filenames in coverage report
             List<String> fileNames = new ArrayList<String>();

@@ -6,6 +6,7 @@ import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.analysis.ILine;
 import org.jacoco.core.analysis.IPackageCoverage;
+import org.jacoco.core.analysis.ISourceFileCoverage;
 import org.jacoco.core.analysis.ISourceNode;
 
 import java.io.IOException;
@@ -92,11 +93,10 @@ public class JacocoCoverageProvider extends CoverageProvider {
         try {
             ExecutionFileLoader executionFileLoader = jacocoAction.getJacocoReport().parse(includes, excludes);
             for (IPackageCoverage packageCoverage : executionFileLoader.getBundleCoverage().getPackages()) {
-                for (IClassCoverage classCoverage : packageCoverage.getClasses()) {
-                    String relativePathFromProjectRoot = getRelativePathFromProjectRoot(
-                            classCoverage.getSourceFileName());
+                for (ISourceFileCoverage fileCoverage : packageCoverage.getSourceFiles()) {
+                    String relativePathFromProjectRoot = getRelativePathFromProjectRoot(fileCoverage.getPackageName() + "/" + fileCoverage.getName());
                     if (relativePathFromProjectRoot != null) {
-                        lineCoverage.put(relativePathFromProjectRoot, getPerLineCoverage(classCoverage));
+                        lineCoverage.put(relativePathFromProjectRoot, getPerLineCoverage(fileCoverage));
                     }
                 }
             }
