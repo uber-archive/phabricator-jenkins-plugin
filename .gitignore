@@ -7,3 +7,4 @@ target/
 local.properties
 **build
 /bin/
+/out/

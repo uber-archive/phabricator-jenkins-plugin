@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -145,7 +146,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.<String, String>emptyMap());
+            coverageProvider = getCoverageProvider(build, listener, Collections.<String>emptySet());
             CodeCoverageMetrics coverageResult = null;
             if (coverageProvider != null) {
                 coverageResult = coverageProvider.getMetrics();
@@ -215,12 +216,9 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
         }
 
-        Map<String, String> includeFiles = new HashMap<String, String>();
-        for (String file : diff.getChangedFiles()) {
-            includeFiles.put(FilenameUtils.getName(file), file);
-        }
+        Set<String> includeFiles = diff.getChangedFiles();
 
-        coverageProvider = getCoverageProvider(build, workspace, listener, includeFiles);
+        coverageProvider = getCoverageProvider(build, listener, includeFiles);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
@@ -304,9 +302,9 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
-    private CoverageProvider getCoverageProvider(Run<?, ?> build, FilePath workspace, TaskListener listener,
-            Map<String, String> includeFiles) {
-        Result buildResult = null;
+    private CoverageProvider getCoverageProvider(Run<?, ?> build, TaskListener listener,
+            Set<String> includeFiles) {
+        Result buildResult;
         if (build.getResult() == null) {
             buildResult = Result.SUCCESS;
         } else {
@@ -319,13 +317,13 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         Logger logger = new Logger(listener.getLogger());
         List<CoverageProvider> coverageProviders = new ArrayList<CoverageProvider>();
 
-        CoverageProvider coberturaCoverage = InstanceProvider.getCoberturaCoverageProvider(build, workspace,
+        CoverageProvider coberturaCoverage = InstanceProvider.getCoberturaCoverageProvider(build,
                 includeFiles, coverageReportPattern, logger);
         if (coberturaCoverage != null) {
             coverageProviders.add(coberturaCoverage);
         }
 
-        CoverageProvider jacocoCoverage = InstanceProvider.getJacocoCoverageProvider(build, workspace,
+        CoverageProvider jacocoCoverage = InstanceProvider.getJacocoCoverageProvider(build,
                 includeFiles, coverageReportPattern, logger);
         if (jacocoCoverage != null) {
             coverageProviders.add(jacocoCoverage);

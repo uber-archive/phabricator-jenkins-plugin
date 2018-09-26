@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Project;
@@ -32,7 +33,7 @@ public class JacocoCoverageProvider extends CoverageProvider {
 
     public JacocoCoverageProvider(
             Run<?, ?> build,
-            Map<String, String> includeFiles, String coverageReportPattern) {
+            Set<String> includeFiles, String coverageReportPattern) {
         super(build, includeFiles, coverageReportPattern);
     }
 

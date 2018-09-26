@@ -20,10 +20,9 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import org.apache.commons.io.FilenameUtils;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -37,10 +36,10 @@ public abstract class CoverageProvider {
 
     final Run<?, ?> build;
     final FilePath workspace;
-    final Map<String, String> includeFiles;
+    final Set<String> includeFiles;
     final String coverageReportPattern;
 
-    CoverageProvider(Run<?, ?> build, Map<String, String> includeFiles, String coverageReportPattern) {
+    CoverageProvider(Run<?, ?> build, Set<String> includeFiles, String coverageReportPattern) {
         this.build = build;
         this.workspace = build != null ? ((AbstractBuild) build).getWorkspace() : null;
         this.includeFiles = includeFiles;
@@ -70,18 +69,37 @@ public abstract class CoverageProvider {
     }
 
     @Nullable
-    static String getRelativePathFromProjectRoot(Map<String, String> includeFiles, String file) {
-        String finalFile = null;
+    static String getRelativePathFromProjectRoot(Set<String> includeFiles, String coverageFile) {
         if (includeFiles == null || includeFiles.isEmpty()) {
-            finalFile = file;
+            return coverageFile;
         } else {
-            String includedFileName = FilenameUtils.getName(file);
-            String foundFile = includeFiles.get(includedFileName);
-            if (foundFile != null) {
-                finalFile = foundFile;
+            int maxMatch = 0;
+            String maxMatchFile = coverageFile;
+            for (String includedFile: includeFiles) {
+                int currmatch = suffixMatch(includedFile, coverageFile);
+                if (currmatch > maxMatch) {
+                    maxMatch = currmatch;
+                    maxMatchFile = includedFile;
+                }
             }
+
+            return maxMatchFile;
         }
-        return finalFile;
+    }
+
+    private static int suffixMatch(String changedFile, String coverageFile) {
+        int changedFileSize = changedFile.length();
+        int coverageFileSize = coverageFile.length();
+
+        if (coverageFileSize > changedFileSize) {
+            return 0;
+        }
+
+        int rIndex = 1;
+        while (coverageFileSize - rIndex >=0 && coverageFile.charAt(coverageFileSize - rIndex) == changedFile.charAt(changedFileSize - rIndex)) {
+            rIndex++;
+        }
+        return rIndex - 1;
     }
 
     protected abstract CodeCoverageMetrics getCoverageMetrics();

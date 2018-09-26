@@ -108,8 +108,7 @@ public class JacocoCoverageProviderTest {
                 TaskListener.NULL, jacocoReportDir, null, null);
         executedJacocoBuild.replaceAction(buildAction);
 
-        JacocoCoverageProvider provider = new JacocoCoverageProvider(executedJacocoBuild, Collections.singletonMap("Greet.java"
-                , JAVA_FILE_PATH), null);
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(executedJacocoBuild, Collections.singleton(JAVA_FILE_PATH), null);
 
         assertTrue(provider.hasCoverage());
         assertEquals(66.6, provider.getCoverageMetrics().getLineCoveragePercent(), 0.1);

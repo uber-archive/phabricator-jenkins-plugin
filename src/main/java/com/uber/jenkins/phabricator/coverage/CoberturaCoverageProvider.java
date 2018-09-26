@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +57,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
 
     public CoberturaCoverageProvider(
             Run<?, ?> build,
-            Map<String, String> includeFiles, String coverageReportPattern) {
+            Set<String> includeFiles, String coverageReportPattern) {
         super(build, includeFiles, coverageReportPattern);
     }
 
@@ -112,7 +113,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         );
     }
 
-    Map<String, List<Integer>> parseReports(Map<String, String> includedFiles, File[] reports) {
+    Map<String, List<Integer>> parseReports(Set<String> includedFiles, File[] reports) {
         if (reports == null) {
             return null;
         }

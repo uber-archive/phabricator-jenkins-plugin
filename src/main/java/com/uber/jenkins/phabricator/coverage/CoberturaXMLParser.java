@@ -82,7 +82,7 @@ public final class CoberturaXMLParser {
 
     private CoberturaXMLParser() {}
 
-    static Map<String, List<Integer>> parse(Map<String, String> includeFiles, File... reports) throws
+    static Map<String, List<Integer>> parse(Set<String> includeFiles, File... reports) throws
             ParserConfigurationException, SAXException,
             IOException {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -106,7 +106,7 @@ public final class CoberturaXMLParser {
         return parse(coverageData, includeFiles);
     }
 
-    private static Map<String, List<Integer>> parse(Set<NodeList> coverageData, Map<String, String> includeFiles) {
+    private static Map<String, List<Integer>> parse(Set<NodeList> coverageData, Set<String> includeFiles) {
         Map<String, SortedMap<Integer, Integer>> internalCounts = new HashMap<String, SortedMap<Integer, Integer>>();
 
         // Each entry in the map is an XML list of classes (files) mapped to its possible source roots
