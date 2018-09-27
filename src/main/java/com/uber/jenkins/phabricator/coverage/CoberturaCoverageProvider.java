@@ -208,6 +208,8 @@ public class CoberturaCoverageProvider extends CoverageProvider {
                 classesCoverage,
                 methodCoverage,
                 lineCoverage,
+                result.getCoverage(CoverageMetric.LINE).numerator,
+                result.getCoverage(CoverageMetric.LINE).denominator,
                 conditionalCoverage
         );
     }

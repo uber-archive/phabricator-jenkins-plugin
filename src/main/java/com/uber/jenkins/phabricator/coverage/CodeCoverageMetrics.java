@@ -26,16 +26,20 @@ public class CodeCoverageMetrics {
     private float classesCoveragePercent = -1;
     private float methodCoveragePercent = -1;
     private float lineCoveragePercent = -1;
+    private float linesCovered = -1;
+    private float linesTested = -1;
     private float conditionalCoveragePercent = -1;
 
     public CodeCoverageMetrics(float packagesCoveragePercent, float filesCoveragePercent,
                                float classesCoveragePercent, float methodCoveragePercent, float lineCoveragePercent,
-                               float conditionalCoveragePercent) {
+                               float linesCovered, float linesTested, float conditionalCoveragePercent) {
         this.packagesCoveragePercent = packagesCoveragePercent;
         this.filesCoveragePercent = filesCoveragePercent;
         this.classesCoveragePercent = classesCoveragePercent;
         this.methodCoveragePercent = methodCoveragePercent;
         this.lineCoveragePercent = lineCoveragePercent;
+        this.linesCovered = linesCovered;
+        this.linesTested = linesTested;
         this.conditionalCoveragePercent = conditionalCoveragePercent;
     }
 
@@ -63,6 +67,14 @@ public class CodeCoverageMetrics {
         return lineCoveragePercent;
     }
 
+    public float getLinesCovered() {
+        return linesCovered;
+    }
+
+    public float getLinesTested() {
+        return linesTested;
+    }
+
     public float getConditionalCoveragePercent() {
         return conditionalCoveragePercent;
     }
@@ -79,6 +91,10 @@ public class CodeCoverageMetrics {
         sb.append(methodCoveragePercent);
         sb.append(", line coverage = ");
         sb.append(lineCoveragePercent);
+        sb.append(", lines covered = ");
+        sb.append(linesCovered);
+        sb.append(", lines tested = ");
+        sb.append(linesTested);
         sb.append(", conditional coverage = ");
         sb.append(conditionalCoveragePercent);
         return sb.toString();
