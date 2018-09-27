@@ -21,18 +21,18 @@
 package com.uber.jenkins.phabricator.coverage;
 
 import com.google.common.io.Files;
-import hudson.FilePath;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -54,12 +54,10 @@ public class CoberturaXMLParserPatameterizedTest {
         File example = new File(tmpDir, "example");
 
         try {
-            CoberturaXMLParser parser = new CoberturaXMLParser(new FilePath(tmpDir), null);
-
             if (createDirectory) {
                 example.mkdir();
             }
-            Map<String, List<Integer>> lineCoverage = parser.parse(getResource(TEST_COVERAGE_PYTHON));
+            Map<String, List<Integer>> lineCoverage = CoberturaXMLParser.parse(null, getResource(TEST_COVERAGE_PYTHON));
             List<Integer> libCoverage = lineCoverage.get("example/lib.py");
             assertEquals(1, libCoverage.get(2).longValue());
             assertNull(libCoverage.get(1));

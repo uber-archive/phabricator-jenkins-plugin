@@ -67,7 +67,7 @@ public class NonDifferentialBuildTask extends Task {
     @Override
     protected void setup() {
         // Handle bad input.
-        if (codeCoverageMetrics == null || !codeCoverageMetrics.isValid()) {
+        if (codeCoverageMetrics == null) {
             info("Coverage result not found. Ignoring build.");
             result = Result.IGNORED;
         } else if (!uberallsEnabled || CommonUtils.isBlank(uberallsClient.getBaseURL())) {

@@ -35,12 +35,15 @@ import java.util.Map;
  *
  * For example a hit count of {null, 2, 0, 1} we would get "NCUC"
  */
-public class CoverageConverter {
+public final class CoverageConverter {
+
+    private CoverageConverter() {}
+
     /**
      * Convert line coverage to the Harbormaster coverage format
      * @return The Harbormaster-formatted coverage
      */
-    public Map<String, String> convert(Map<String, List<Integer>> lineCoverage) {
+    public static Map<String, String> convert(Map<String, List<Integer>> lineCoverage) {
         Map<String, String> results = new HashMap<String, String>();
         for (Map.Entry<String, List<Integer>> entry : lineCoverage.entrySet()) {
             results.put(entry.getKey(), convertFileCoverage(entry.getValue()));
@@ -49,7 +52,7 @@ public class CoverageConverter {
         return results;
     }
 
-    private String convertFileCoverage(List<Integer> lineCoverage) {
+    private static String convertFileCoverage(List<Integer> lineCoverage) {
         StringBuilder sb = new StringBuilder();
         for (Integer line : lineCoverage) {
             // Can't use a case statement because NULL

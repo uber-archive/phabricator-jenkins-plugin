@@ -23,10 +23,12 @@ package com.uber.jenkins.phabricator.uberalls;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -95,7 +97,7 @@ public class UberallsClient {
     }
 
     public boolean recordCoverage(String sha, CodeCoverageMetrics codeCoverageMetrics) {
-        if (codeCoverageMetrics != null && codeCoverageMetrics.isValid()) {
+        if (codeCoverageMetrics != null) {
             JSONObject params = new JSONObject();
             params.put("sha", sha);
             params.put("branch", branch);

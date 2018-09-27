@@ -36,9 +36,7 @@ import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
-import hudson.FilePath;
-import hudson.model.Result;
-import hudson.model.Run;
+
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -47,6 +45,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
+
+import hudson.FilePath;
+import hudson.model.Result;
+import hudson.model.Run;
 
 public class BuildResultProcessor {
 
@@ -298,7 +300,7 @@ public class BuildResultProcessor {
             return;
         }
 
-        harbormasterCoverage = new CoverageConverter().convert(lineCoverage);
+        harbormasterCoverage = CoverageConverter.convert(lineCoverage);
     }
 
     public Map<String, String> getCoverage() {

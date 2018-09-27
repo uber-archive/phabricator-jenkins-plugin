@@ -21,12 +21,13 @@
 package com.uber.jenkins.phabricator.coverage;
 
 public class CodeCoverageMetrics {
-    private float packagesCoveragePercent = -1;
-    private float filesCoveragePercent = -1;
-    private float classesCoveragePercent = -1;
-    private float methodCoveragePercent = -1;
-    private float lineCoveragePercent = -1;
-    private float conditionalCoveragePercent = -1;
+
+    private final float packagesCoveragePercent;
+    private final float filesCoveragePercent;
+    private final float classesCoveragePercent;
+    private final float methodCoveragePercent;
+    private final float lineCoveragePercent;
+    private final float conditionalCoveragePercent;
 
     public CodeCoverageMetrics(float packagesCoveragePercent, float filesCoveragePercent,
                                float classesCoveragePercent, float methodCoveragePercent, float lineCoveragePercent,
@@ -37,10 +38,6 @@ public class CodeCoverageMetrics {
         this.methodCoveragePercent = methodCoveragePercent;
         this.lineCoveragePercent = lineCoveragePercent;
         this.conditionalCoveragePercent = conditionalCoveragePercent;
-    }
-
-    public boolean isValid() {
-        return lineCoveragePercent != -1;
     }
 
     public float getPackageCoveragePercent() {
