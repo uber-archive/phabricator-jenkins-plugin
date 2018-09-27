@@ -116,7 +116,10 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         Logger logger = new Logger(listener.getLogger());
 
         final String branch = environment.get("GIT_BRANCH");
-        final String gitUrl = environment.get("GIT_URL");
+        String gitUrl = environment.get("GIT_URL");
+        if (gitUrl == null) {
+            gitUrl = environment.get("GIT_URL_1");
+        }
 
         final UberallsClient uberallsClient = getUberallsClient(logger, gitUrl, branch);
 
