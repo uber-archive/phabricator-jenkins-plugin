@@ -95,12 +95,7 @@ public abstract class CoverageProvider {
                 }
             }
 
-            // Make sure the match is atleast a full match on the filename and not an accidental partial match
-            if (FilenameUtils.getName(maxMatchFile).equals(FilenameUtils.getName(coverageFile))) {
-                return maxMatchFile;
-            } else {
-                return coverageFile;
-            }
+            return maxMatchFile;
         }
     }
 
@@ -117,6 +112,12 @@ public abstract class CoverageProvider {
                 changedFileSize - rIndex)) {
             rIndex++;
         }
+
+        // Make sure the match is atleast a full match on the filename and not an accidental partial match
+        if (rIndex < coverageFileSize && coverageFile.charAt(rIndex - 1) != '/') {
+            return 0;
+        }
+
         return rIndex - 1;
     }
 
