@@ -113,11 +113,13 @@ public class CoberturaXMLParserTest {
 
         Map<String, List<Integer>> lineCoverage = CoberturaXMLParser.parse(
                 new HashSet<String>(Arrays.asList("com/uber/jenkins/phabricator/packageA/Greet.java", "com/uber/jenkins"
-                        + "/phabricator/packageB/Greet.java")), testCoverageFile);
+                        + "/phabricator/packageB/Greet.java", "eet.java")), testCoverageFile);
         List<Integer> greetACoverage = lineCoverage.get("com/uber/jenkins/phabricator/packageA/Greet.java");
         List<Integer> greetBCoverage = lineCoverage.get("com/uber/jenkins/phabricator/packageB/Greet.java");
+        List<Integer> eetCoverage = lineCoverage.get("eet.java");
         assertEquals(0, greetACoverage.get(6).longValue());
         assertEquals(1, greetBCoverage.get(6).longValue());
+        assertNull(eetCoverage);
     }
 
     private File getResource(String fileName) throws URISyntaxException {

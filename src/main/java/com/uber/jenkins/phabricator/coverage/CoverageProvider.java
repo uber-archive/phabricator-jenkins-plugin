@@ -20,6 +20,8 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,7 +95,12 @@ public abstract class CoverageProvider {
                 }
             }
 
-            return maxMatchFile;
+            // Make sure the match is atleast a full match on the filename and not an accidental partial match
+            if (FilenameUtils.getName(maxMatchFile).equals(FilenameUtils.getName(coverageFile))) {
+                return maxMatchFile;
+            } else {
+                return coverageFile;
+            }
         }
     }
 
