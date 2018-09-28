@@ -32,6 +32,14 @@ import com.uber.jenkins.phabricator.tasks.SendHarbormasterUriTask;
 import com.uber.jenkins.phabricator.tasks.Task;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -48,14 +56,8 @@ import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
 import hudson.util.RunList;
 
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 public class PhabricatorBuildWrapper extends BuildWrapper {
+
     private static final String CONDUIT_TAG = "conduit";
     private static final String DEFAULT_GIT_PATH = "git";
     private static final String DIFFERENTIAL_SUMMARY = "PHABRICATOR_DIFFERENTIAL_SUMMARY";
@@ -73,10 +75,11 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     private String scmType;
 
     @DataBoundConstructor
-    public PhabricatorBuildWrapper(boolean createCommit, boolean applyToMaster,
-                                   boolean skipForcedClean,
-                                   boolean createBranch, boolean patchWithForceFlag,
-                                   boolean skipApplyPatch) {
+    public PhabricatorBuildWrapper(
+            boolean createCommit, boolean applyToMaster,
+            boolean skipForcedClean,
+            boolean createBranch, boolean patchWithForceFlag,
+            boolean skipApplyPatch) {
         this.createCommit = createCommit;
         this.applyToMaster = applyToMaster;
         this.skipForcedClean = skipForcedClean;
@@ -87,21 +90,39 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         this.scmType = "git";
     }
 
-    @DataBoundSetter
-    public void setWorkDir(final String workDir) {
-        this.workDir = workDir;
+    @VisibleForTesting
+    static String getAbortOnRevisionId(AbstractBuild build) {
+        ParametersAction parameters = build.getAction(ParametersAction.class);
+        if (parameters != null) {
+            ParameterValue parameterValue = parameters.getParameter(
+                    PhabricatorPlugin.ABORT_ON_REVISION_ID_FIELD);
+            if (parameterValue != null) {
+                return (String) parameterValue.getValue();
+            }
+        }
+        return null;
     }
 
-    @DataBoundSetter
-    public void setScmType(final String scmType) {
-        this.scmType = scmType;
+    @VisibleForTesting
+    static Run<?, ?> getUpstreamRun(AbstractBuild build) {
+        CauseAction action = build.getAction(hudson.model.CauseAction.class);
+        if (action != null) {
+            Cause.UpstreamCause upstreamCause = action.findCause(hudson.model.Cause.UpstreamCause.class);
+            if (upstreamCause != null) {
+                return upstreamCause.getUpstreamRun();
+            }
+        }
+        return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Environment setUp(AbstractBuild build,
-                             Launcher launcher,
-                             BuildListener listener) throws IOException, InterruptedException {
+    public Environment setUp(
+            AbstractBuild build,
+            Launcher launcher,
+            BuildListener listener) throws IOException, InterruptedException {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
         if (environment == null) {
@@ -115,7 +136,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         if (CommonUtils.isBlank(diffID)) {
             this.addShortText(build);
             this.ignoreBuild(logger, "No differential ID found.");
-            return new Environment(){};
+            return new Environment() { };
         }
 
         FilePath arcWorkPath;
@@ -184,7 +205,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
             if (result != Task.Result.SUCCESS) {
                 logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
-                Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false, null, null, null).run();
+                Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false, null, null,
+                        null).run();
                 if (failureResult != Task.Result.SUCCESS) {
                     // such failure, very broke
                     logger.warn("arcanist", "Unable to notify harbormaster of patch failure");
@@ -253,7 +275,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
     private Environment ignoreBuild(Logger logger, String message) {
         logger.info("ignore-build", message);
-        return new Environment(){};
+        return new Environment() { };
     }
 
     private ConduitAPIClient getConduitClient(Job owner, Logger logger) throws ConduitAPIException {
@@ -298,9 +320,19 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
         return workDir;
     }
 
+    @DataBoundSetter
+    public void setWorkDir(final String workDir) {
+        this.workDir = workDir;
+    }
+
     @SuppressWarnings("unused")
     public String getScmType() {
         return scmType;
+    }
+
+    @DataBoundSetter
+    public void setScmType(final String scmType) {
+        this.scmType = scmType;
     }
 
     private String getPhabricatorURL(Job owner) {
@@ -322,6 +354,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
     /**
      * Return the path to the arcanist executable
+     *
      * @return a string, fully-qualified or not, could just be "arc"
      */
     private String getArcPath() {
@@ -335,31 +368,6 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
     // Overridden for better type safety.
     @Override
     public PhabricatorBuildWrapperDescriptor getDescriptor() {
-        return (PhabricatorBuildWrapperDescriptor)super.getDescriptor();
-    }
-
-    @VisibleForTesting
-    static String getAbortOnRevisionId(AbstractBuild build) {
-        ParametersAction parameters = build.getAction(ParametersAction.class);
-        if (parameters != null) {
-            ParameterValue parameterValue = parameters.getParameter(
-                    PhabricatorPlugin.ABORT_ON_REVISION_ID_FIELD);
-            if (parameterValue != null) {
-                return (String) parameterValue.getValue();
-            }
-        }
-        return null;
-    }
-
-    @VisibleForTesting
-    static Run<?, ?> getUpstreamRun(AbstractBuild build) {
-        CauseAction action = build.getAction(hudson.model.CauseAction.class);
-        if (action != null) {
-            Cause.UpstreamCause upstreamCause = action.findCause(hudson.model.Cause.UpstreamCause.class);
-            if (upstreamCause != null) {
-                return upstreamCause.getUpstreamRun();
-            }
-        }
-        return null;
+        return (PhabricatorBuildWrapperDescriptor) super.getDescriptor();
     }
 }

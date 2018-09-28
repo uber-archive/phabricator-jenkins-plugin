@@ -33,20 +33,10 @@ import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentialsImpl;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitResult;
-import hudson.EnvVars;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleProject;
-import hudson.plugins.cobertura.CoberturaPublisher;
-import hudson.plugins.cobertura.renderers.SourceEncoding;
-import hudson.slaves.EnvironmentVariablesNodeProperty;
-import hudson.tasks.Publisher;
-import hudson.tasks.junit.JUnitResultArchiver;
-import hudson.util.CopyOnWriteMap;
+
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -64,7 +54,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import hudson.EnvVars;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
+import hudson.plugins.cobertura.CoberturaPublisher;
+import hudson.plugins.cobertura.renderers.SourceEncoding;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
+import hudson.tasks.Publisher;
+import hudson.tasks.junit.JUnitResultArchiver;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -92,8 +98,9 @@ public class TestUtils {
         return new Logger(new PrintStream(new ByteArrayOutputStream()));
     }
 
-    public static UberallsClient getUberallsClient(String baseURL, Logger logger, String repository,
-                                             String branch) {
+    public static UberallsClient getUberallsClient(
+            String baseURL, Logger logger, String repository,
+            String branch) {
         return spy(new UberallsClient(baseURL, logger, repository, branch));
     }
 
@@ -119,12 +126,13 @@ public class TestUtils {
         );
     }
 
-    public static CodeCoverageMetrics getCodeCoverageMetrics(float packagesCoveragePercent,
-                                                             float filesCoveragePercent,
-                                                             float classesCoveragePercent,
-                                                             float methodCoveragePercent,
-                                                             float lineCoveragePercent,
-                                                             float conditionalCoveragePercent) {
+    public static CodeCoverageMetrics getCodeCoverageMetrics(
+            float packagesCoveragePercent,
+            float filesCoveragePercent,
+            float classesCoveragePercent,
+            float methodCoveragePercent,
+            float lineCoveragePercent,
+            float conditionalCoveragePercent) {
         return spy(new CodeCoverageMetrics(packagesCoveragePercent, filesCoveragePercent,
                 classesCoveragePercent, methodCoveragePercent, lineCoveragePercent,
                 conditionalCoveragePercent));
@@ -134,9 +142,10 @@ public class TestUtils {
         return getCodeCoverageMetrics(100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
     }
 
-    public static CodeCoverageMetrics getCoverageResult(Float packageCoverage, Float filesCoverage,
-                                                        Float classesCoverage, Float methodCoverage,
-                                                        Float linesCoverage) {
+    public static CodeCoverageMetrics getCoverageResult(
+            Float packageCoverage, Float filesCoverage,
+            Float classesCoverage, Float methodCoverage,
+            Float linesCoverage) {
         return new CodeCoverageMetrics(
                 packageCoverage,
                 filesCoverage,
@@ -165,16 +174,18 @@ public class TestUtils {
         return makeHttpHandler(statusCode, body, requestBodies);
     }
 
-    public static HttpRequestHandler makeHttpHandler(final int statusCode, final String body,
-                                                     final List<String> requestBodies) {
+    public static HttpRequestHandler makeHttpHandler(
+            final int statusCode, final String body,
+            final List<String> requestBodies) {
         return new HttpRequestHandler() {
             @Override
-            public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
+            public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException,
+                    IOException {
                 response.setStatusCode(statusCode);
                 response.setEntity(new StringEntity(body));
 
                 if (request instanceof HttpEntityEnclosingRequest) {
-                    HttpEntity entity = ((HttpEntityEnclosingRequest)request).getEntity();
+                    HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
                     requestBodies.add(EntityUtils.toString(entity));
                 } else {
                     requestBodies.add("");
@@ -295,10 +306,15 @@ public class TestUtils {
         );
     }
 
-    public static void addCopyBuildStep(FreeStyleProject p, final String fileName, final Class resourceClass, final String resourceName) {
+    public static void addCopyBuildStep(
+            FreeStyleProject p,
+            final String fileName,
+            final Class resourceClass,
+            final String resourceName) {
         p.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild build, Launcher launcher, BuildListener buildListener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild build, Launcher launcher, BuildListener buildListener) throws
+                    InterruptedException, IOException {
                 build.getWorkspace().child(fileName).copyFrom(resourceClass.getResourceAsStream(resourceName));
                 return true;
             }

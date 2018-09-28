@@ -31,6 +31,7 @@ import hudson.tasks.junit.TestResultAction;
  */
 @SuppressWarnings("unused")
 public class JUnitTestProvider extends UnitTestProvider {
+
     /**
      * {@inheritDoc}
      */
@@ -49,6 +50,7 @@ public class JUnitTestProvider extends UnitTestProvider {
 
     /**
      * Convert JUnit's TestResult representation into a generic UnitResults
+     *
      * @param jUnitResults The result of the JUnit run
      * @return The converted results
      */

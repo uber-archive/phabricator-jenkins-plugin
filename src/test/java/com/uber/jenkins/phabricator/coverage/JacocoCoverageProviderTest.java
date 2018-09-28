@@ -43,8 +43,10 @@ import static org.mockito.Mockito.when;
 @PrepareForTest({CoverageReport.class, Run.class, JacocoBuildAction.class})
 @RunWith(PowerMockRunner.class)
 public class JacocoCoverageProviderTest {
+
     private static final String JAVA_FILE_PATH = "src/main/java/com/petehouston/greet/Greet.java";
-    private static final ArrayList<Integer> GREET_EXPECTED_COVERAGE = Lists.newArrayList(null, null, null, null, 1, null, null, null, 1, null, null, null, null, null, 0);
+    private static final ArrayList<Integer> GREET_EXPECTED_COVERAGE = Lists.newArrayList(null, null, null, null, 1,
+            null, null, null, 1, null, null, null, null, null, 0);
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
@@ -108,7 +110,8 @@ public class JacocoCoverageProviderTest {
                 TaskListener.NULL, jacocoReportDir, null, null);
         executedJacocoBuild.replaceAction(buildAction);
 
-        JacocoCoverageProvider provider = new JacocoCoverageProvider(executedJacocoBuild, Collections.singleton(JAVA_FILE_PATH), null);
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(executedJacocoBuild,
+                Collections.singleton(JAVA_FILE_PATH), null);
 
         assertTrue(provider.hasCoverage());
         assertEquals(66.6, provider.getCoverageMetrics().getLineCoveragePercent(), 0.1);
@@ -132,7 +135,8 @@ public class JacocoCoverageProviderTest {
         return report;
     }
 
-    private JacocoReportDir createJacocoReportDir(FreeStyleBuild build) throws IOException, InterruptedException, URISyntaxException {
+    private JacocoReportDir createJacocoReportDir(FreeStyleBuild build) throws IOException, InterruptedException,
+            URISyntaxException {
         File classesDir = Files.createTempDir();
         classesDir.deleteOnExit();
         File classPath = new File(classesDir, "com/petehouston/greet/Greet.class");
@@ -141,7 +145,8 @@ public class JacocoCoverageProviderTest {
         Files.copy(clazz, classPath);
 
         JacocoReportDir jacocoReportDir = new JacocoReportDir(build.getRootDir());
-        jacocoReportDir.addExecFiles(Collections.singleton(new FilePath(new File(getClass().getResource("jacoco.exec").toURI()))));
+        jacocoReportDir.addExecFiles(
+                Collections.singleton(new FilePath(new File(getClass().getResource("jacoco.exec").toURI()))));
         jacocoReportDir.saveClassesFrom(new FilePath(classesDir), "**/*.class");
 
         return jacocoReportDir;

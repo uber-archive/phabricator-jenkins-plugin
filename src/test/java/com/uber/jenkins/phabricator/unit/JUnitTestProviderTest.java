@@ -20,18 +20,20 @@
 
 package com.uber.jenkins.phabricator.unit;
 
-import hudson.tasks.junit.TestResult;
-import hudson.util.IOUtils;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import hudson.tasks.junit.TestResult;
+import hudson.util.IOUtils;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class JUnitTestProviderTest {
+
     @Test
     public void testConvertJUnit() throws Exception {
         JUnitTestProvider provider = new JUnitTestProvider();

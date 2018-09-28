@@ -21,12 +21,14 @@
 package com.uber.jenkins.phabricator.lint;
 
 import net.sf.json.JSONObject;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class LintResultTest {
+
     @Test
     public void testToHarbormaster() {
         LintResult results = new LintResult("name", "code", "severity", "path", 1, 2, "description");

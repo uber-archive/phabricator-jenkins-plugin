@@ -20,13 +20,14 @@
 
 package com.uber.jenkins.phabricator;
 
+import java.io.PrintStream;
+
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 
-import java.io.PrintStream;
-
 public class LauncherFactory {
+
     private final Launcher launcher;
     private final PrintStream stderr;
     private final EnvVars environment;
@@ -45,6 +46,7 @@ public class LauncherFactory {
 
     /**
      * Create a launcher
+     *
      * @return a launcher suitable for executing programs within Jenkins
      */
     public Launcher.ProcStarter launch() {

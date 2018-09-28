@@ -62,8 +62,8 @@ public class BuildResultProcessor {
     private final boolean runHarbormaster;
     private final FilePath workspace;
     private final Run<?, ?> build;
-    private String commentAction;
     private final CommentBuilder commenter;
+    private String commentAction;
     private UnitResults unitResults;
     private Map<String, String> harbormasterCoverage;
     private LintResults lintResults;
@@ -82,7 +82,7 @@ public class BuildResultProcessor {
 
         this.commentAction = "none";
         this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
-            coverageCheckSettings);
+                coverageCheckSettings);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
@@ -98,7 +98,6 @@ public class BuildResultProcessor {
      * Fetch parent coverage data from Uberalls, if available
      *
      * @param uberalls the client to the Uberalls instance
-     *
      * @return
      */
     public boolean processParentCoverage(UberallsClient uberalls) {
@@ -107,7 +106,7 @@ public class BuildResultProcessor {
         if (commenter.hasCoverageAvailable()) {
             if (uberalls.isConfigured()) {
                 passBuild = commenter.processParentCoverage(uberalls.getParentCoverage(diff.getBaseCommit()),
-                    diff.getBaseCommit(), diff.getBranch());
+                        diff.getBaseCommit(), diff.getBranch());
             } else {
                 logger.info(LOGGING_TAG, "No Uberalls backend configured, skipping...");
             }
@@ -120,7 +119,7 @@ public class BuildResultProcessor {
     /**
      * Add build result data into the commenter
      *
-     * @param commentOnSuccess                whether a "success" should trigger a comment
+     * @param commentOnSuccess whether a "success" should trigger a comment
      * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
      */
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure) {
@@ -148,7 +147,7 @@ public class BuildResultProcessor {
     /**
      * Fetch remote lint violations from the build workspace and process
      *
-     * @param lintFile     the path pattern of the file
+     * @param lintFile the path pattern of the file
      * @param lintFileSize maximum number of bytes to read from the remote file
      */
     public void processLintResults(String lintFile, String lintFileSize) {

@@ -38,6 +38,7 @@ import net.sf.json.JSONObject;
  * description  optional string Long explanation of the lint message.
  */
 public class LintResult {
+
     final String name;
     final String code;
     final String severity;
@@ -46,8 +47,9 @@ public class LintResult {
     final Integer charPosition; // NOTE "char" parameter in JSON
     final String description;
 
-    public LintResult(String name, String code, String severity, String path, Integer line, Integer charPosition,
-                      String description) {
+    public LintResult(
+            String name, String code, String severity, String path, Integer line, Integer charPosition,
+            String description) {
         this.name = name;
         this.code = code;
         this.severity = severity;
@@ -55,21 +57,6 @@ public class LintResult {
         this.line = line;
         this.charPosition = charPosition;
         this.description = description;
-    }
-
-    /**
-     * Create a Harbormaster-API-compatible representation of the lint result
-     * @return A JSON representation of the lint result
-     */
-    public JSONObject toHarbormaster() {
-        return new JSONObject()
-                .element("name", name)
-                .element("code", code)
-                .element("severity", severity)
-                .element("path", path)
-                .element("line", line)
-                .element("char", charPosition)
-                .element("description", description);
     }
 
     public static LintResult fromJsonObject(JSONObject json) {
@@ -82,5 +69,21 @@ public class LintResult {
         String description = (String) json.opt("description");
 
         return new LintResult(name, code, severity, path, line, charPosition, description);
+    }
+
+    /**
+     * Create a Harbormaster-API-compatible representation of the lint result
+     *
+     * @return A JSON representation of the lint result
+     */
+    public JSONObject toHarbormaster() {
+        return new JSONObject()
+                .element("name", name)
+                .element("code", code)
+                .element("severity", severity)
+                .element("path", path)
+                .element("line", line)
+                .element("char", charPosition)
+                .element("description", description);
     }
 }

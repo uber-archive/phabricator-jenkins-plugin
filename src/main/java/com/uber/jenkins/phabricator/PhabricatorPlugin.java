@@ -20,13 +20,14 @@
 
 package com.uber.jenkins.phabricator;
 
+import java.io.File;
+
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
 
-import java.io.File;
-
 public class PhabricatorPlugin extends Plugin {
+
     // Diff ID (not differential ID)
     public static final String DIFFERENTIAL_ID_FIELD = "DIFF_ID";
     // Phabricator object ID (for Harbormaster)
@@ -45,7 +46,9 @@ public class PhabricatorPlugin extends Plugin {
         // Try plugin images dir, fallback to Hudson images dir
         PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(PhabricatorPlugin.class);
 
-        boolean pluginIconExists = (wrapper != null) && new File(wrapper.baseResourceURL.getPath() + "/images/" + icon).exists();
-        return pluginIconExists ? "/plugin/" + wrapper.getShortName() + "/images/" + icon : Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
+        boolean pluginIconExists =
+                (wrapper != null) && new File(wrapper.baseResourceURL.getPath() + "/images/" + icon).exists();
+        return pluginIconExists ? "/plugin/" + wrapper.getShortName() + "/images/" + icon :
+                Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
     }
 }

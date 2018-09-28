@@ -3,6 +3,7 @@ package com.uber.jenkins.phabricator;
 import jenkins.model.CauseOfInterruption;
 
 public final class PhabricatorCauseOfInterruption extends CauseOfInterruption {
+
     private final String buildUrl;
 
     PhabricatorCauseOfInterruption(String buildUrl) {

@@ -21,13 +21,15 @@
 package com.uber.jenkins.phabricator;
 
 public class CoverageCheckSettings {
+
     private final boolean coverageCheckEnabled;
     private final double maxCoverageDecreaseInPercent;
     private final double minCoverageInPercent;
 
-    public CoverageCheckSettings(boolean coverageCheckEnabled,
-                                 double maxCoverageDecreaseInPercent,
-                                 double minCoverageInPercent) {
+    public CoverageCheckSettings(
+            boolean coverageCheckEnabled,
+            double maxCoverageDecreaseInPercent,
+            double minCoverageInPercent) {
         this.coverageCheckEnabled = coverageCheckEnabled;
         this.maxCoverageDecreaseInPercent = maxCoverageDecreaseInPercent;
         this.minCoverageInPercent = minCoverageInPercent;

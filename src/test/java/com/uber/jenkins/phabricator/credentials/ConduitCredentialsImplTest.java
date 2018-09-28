@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.credentials;
 
 import com.uber.jenkins.phabricator.BuildIntegrationTest;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

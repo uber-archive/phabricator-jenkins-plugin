@@ -26,28 +26,32 @@ import hudson.model.Run;
  * Provides an interface for plugins that have unit test results
  */
 public abstract class UnitTestProvider {
-    private Run<?, ?> build;
 
-    /**
-     * Set the owning build for this provider
-     * @param build The build that is associated with the current run
-     */
-    public void setBuild(Run<?, ?> build) {
-        this.build = build;
-    }
+    private Run<?, ?> build;
 
     protected Run<?, ?> getBuild() {
         return build;
     }
 
     /**
+     * Set the owning build for this provider
+     *
+     * @param build The build that is associated with the current run
+     */
+    public void setBuild(Run<?, ?> build) {
+        this.build = build;
+    }
+
+    /**
      * Determine if the current provider has results available for the build
+     *
      * @return Whether results are available
      */
     public abstract boolean resultsAvailable();
 
     /**
      * Convert the provider's results to a standard format
+     *
      * @return The results of the unit tests
      */
     public abstract UnitResults getResults();

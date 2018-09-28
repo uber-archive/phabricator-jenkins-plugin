@@ -29,6 +29,7 @@ import java.util.List;
  * Represent a list of unit results
  */
 public class UnitResults {
+
     private final List<UnitResult> results;
 
     public UnitResults() {
@@ -45,6 +46,7 @@ public class UnitResults {
 
     /**
      * Convert a suite of unit results to Harbormaster JSON format
+     *
      * @return Harbormaster-formatted unit results
      */
     public List<JSONObject> toHarbormaster() {

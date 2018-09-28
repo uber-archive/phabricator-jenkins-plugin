@@ -41,6 +41,7 @@ public final class CoverageConverter {
 
     /**
      * Convert line coverage to the Harbormaster coverage format
+     *
      * @return The Harbormaster-formatted coverage
      */
     public static Map<String, String> convert(Map<String, List<Integer>> lineCoverage) {

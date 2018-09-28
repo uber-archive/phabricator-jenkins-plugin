@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.utils;
 
 public class CommonUtils {
+
     public static boolean isBlank(String str) {
         return str == null || str.trim().isEmpty();
     }
