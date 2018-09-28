@@ -36,16 +36,13 @@ import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 
-import org.apache.commons.io.FilenameUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import hudson.AbortException;
@@ -63,6 +60,7 @@ import jenkins.model.InterruptedBuildAction;
 import jenkins.tasks.SimpleBuildStep;
 
 public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
+
     private static final String ABORT_TAG = "abort";
     private static final String UBERALLS_TAG = "uberalls";
     private static final String CONDUIT_TAG = "conduit";
@@ -83,11 +81,12 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
-                               double coverageThreshold, double minCoverageThreshold, String coverageReportPattern,
-                               boolean preserveFormatting, String commentFile, String commentSize,
-                               boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
-                               String lintFile, String lintFileSize) {
+    public PhabricatorNotifier(
+            boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
+            double coverageThreshold, double minCoverageThreshold, String coverageReportPattern,
+            boolean preserveFormatting, String commentFile, String commentSize,
+            boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
+            String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.coverageCheckSettings = new CoverageCheckSettings(coverageCheck, coverageThreshold, minCoverageThreshold);
@@ -107,8 +106,9 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     }
 
     @Override
-    public final void perform(final Run<?, ?> build, FilePath workspace, final Launcher launcher,
-                                 final TaskListener listener) throws InterruptedException, IOException {
+    public final void perform(
+            final Run<?, ?> build, FilePath workspace, final Launcher launcher,
+            final TaskListener listener) throws InterruptedException, IOException {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
@@ -228,16 +228,16 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
 
         BuildResultProcessor resultProcessor = new BuildResultProcessor(
-            logger,
-            build,
-            workspace,
-            diff,
-            diffClient,
-            environment.get(PhabricatorPlugin.PHID_FIELD),
-            coverageResult,
-            buildUrl,
-            preserveFormatting,
-            coverageCheckSettings
+                logger,
+                build,
+                workspace,
+                diff,
+                diffClient,
+                environment.get(PhabricatorPlugin.PHID_FIELD),
+                coverageResult,
+                buildUrl,
+                preserveFormatting,
+                coverageCheckSettings
         );
 
         if (uberallsEnabled) {
@@ -277,10 +277,10 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
 
         setUberallsClient(new UberallsClient(
-            getDescriptor().getUberallsURL(),
-            logger,
-            gitUrl,
-            branch
+                getDescriptor().getUberallsURL(),
+                logger,
+                gitUrl,
+                branch
         ));
         return uberallsClient;
     }
@@ -301,11 +301,12 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     /**
      * Get the cobertura coverage for the build
      *
-     * @param build    The current build
+     * @param build The current build
      * @param listener The build listener
      * @return The current cobertura coverage, if any
      */
-    private CoverageProvider getCoverageProvider(Run<?, ?> build, TaskListener listener,
+    private CoverageProvider getCoverageProvider(
+            Run<?, ?> build, TaskListener listener,
             Set<String> includeFiles) {
         Result buildResult;
         if (build.getResult() == null) {

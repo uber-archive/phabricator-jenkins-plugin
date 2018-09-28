@@ -21,7 +21,9 @@
 package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import net.sf.json.JSONObject;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.localserver.LocalTestServer;
 import org.junit.After;
@@ -33,9 +35,10 @@ import java.io.UnsupportedEncodingException;
 import static org.junit.Assert.assertEquals;
 
 public class ConduitAPIClientTest {
+
+    private final JSONObject emptyParams = new JSONObject();
     private LocalTestServer server;
     private ConduitAPIClient client;
-    private final JSONObject emptyParams = new JSONObject();
 
     @Before
     public void setUp() throws Exception {

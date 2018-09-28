@@ -20,15 +20,17 @@
 
 package com.uber.jenkins.phabricator;
 
-import hudson.model.Action;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+
+import hudson.model.Action;
 
 /**
  * Ripped from https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildSummaryAction.java
  */
 @ExportedBean(defaultVisibility = 2)
 public class PhabricatorPostbuildSummaryAction implements Action {
+
     private final String iconPath;
     private final String url;
     private final String diffID;
@@ -37,8 +39,9 @@ public class PhabricatorPostbuildSummaryAction implements Action {
     private final String authorEmail;
     private final String commitMessage;
 
-    public PhabricatorPostbuildSummaryAction(String iconPath, String phabricatorLink, String diffID, String revisionID,
-                                             String authorName, String authorEmail, String commitMessage) {
+    public PhabricatorPostbuildSummaryAction(
+            String iconPath, String phabricatorLink, String diffID, String revisionID,
+            String authorName, String authorEmail, String commitMessage) {
         this.iconPath = iconPath;
         this.url = phabricatorLink;
         this.diffID = diffID;
@@ -48,44 +51,51 @@ public class PhabricatorPostbuildSummaryAction implements Action {
         this.commitMessage = commitMessage;
     }
 
-    /* Action methods */
-    public String getUrlName() {
-        return "";
+    public String getIconFileName() {
+        return null;
     }
 
     public String getDisplayName() {
         return "";
     }
 
-    public String getIconFileName() {
-        return null;
+    /* Action methods */
+    public String getUrlName() {
+        return "";
     }
 
-    @Exported public String getIconPath() {
+    @Exported
+    public String getIconPath() {
         return PhabricatorPlugin.getIconPath(iconPath);
     }
 
-    @Exported public String getUrl() {
+    @Exported
+    public String getUrl() {
         return url;
     }
 
-    @Exported public String getRevisionID() {
+    @Exported
+    public String getRevisionID() {
         return revisionID;
     }
 
-    @Exported public String getDiffID() {
+    @Exported
+    public String getDiffID() {
         return diffID;
     }
 
-    @Exported public String getAuthorName() {
+    @Exported
+    public String getAuthorName() {
         return authorName;
     }
 
-    @Exported public String getAuthorEmail() {
+    @Exported
+    public String getAuthorEmail() {
         return authorEmail;
     }
 
-    @Exported public String getCommitMessage() {
+    @Exported
+    public String getCommitMessage() {
         return commitMessage;
     }
 }

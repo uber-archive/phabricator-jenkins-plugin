@@ -2,6 +2,7 @@ package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.UnitResults;
+
 import net.sf.json.JSONObject;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HarbormasterClient {
+
     private final ConduitAPIClient conduit;
 
     public HarbormasterClient(ConduitAPIClient conduit) {
@@ -18,6 +20,7 @@ public class HarbormasterClient {
 
     /**
      * Sets a sendHarbormasterMessage build status
+     *
      * @param phid Phabricator object ID
      * @param pass whether or not the build passed
      * @param unitResults the results from the unit tests
@@ -27,7 +30,12 @@ public class HarbormasterClient {
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults, Map<String, String> coverage, LintResults lintResults) throws ConduitAPIException, IOException {
+    public JSONObject sendHarbormasterMessage(
+            String phid,
+            boolean pass,
+            UnitResults unitResults,
+            Map<String, String> coverage,
+            LintResults lintResults) throws ConduitAPIException, IOException {
 
         List<JSONObject> unit = new ArrayList<JSONObject>();
 
@@ -66,6 +74,7 @@ public class HarbormasterClient {
 
     /**
      * Uploads a uri as an 'artifact' for Harbormaster to display
+     *
      * @param phid Phabricator object ID
      * @param buildUri Uri to display, presumably the jenkins builds
      * @return the Conduit API response

@@ -61,30 +61,6 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         super(build, includeFiles, coverageReportPattern);
     }
 
-    @Override
-    public boolean hasCoverage() {
-        if (!mHasComputedCoverage) {
-            computeCoverage();
-        }
-        return mCoverageResult != null && mCoverageResult.getCoverage(CoverageMetric.LINE) != null;
-    }
-
-    @Override
-    protected CodeCoverageMetrics getCoverageMetrics() {
-        if (!mHasComputedCoverage) {
-            computeCoverage();
-        }
-        return convertCobertura(mCoverageResult);
-    }
-
-    @Override
-    public Map<String, List<Integer>> readLineCoverage() {
-        if (!mHasComputedCoverage) {
-            computeCoverage();
-        }
-        return mLineCoverage;
-    }
-
     /**
      * Convert Cobertura results to an internal CodeCoverageMetrics representation
      *
@@ -111,6 +87,38 @@ public class CoberturaCoverageProvider extends CoverageProvider {
                 lineCoverage,
                 conditionalCoverage
         );
+    }
+
+    private static float getCoveragePercentage(CoverageResult result, CoverageMetric metric) {
+        Ratio ratio = result.getCoverage(metric);
+        if (ratio == null) {
+            return 0.0f;
+        }
+        return ratio.getPercentageFloat();
+    }
+
+    @Override
+    public Map<String, List<Integer>> readLineCoverage() {
+        if (!mHasComputedCoverage) {
+            computeCoverage();
+        }
+        return mLineCoverage;
+    }
+
+    @Override
+    public boolean hasCoverage() {
+        if (!mHasComputedCoverage) {
+            computeCoverage();
+        }
+        return mCoverageResult != null && mCoverageResult.getCoverage(CoverageMetric.LINE) != null;
+    }
+
+    @Override
+    protected CodeCoverageMetrics getCoverageMetrics() {
+        if (!mHasComputedCoverage) {
+            computeCoverage();
+        }
+        return convertCobertura(mCoverageResult);
     }
 
     Map<String, List<Integer>> parseReports(Set<String> includedFiles, File[] reports) {
@@ -208,14 +216,6 @@ public class CoberturaCoverageProvider extends CoverageProvider {
                 report.delete();
             }
         }
-    }
-
-    private static float getCoveragePercentage(CoverageResult result, CoverageMetric metric) {
-        Ratio ratio = result.getCoverage(metric);
-        if (ratio == null) {
-            return 0.0f;
-        }
-        return ratio.getPercentageFloat();
     }
 
     private File[] getCoberturaReports() {

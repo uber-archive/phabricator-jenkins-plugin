@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.conduit;
 
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConduitAPIClient {
+
     private static final String API_TOKEN_KEY = "token";
     private static final String CONDUIT_METADATA_KEY = "__conduit__";
 
@@ -56,6 +58,7 @@ public class ConduitAPIClient {
 
     /**
      * Call the conduit API of Phabricator
+     *
      * @param action Name of the API call
      * @param params The data to send to Harbormaster
      * @return The result as a JSONObject
@@ -80,18 +83,20 @@ public class ConduitAPIClient {
         }
 
         JsonSlurper jsonParser = new JsonSlurper();
-        return (JSONObject)jsonParser.parse(responseBody);
+        return (JSONObject) jsonParser.parse(responseBody);
     }
 
     /**
      * Post a URL-encoded "params" key with a JSON-encoded body as per the Conduit API
+     *
      * @param action The name of the Conduit method
      * @param params The data to be sent to the Conduit method
      * @return The request to perform
      * @throws UnsupportedEncodingException when the POST data can't be encoded
      * @throws ConduitAPIException when the conduit URL is misconfigured
      */
-    public HttpUriRequest createRequest(String action, JSONObject params) throws UnsupportedEncodingException, ConduitAPIException {
+    public HttpUriRequest createRequest(String action, JSONObject params) throws UnsupportedEncodingException,
+            ConduitAPIException {
         HttpPost post;
         try {
             post = new HttpPost(

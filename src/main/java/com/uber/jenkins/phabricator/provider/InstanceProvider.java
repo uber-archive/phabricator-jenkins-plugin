@@ -27,10 +27,8 @@ import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.Logger;
 
-import java.util.Map;
 import java.util.Set;
 
-import hudson.FilePath;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
 
@@ -56,21 +54,6 @@ public abstract class InstanceProvider<T> {
         this.pluginName = pluginName;
         this.logger = logger;
     }
-
-    /**
-     * Get an instance of the desired implementation, if available
-     *
-     * @return the class desired
-     */
-    final T getInstance() {
-        if (jenkins.getPlugin(pluginName) == null) {
-            logger.info(LOGGER_TAG, String.format("'%s' plugin not installed.", pluginName));
-            return null;
-        }
-        return makeInstance();
-    }
-
-    abstract T makeInstance();
 
     public static CoverageProvider getCoberturaCoverageProvider(
             final Run<?, ?> build,
@@ -105,4 +88,19 @@ public abstract class InstanceProvider<T> {
             }
         }.getInstance();
     }
+
+    /**
+     * Get an instance of the desired implementation, if available
+     *
+     * @return the class desired
+     */
+    final T getInstance() {
+        if (jenkins.getPlugin(pluginName) == null) {
+            logger.info(LOGGER_TAG, String.format("'%s' plugin not installed.", pluginName));
+            return null;
+        }
+        return makeInstance();
+    }
+
+    abstract T makeInstance();
 }

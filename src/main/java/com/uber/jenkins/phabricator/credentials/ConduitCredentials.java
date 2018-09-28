@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.credentials;
 
 import com.cloudbees.plugins.credentials.Credentials;
+
 import hudson.util.Secret;
 
 public interface ConduitCredentials extends Credentials {

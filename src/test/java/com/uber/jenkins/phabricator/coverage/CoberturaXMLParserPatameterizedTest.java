@@ -48,6 +48,14 @@ public class CoberturaXMLParserPatameterizedTest {
         this.createDirectory = createDirectory;
     }
 
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                {false},
+                {true},
+        });
+    }
+
     @Test
     public void testDetectCoverageRoot() throws Exception {
         File tmpDir = Files.createTempDir();
@@ -71,13 +79,5 @@ public class CoberturaXMLParserPatameterizedTest {
 
     private File getResource(String fileName) throws URISyntaxException {
         return Paths.get(getClass().getResource(fileName).toURI()).toFile();
-    }
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {false},
-                {true},
-        });
     }
 }

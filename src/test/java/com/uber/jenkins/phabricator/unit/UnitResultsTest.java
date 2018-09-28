@@ -21,12 +21,14 @@
 package com.uber.jenkins.phabricator.unit;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class UnitResultsTest {
+
     private UnitResults results;
 
     @Before

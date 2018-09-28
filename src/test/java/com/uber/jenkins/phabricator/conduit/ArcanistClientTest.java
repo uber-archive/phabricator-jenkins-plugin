@@ -20,14 +20,16 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import hudson.Launcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import hudson.Launcher;
+
 import static org.junit.Assert.assertEquals;
 
 public class ArcanistClientTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 

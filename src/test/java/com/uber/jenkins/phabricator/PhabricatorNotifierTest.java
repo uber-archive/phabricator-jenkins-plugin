@@ -26,15 +26,21 @@ import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Result;
+
 import net.sf.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import hudson.model.FreeStyleBuild;
+import hudson.model.Result;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -132,14 +138,14 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         notifier = getDecreasedLineCoverageNotifier(0.0);
 
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
-            "  \"sha\": \"deadbeef\",\n" +
-            "  \"lineCoverage\": 100,\n" +
-            "  \"filesCoverage\": 100,\n" +
-            "  \"packageCoverage\": 100,\n" +
-            "  \"classesCoverage\": 100,\n" +
-            "  \"methodCoverage\": 100,\n" +
-            "  \"conditionalCoverage\": 100\n" +
-            "}");
+                "  \"sha\": \"deadbeef\",\n" +
+                "  \"lineCoverage\": 100,\n" +
+                "  \"filesCoverage\": 100,\n" +
+                "  \"packageCoverage\": 100,\n" +
+                "  \"classesCoverage\": 100,\n" +
+                "  \"methodCoverage\": 100,\n" +
+                "  \"conditionalCoverage\": 100\n" +
+                "}");
         notifier.getDescriptor().setUberallsURL("http://uber.alls");
         notifier.setUberallsClient(uberalls);
 
@@ -155,14 +161,14 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         notifier = getNotifierWithCoverageCheck(0.0, 90.0);
 
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
-            "  \"sha\": \"deadbeef\",\n" +
-            "  \"lineCoverage\": 100,\n" +
-            "  \"filesCoverage\": 100,\n" +
-            "  \"packageCoverage\": 100,\n" +
-            "  \"classesCoverage\": 100,\n" +
-            "  \"methodCoverage\": 100,\n" +
-            "  \"conditionalCoverage\": 100\n" +
-            "}");
+                "  \"sha\": \"deadbeef\",\n" +
+                "  \"lineCoverage\": 100,\n" +
+                "  \"filesCoverage\": 100,\n" +
+                "  \"packageCoverage\": 100,\n" +
+                "  \"classesCoverage\": 100,\n" +
+                "  \"methodCoverage\": 100,\n" +
+                "  \"conditionalCoverage\": 100\n" +
+                "}");
         notifier.getDescriptor().setUberallsURL("http://uber.alls");
         notifier.setUberallsClient(uberalls);
 
@@ -176,13 +182,13 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
         notifier = getDecreasedLineCoverageNotifier(0.0);
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
-            "  \"sha\": \"deadbeef\",\n" +
-            "  \"lineCoverage\": 0.0,\n" +
-            "  \"packageCoverage\": 0,\n" +
-            "  \"classesCoverage\": 0,\n" +
-            "  \"methodCoverage\": 0,\n" +
-            "  \"conditionalCoverage\": 0\n" +
-            "}");
+                "  \"sha\": \"deadbeef\",\n" +
+                "  \"lineCoverage\": 0.0,\n" +
+                "  \"packageCoverage\": 0,\n" +
+                "  \"classesCoverage\": 0,\n" +
+                "  \"methodCoverage\": 0,\n" +
+                "  \"conditionalCoverage\": 0\n" +
+                "}");
         notifier.setUberallsClient(uberalls);
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
@@ -195,14 +201,14 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
         notifier = getDecreasedLineCoverageNotifier(0.01);
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
-            "  \"sha\": \"deadbeef\",\n" +
-            "  \"lineCoverage\": 95.2391,\n" +
-            "  \"filesCoverage\": 0,\n" +
-            "  \"packageCoverage\": 0,\n" +
-            "  \"classesCoverage\": 0,\n" +
-            "  \"methodCoverage\": 0,\n" +
-            "  \"conditionalCoverage\": 0\n" +
-            "}");
+                "  \"sha\": \"deadbeef\",\n" +
+                "  \"lineCoverage\": 95.2391,\n" +
+                "  \"filesCoverage\": 0,\n" +
+                "  \"packageCoverage\": 0,\n" +
+                "  \"classesCoverage\": 0,\n" +
+                "  \"methodCoverage\": 0,\n" +
+                "  \"conditionalCoverage\": 0\n" +
+                "}");
         notifier.setUberallsClient(uberalls);
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
@@ -211,7 +217,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPostCoverageWithoutPublisher() throws Exception {
-        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class,
+                "go-torch-coverage.xml");
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.SUCCESS, build.getResult());
@@ -224,7 +231,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         for (String emptyPattern : emptyPatterns) {
             notifier = getDefaultTestNotifierWithCoverageReportPattern(emptyPattern);
 
-            TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+            TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class,
+                    "go-torch-coverage.xml");
 
             FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
             assertEquals(Result.SUCCESS, build.getResult());
@@ -236,7 +244,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testPostCoverageWithoutPublisherWithNoFilesMatchingReportPattern() throws Exception {
         notifier = getDefaultTestNotifierWithCoverageReportPattern("*.html");
 
-        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class, "go-torch-coverage.xml");
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoberturaXMLParser.class,
+                "go-torch-coverage.xml");
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.SUCCESS, build.getResult());
@@ -321,20 +330,20 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     private PhabricatorNotifier getNotifierWithCoverageCheck(double maxCoverageDecrease, double minCoverage) {
         return new PhabricatorNotifier(
-            false,
-            true,
-            true,
-            maxCoverageDecrease,
-            minCoverage,
-            COVERAGE_REPORT_FILTER,
-            true,
-            ".phabricator-comment",
-            "1001",
-            false,
-            true,
-            true,
-            ".phabricator-lint",
-            "10000"
+                false,
+                true,
+                true,
+                maxCoverageDecrease,
+                minCoverage,
+                COVERAGE_REPORT_FILTER,
+                true,
+                ".phabricator-comment",
+                "1001",
+                false,
+                true,
+                true,
+                ".phabricator-lint",
+                "10000"
         );
     }
 

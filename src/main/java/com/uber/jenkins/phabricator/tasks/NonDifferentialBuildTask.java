@@ -37,15 +37,17 @@ public class NonDifferentialBuildTask extends Task {
 
     /**
      * GenericBuildTask constructor.
+     *
      * @param logger The logger.
      * @param uberallsClient The uberalls client.
      * @param codeCoverageMetrics The coverage metrics.
      * @param uberallsEnabled Whether uberalls is enabled.
      * @param commitSha The commit sha.
      */
-    public NonDifferentialBuildTask(Logger logger, UberallsClient uberallsClient,
-                                    CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
-                                    String commitSha) {
+    public NonDifferentialBuildTask(
+            Logger logger, UberallsClient uberallsClient,
+            CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
+            String commitSha) {
         super(logger);
         this.uberallsClient = uberallsClient;
         this.codeCoverageMetrics = codeCoverageMetrics;

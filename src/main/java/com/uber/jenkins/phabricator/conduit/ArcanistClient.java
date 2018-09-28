@@ -21,20 +21,27 @@
 package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.utils.CommonUtils;
-import hudson.Launcher;
-import hudson.util.ArgumentListBuilder;
 
 import java.io.IOException;
 import java.io.PrintStream;
 
+import hudson.Launcher;
+import hudson.util.ArgumentListBuilder;
+
 public class ArcanistClient {
+
     private final String arcPath;
     private final String methodName;
     private final String conduitUrl;
     private final String conduitToken;
     private final String[] arguments;
 
-    public ArcanistClient(String arcPath, String methodName, String conduitUrl, String conduitToken, String... arguments) {
+    public ArcanistClient(
+            String arcPath,
+            String methodName,
+            String conduitUrl,
+            String conduitToken,
+            String... arguments) {
         this.arcPath = arcPath;
         this.methodName = methodName;
         this.conduitUrl = conduitUrl;

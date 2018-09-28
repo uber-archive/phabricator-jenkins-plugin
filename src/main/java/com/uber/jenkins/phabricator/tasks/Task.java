@@ -27,22 +27,12 @@ import com.uber.jenkins.phabricator.utils.Logger;
  */
 public abstract class Task {
 
-    /**
-     * Task results.
-     */
-    public enum Result {
-        SUCCESS,
-        FAILURE,
-        IGNORED, // For incorrect input.
-        SKIPPED, // For incorrect configuration.
-        UNKNOWN
-    }
-
     protected Result result = Result.UNKNOWN;
     private final Logger logger;
 
     /**
      * Task constructor.
+     *
      * @param logger The logger where logs go to.
      */
     public Task(Logger logger) {
@@ -51,6 +41,7 @@ public abstract class Task {
 
     /**
      * Runs the task workflow.
+     *
      * @return the result of the task
      */
     public Result run() {
@@ -63,6 +54,7 @@ public abstract class Task {
 
     /**
      * Logs the message.
+     *
      * @param message The message to log.
      */
     protected void info(String message) {
@@ -71,6 +63,7 @@ public abstract class Task {
 
     /**
      * Prints stack trace
+     *
      * @param e the exception to log
      */
     protected void printStackTrace(Exception e) {
@@ -79,6 +72,7 @@ public abstract class Task {
 
     /**
      * Gets the task's tag.
+     *
      * @return A string representation of this task's tag.
      */
     protected abstract String getTag();
@@ -97,4 +91,15 @@ public abstract class Task {
      * Tears down after task execution.
      */
     protected abstract void tearDown();
+
+    /**
+     * Task results.
+     */
+    public enum Result {
+        SUCCESS,
+        FAILURE,
+        IGNORED, // For incorrect input.
+        SKIPPED, // For incorrect configuration.
+        UNKNOWN
+    }
 }

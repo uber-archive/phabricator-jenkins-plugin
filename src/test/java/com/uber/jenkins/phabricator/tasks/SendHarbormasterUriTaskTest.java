@@ -21,7 +21,9 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import net.sf.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class SendHarbormasterUriTaskTest {
+
     private final String buildUrl = "http://jenkins.example.com/foo/123";
     private final JSONObject validResponse = new JSONObject();
     private DifferentialClient diffClient;

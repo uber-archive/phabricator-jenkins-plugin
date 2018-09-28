@@ -20,8 +20,6 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import org.apache.commons.io.FilenameUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,28 +45,6 @@ public abstract class CoverageProvider {
         this.includeFiles = includeFiles;
         this.coverageReportPattern =
                 coverageReportPattern != null ? coverageReportPattern : DEFAULT_COVERAGE_REPORT_PATTERN;
-    }
-
-    public abstract Map<String, List<Integer>> readLineCoverage();
-
-    public abstract boolean hasCoverage();
-
-    /**
-     * Get the coverage metrics for the provider
-     *
-     * @return The metrics, if any are available
-     */
-    @Nullable
-    public CodeCoverageMetrics getMetrics() {
-        if (!hasCoverage()) {
-            return null;
-        }
-        return getCoverageMetrics();
-    }
-
-    @Nullable
-    String getRelativePathFromProjectRoot(String file) {
-        return getRelativePathFromProjectRoot(includeFiles, file);
     }
 
     /**
@@ -119,6 +95,28 @@ public abstract class CoverageProvider {
         }
 
         return rIndex - 1;
+    }
+
+    public abstract Map<String, List<Integer>> readLineCoverage();
+
+    public abstract boolean hasCoverage();
+
+    /**
+     * Get the coverage metrics for the provider
+     *
+     * @return The metrics, if any are available
+     */
+    @Nullable
+    public CodeCoverageMetrics getMetrics() {
+        if (!hasCoverage()) {
+            return null;
+        }
+        return getCoverageMetrics();
+    }
+
+    @Nullable
+    String getRelativePathFromProjectRoot(String file) {
+        return getRelativePathFromProjectRoot(includeFiles, file);
     }
 
     protected abstract CodeCoverageMetrics getCoverageMetrics();

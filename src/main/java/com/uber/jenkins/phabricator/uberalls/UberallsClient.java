@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class UberallsClient {
+
     public static final String PACKAGE_COVERAGE_KEY = "packageCoverage";
     public static final String FILES_COVERAGE_KEY = "filesCoverage";
     public static final String CLASSES_COVERAGE_KEY = "classesCoverage";
@@ -144,8 +145,8 @@ public class UberallsClient {
         URIBuilder builder;
         try {
             builder = getBuilder()
-                .setParameter("sha", sha)
-                .setParameter("repository", repository);
+                    .setParameter("sha", sha)
+                    .setParameter("repository", repository);
 
             HttpClient client = getClient();
             HttpMethod request = new GetMethod(builder.build().toString());

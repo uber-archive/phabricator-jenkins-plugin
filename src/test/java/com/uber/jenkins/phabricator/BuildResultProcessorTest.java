@@ -1,4 +1,3 @@
-
 // Copyright (c) 2015 Uber
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,16 +30,9 @@ import com.uber.jenkins.phabricator.coverage.FakeCoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.Run;
-import hudson.tasks.Builder;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +44,18 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Run;
+import hudson.tasks.Builder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 public class BuildResultProcessorTest {
@@ -140,10 +143,13 @@ public class BuildResultProcessorTest {
 
     @Test
     public void testProcessLintViolationsWithNonJsonLines() throws Exception {
-        String content = "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n" +
-                "Features should only be in memory when they are attached.\" }\n" +
-                "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"App.java\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n" +
-                "Features should only be in memory when they are attached.\" }\n";
+        String content =
+                "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n"
+                        +
+                        "Features should only be in memory when they are attached.\" }\n" +
+                        "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"App.java\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n"
+                        +
+                        "Features should only be in memory when they are attached.\" }\n";
 
         ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
             @Override
@@ -183,7 +189,8 @@ public class BuildResultProcessorTest {
     private Builder echoBuilder(final String fileName, final String content) {
         return new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws
+                    InterruptedException, IOException {
                 build.getWorkspace().child(fileName).write(content, "UTF-8");
                 return true;
             }

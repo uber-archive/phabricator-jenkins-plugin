@@ -22,7 +22,6 @@ package com.uber.jenkins.phabricator.coverage;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;

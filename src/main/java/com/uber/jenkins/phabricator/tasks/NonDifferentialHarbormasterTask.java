@@ -28,6 +28,7 @@ import com.uber.jenkins.phabricator.utils.Logger;
 import java.io.IOException;
 
 public class NonDifferentialHarbormasterTask extends Task {
+
     private final String phid;
     private final ConduitAPIClient conduit;
     private final hudson.model.Result buildResult;
@@ -37,12 +38,18 @@ public class NonDifferentialHarbormasterTask extends Task {
 
     /**
      * Task constructor.
+     *
      * @param logger The logger where logs go to.
      * @param conduitClient
      * @param result
      * @param buildUrl
      */
-    public NonDifferentialHarbormasterTask(Logger logger, String phid, ConduitAPIClient conduitClient, hudson.model.Result result, String buildUrl) {
+    public NonDifferentialHarbormasterTask(
+            Logger logger,
+            String phid,
+            ConduitAPIClient conduitClient,
+            hudson.model.Result result,
+            String buildUrl) {
         super(logger);
         this.logger = logger;
         this.phid = phid;

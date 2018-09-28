@@ -23,15 +23,18 @@ package com.uber.jenkins.phabricator.conduit;
 import com.google.common.collect.Sets;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.EnvVars;
+
 import junit.framework.TestCase;
+
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
+
 import org.junit.Test;
 
 import java.io.IOException;
 
 public class DifferentialTest extends TestCase {
+
     private static final String FAKE_DIFF_ID = "not-a-real-diff-id";
     private static final String FAKE_REVISION_ID = "not-a-real-revision-id";
 
@@ -109,6 +112,6 @@ public class DifferentialTest extends TestCase {
         JSONObject response = TestUtils.getJSONFromFile(getClass(), "ResponseWithChanges");
         differential = new Differential(response);
 
-        assertEquals(Sets.newHashSet("file.go","file2.go"), differential.getChangedFiles());
+        assertEquals(Sets.newHashSet("file.go", "file2.go"), differential.getChangedFiles());
     }
 }

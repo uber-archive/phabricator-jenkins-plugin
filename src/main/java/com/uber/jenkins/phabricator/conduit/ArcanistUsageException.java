@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.conduit;
 
 class ArcanistUsageException extends Exception {
+
     ArcanistUsageException(String message) {
         super(message);
     }

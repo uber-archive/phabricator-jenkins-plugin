@@ -21,9 +21,11 @@
 package com.uber.jenkins.phabricator.credentials;
 
 import com.cloudbees.plugins.credentials.CredentialsNameProvider;
+
 import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class ConduitCredentialsNameProvider extends CredentialsNameProvider<ConduitCredentialsImpl> {
+
     @NonNull
     @Override
     public String getName(@NonNull ConduitCredentialsImpl credentials) {

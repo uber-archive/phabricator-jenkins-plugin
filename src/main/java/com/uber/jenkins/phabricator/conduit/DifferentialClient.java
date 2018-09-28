@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator.conduit;
 
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.UnitResults;
+
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -32,6 +33,7 @@ import java.util.Map;
  * DifferentialClient handles all interaction with conduit/arc for differentials
  */
 public class DifferentialClient {
+
     private final String diffID;
     private final ConduitAPIClient conduit;
 
@@ -42,6 +44,7 @@ public class DifferentialClient {
 
     /**
      * Posts a comment to a differential
+     *
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
      * @param message the content of the comment
      * @param silent whether or not to trigger an email
@@ -50,7 +53,8 @@ public class DifferentialClient {
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException, ConduitAPIException {
+    public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException,
+            ConduitAPIException {
         JSONObject params = new JSONObject();
         params.element("revision_id", revisionID)
                 .element("action", action)
@@ -62,12 +66,13 @@ public class DifferentialClient {
 
     /**
      * Fetch a differential from Conduit
+     *
      * @return the Conduit API response
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject fetchDiff() throws IOException, ConduitAPIException {
-        JSONObject params = new JSONObject().element("ids", new String[]{diffID});
+        JSONObject params = new JSONObject().element("ids", new String[] {diffID});
         JSONObject query = this.callConduit("differential.querydiffs", params);
         JSONObject response;
         try {
@@ -92,6 +97,7 @@ public class DifferentialClient {
 
     /**
      * Sets a sendHarbormasterMessage build status
+     *
      * @param phid Phabricator object ID
      * @param pass whether or not the build passed
      * @param unitResults the results from the unit tests
@@ -100,14 +106,16 @@ public class DifferentialClient {
      * @throws IOException if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
-    public JSONObject sendHarbormasterMessage(String phid, boolean pass, UnitResults unitResults,
-                                              Map<String, String> coverage,
-                                              LintResults lintResults) throws ConduitAPIException, IOException {
+    public JSONObject sendHarbormasterMessage(
+            String phid, boolean pass, UnitResults unitResults,
+            Map<String, String> coverage,
+            LintResults lintResults) throws ConduitAPIException, IOException {
         return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage, lintResults);
     }
 
     /**
      * Uploads a uri as an 'artifact' for Harbormaster to display
+     *
      * @param phid Phabricator object ID
      * @param buildUri Uri to display, presumably the jenkins builds
      * @return the Conduit API response
@@ -120,6 +128,7 @@ public class DifferentialClient {
 
     /**
      * Post a comment on the differential
+     *
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
      * @param message the string message to post
      * @return the Conduit API response
@@ -132,6 +141,7 @@ public class DifferentialClient {
 
     /**
      * Fetch the commit message for the revision. This isn't available on the diff, so it requires a separate query.
+     *
      * @param revisionID The ID of the revision, e.g. for "D123" this would be "123"
      * @return A \n-separated string of the commit message
      * @throws ConduitAPIException

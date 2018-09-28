@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
@@ -43,14 +44,16 @@ public class PostCommentTask extends Task {
 
     /**
      * PostCommentTask constructor.
+     *
      * @param logger the logger
      * @param differentialClient the client for the differential
      * @param revisionID the revision identifier from harbormaster
      * @param comment the body of the comment
      * @param commentAction the name of the comment action
      */
-    public PostCommentTask(Logger logger, DifferentialClient differentialClient,
-                           String revisionID, String comment, String commentAction) {
+    public PostCommentTask(
+            Logger logger, DifferentialClient differentialClient,
+            String revisionID, String comment, String commentAction) {
         super(logger);
 
         this.differentialClient = differentialClient;

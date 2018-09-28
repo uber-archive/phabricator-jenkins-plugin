@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -31,6 +32,7 @@ import java.io.OutputStream;
 import static org.junit.Assert.assertEquals;
 
 public class LauncherFactoryTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 

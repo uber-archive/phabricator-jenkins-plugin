@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.tasks;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -28,6 +29,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import static org.junit.Assert.assertEquals;
 
 public class ApplyPatchTaskTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 

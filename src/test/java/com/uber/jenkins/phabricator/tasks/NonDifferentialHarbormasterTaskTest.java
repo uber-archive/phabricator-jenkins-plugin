@@ -23,12 +23,15 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.model.Result;
+
 import net.sf.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import hudson.model.Result;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -37,6 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class NonDifferentialHarbormasterTaskTest {
+
     private ConduitAPIClient conduitClient;
 
     @Before

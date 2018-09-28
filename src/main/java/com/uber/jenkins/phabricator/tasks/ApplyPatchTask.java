@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ApplyPatchTask extends Task {
+
     private final LauncherFactory starter;
     private final String baseCommit;
     private final String diffID;
@@ -45,11 +46,12 @@ public class ApplyPatchTask extends Task {
     private final boolean patchWithForceFlag;
     private final String scmType;
 
-    public ApplyPatchTask(Logger logger, LauncherFactory starter, String baseCommit,
-                          String diffID, String conduitUrl, String conduitToken,
-                          String arcPath, String gitPath, boolean createCommit,
-                          boolean skipForcedClean, boolean createBranch,
-                          boolean patchWithForceFlag, String scmType) {
+    public ApplyPatchTask(
+            Logger logger, LauncherFactory starter, String baseCommit,
+            String diffID, String conduitUrl, String conduitToken,
+            String arcPath, String gitPath, boolean createCommit,
+            boolean skipForcedClean, boolean createBranch,
+            boolean patchWithForceFlag, String scmType) {
         super(logger);
         this.starter = starter;
         this.baseCommit = baseCommit;
@@ -103,9 +105,9 @@ public class ApplyPatchTask extends Task {
                 if (!skipForcedClean) {
                     // Clean workspace, otherwise `arc patch` may fail
                     starter.launch()
-                        .stdout(logStream)
-                        .cmds(Arrays.asList(gitPath, "clean", "-fd", "-f"))
-                        .join();
+                            .stdout(logStream)
+                            .cmds(Arrays.asList(gitPath, "clean", "-fd", "-f"))
+                            .join();
                 }
 
                 // Update submodules recursively.

@@ -2,7 +2,6 @@ package com.uber.jenkins.phabricator.coverage;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.jacoco.core.analysis.IClassCoverage;
 import org.jacoco.core.analysis.ICounter;
 import org.jacoco.core.analysis.ILine;
 import org.jacoco.core.analysis.IPackageCoverage;
@@ -36,76 +35,6 @@ public class JacocoCoverageProvider extends CoverageProvider {
             Run<?, ?> build,
             Set<String> includeFiles, String coverageReportPattern) {
         super(build, includeFiles, coverageReportPattern);
-    }
-
-    @Override
-    public boolean hasCoverage() {
-        CoverageReport result = getCoverageResult();
-        return result != null && result.hasLineCoverage();
-    }
-
-    private CoverageReport getCoverageResult() {
-        if (build == null) {
-            return null;
-        }
-
-        JacocoBuildAction jacocoAction = getJacocoBuildAction();
-        if (jacocoAction == null) {
-            return null;
-        }
-        return jacocoAction.getResult();
-    }
-
-    private JacocoBuildAction getJacocoBuildAction() {
-        return build.getAction(JacocoBuildAction.class);
-    }
-
-    private JacocoPublisher getJacocoPublisher() {
-        Project<?, ?> project = (Project<?, ?>) ((AbstractBuild) build).getProject();
-        return (JacocoPublisher) project.getPublisher(JacocoPublisher.DESCRIPTOR);
-    }
-
-    @Override
-    protected CodeCoverageMetrics getCoverageMetrics() {
-        return convertJacoco(getCoverageResult());
-    }
-
-    @Override
-    public Map<String, List<Integer>> readLineCoverage() {
-        JacocoBuildAction jacocoAction = getJacocoBuildAction();
-        JacocoPublisher jacocoPublisher = getJacocoPublisher();
-        if (jacocoAction == null || jacocoPublisher == null) {
-            return null;
-        }
-
-        HashMap<String, List<Integer>> lineCoverage = new HashMap<String, List<Integer>>();
-
-        String[] includes = null;
-        if (jacocoPublisher.getInclusionPattern() != null) {
-            includes = new String[] {jacocoPublisher.getInclusionPattern()};
-        }
-
-        String[] excludes = null;
-        if (jacocoPublisher.getExclusionPattern() != null) {
-            excludes = new String[] {jacocoPublisher.getExclusionPattern()};
-        }
-
-        try {
-            ExecutionFileLoader executionFileLoader = jacocoAction.getJacocoReport().parse(includes, excludes);
-            for (IPackageCoverage packageCoverage : executionFileLoader.getBundleCoverage().getPackages()) {
-                for (ISourceFileCoverage fileCoverage : packageCoverage.getSourceFiles()) {
-                    String relativePathFromProjectRoot = getRelativePathFromProjectRoot(fileCoverage.getPackageName() + "/" + fileCoverage.getName());
-                    if (relativePathFromProjectRoot != null) {
-                        lineCoverage.put(relativePathFromProjectRoot, getPerLineCoverage(fileCoverage));
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        return lineCoverage;
     }
 
     private static List<Integer> getPerLineCoverage(ISourceNode fileCoverage) {
@@ -163,5 +92,76 @@ public class JacocoCoverageProvider extends CoverageProvider {
                 lineCoverage,
                 branchCoverage
         );
+    }
+
+    private CoverageReport getCoverageResult() {
+        if (build == null) {
+            return null;
+        }
+
+        JacocoBuildAction jacocoAction = getJacocoBuildAction();
+        if (jacocoAction == null) {
+            return null;
+        }
+        return jacocoAction.getResult();
+    }
+
+    private JacocoBuildAction getJacocoBuildAction() {
+        return build.getAction(JacocoBuildAction.class);
+    }
+
+    private JacocoPublisher getJacocoPublisher() {
+        Project<?, ?> project = (Project<?, ?>) ((AbstractBuild) build).getProject();
+        return (JacocoPublisher) project.getPublisher(JacocoPublisher.DESCRIPTOR);
+    }
+
+    @Override
+    public Map<String, List<Integer>> readLineCoverage() {
+        JacocoBuildAction jacocoAction = getJacocoBuildAction();
+        JacocoPublisher jacocoPublisher = getJacocoPublisher();
+        if (jacocoAction == null || jacocoPublisher == null) {
+            return null;
+        }
+
+        HashMap<String, List<Integer>> lineCoverage = new HashMap<String, List<Integer>>();
+
+        String[] includes = null;
+        if (jacocoPublisher.getInclusionPattern() != null) {
+            includes = new String[] {jacocoPublisher.getInclusionPattern()};
+        }
+
+        String[] excludes = null;
+        if (jacocoPublisher.getExclusionPattern() != null) {
+            excludes = new String[] {jacocoPublisher.getExclusionPattern()};
+        }
+
+        try {
+            ExecutionFileLoader executionFileLoader = jacocoAction.getJacocoReport().parse(includes, excludes);
+            for (IPackageCoverage packageCoverage : executionFileLoader.getBundleCoverage().getPackages()) {
+                for (ISourceFileCoverage fileCoverage : packageCoverage.getSourceFiles()) {
+                    String relativePathFromProjectRoot = getRelativePathFromProjectRoot(
+                            fileCoverage.getPackageName() + "/" + fileCoverage.getName());
+                    if (relativePathFromProjectRoot != null) {
+                        lineCoverage.put(relativePathFromProjectRoot, getPerLineCoverage(fileCoverage));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return lineCoverage;
+    }
+
+    @Override
+    public boolean hasCoverage() {
+        CoverageReport result = getCoverageResult();
+        return result != null && result.hasLineCoverage();
+    }
+
+    @Override
+    protected CodeCoverageMetrics getCoverageMetrics() {
+        return convertJacoco(getCoverageResult());
     }
 }

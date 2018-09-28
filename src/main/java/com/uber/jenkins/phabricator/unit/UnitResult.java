@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator.unit;
 import net.sf.json.JSONObject;
 
 public class UnitResult {
+
     private static final String FAILURE = "fail";
     private static final String SKIP = "skip";
     private static final String PASS = "pass";
@@ -36,7 +37,14 @@ public class UnitResult {
     private final int skipCount;
     private final int passCount;
 
-    public UnitResult(String className, String displayName, String stackTrace, float duration, int failCount, int skipCount, int passCount) {
+    public UnitResult(
+            String className,
+            String displayName,
+            String stackTrace,
+            float duration,
+            int failCount,
+            int skipCount,
+            int passCount) {
         this.className = className;
         name = displayName;
         this.duration = duration;

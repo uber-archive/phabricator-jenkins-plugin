@@ -24,11 +24,9 @@ import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClientTest;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.model.AbstractBuild;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.Result;
+
 import net.sf.json.JSONObject;
+
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
@@ -40,12 +38,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hudson.model.AbstractBuild;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Result;
+
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public abstract class BuildIntegrationTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -83,11 +87,18 @@ public abstract class BuildIntegrationTest {
         return TestUtils.getJSONFromFile(ConduitAPIClientTest.class, "unitResultWithFailureRequest");
     }
 
-    protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse) throws Exception {
+    protected FreeStyleBuild buildWithConduit(
+            JSONObject queryDiffsResponse,
+            JSONObject postCommentResponse,
+            JSONObject sendMessageResponse) throws Exception {
         return buildWithConduit(queryDiffsResponse, postCommentResponse, sendMessageResponse, true);
     }
 
-    protected FreeStyleBuild buildWithConduit(JSONObject queryDiffsResponse, JSONObject postCommentResponse, JSONObject sendMessageResponse, boolean harbormaster) throws Exception {
+    protected FreeStyleBuild buildWithConduit(
+            JSONObject queryDiffsResponse,
+            JSONObject postCommentResponse,
+            JSONObject sendMessageResponse,
+            boolean harbormaster) throws Exception {
         Map<String, JSONObject> responses = new HashMap<String, JSONObject>();
         if (queryDiffsResponse != null) {
             responses.put("differential.querydiffs", queryDiffsResponse);
@@ -134,10 +145,13 @@ public abstract class BuildIntegrationTest {
         assertThat(log.toString(), containsString(needle));
     }
 
-    protected void assertConduitRequest(JSONObject expectedRequestParams, String actualRequestBody) throws IOException, ConduitAPIException {
+    protected void assertConduitRequest(JSONObject expectedRequestParams, String actualRequestBody) throws IOException,
+            ConduitAPIException {
         String conduitTestServerAddress = TestUtils.getTestServerAddress(conduit.getServer());
-        ConduitAPIClient conduitTestClient = new ConduitAPIClient(conduitTestServerAddress, TestUtils.TEST_CONDUIT_TOKEN);
-        HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) conduitTestClient.createRequest("", expectedRequestParams);
+        ConduitAPIClient conduitTestClient = new ConduitAPIClient(conduitTestServerAddress,
+                TestUtils.TEST_CONDUIT_TOKEN);
+        HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) conduitTestClient.createRequest("",
+                expectedRequestParams);
         String expectedRequestBody = EntityUtils.toString(request.getEntity());
 
         assertEquals(expectedRequestBody, actualRequestBody);
