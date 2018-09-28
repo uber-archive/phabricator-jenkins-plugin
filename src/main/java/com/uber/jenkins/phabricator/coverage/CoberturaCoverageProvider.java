@@ -102,6 +102,8 @@ public class CoberturaCoverageProvider extends CoverageProvider {
         float methodCoverage = getCoveragePercentage(result, CoverageMetric.METHOD);
         float lineCoverage = getCoveragePercentage(result, CoverageMetric.LINE);
         float conditionalCoverage = getCoveragePercentage(result, CoverageMetric.CONDITIONAL);
+        int linesCovered = (int) result.getCoverage(CoverageMetric.LINE).numerator;
+        int linesTested = (int) result.getCoverage(CoverageMetric.LINE).denominator;
 
         return new CodeCoverageMetrics(
                 packagesCoverage,
@@ -109,7 +111,9 @@ public class CoberturaCoverageProvider extends CoverageProvider {
                 classesCoverage,
                 methodCoverage,
                 lineCoverage,
-                conditionalCoverage
+                conditionalCoverage,
+                linesTested,
+                linesCovered
         );
     }
 
