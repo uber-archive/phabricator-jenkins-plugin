@@ -154,9 +154,9 @@ public class TestUtils {
                 filesCoverage,
                 classesCoverage,
                 methodCoverage,
-                0.0f,
-                0.0f,
                 linesCoverage,
+                0.0f,
+                linesCovered,
                 linesTested
         );
     }
