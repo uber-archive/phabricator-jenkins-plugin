@@ -113,6 +113,8 @@ public class UberallsClient {
             params.put(METHOD_COVERAGE_KEY, codeCoverageMetrics.getMethodCoveragePercent());
             params.put(LINE_COVERAGE_KEY, codeCoverageMetrics.getLineCoveragePercent());
             params.put(CONDITIONAL_COVERAGE_KEY, codeCoverageMetrics.getConditionalCoveragePercent());
+            params.put(LINES_COVERED_KEY, codeCoverageMetrics.getLinesCovered());
+            params.put(LINES_TESTED_KEY, codeCoverageMetrics.getLinesTested());
 
             try {
                 HttpClient client = getClient();

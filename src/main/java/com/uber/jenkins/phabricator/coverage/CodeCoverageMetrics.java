@@ -69,9 +69,13 @@ public class CodeCoverageMetrics {
         return conditionalCoveragePercent;
     }
 
-    public float getLinesCovered() { return linesCovered; }
+    public float getLinesCovered() {
+        return linesCovered;
+    }
 
-    public float getLinesTested() { return linesTested; }
+    public float getLinesTested() {
+        return linesTested;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
