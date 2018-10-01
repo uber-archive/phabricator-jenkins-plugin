@@ -51,6 +51,8 @@ public class UberallsClient {
     public static final String METHOD_COVERAGE_KEY = "methodCoverage";
     public static final String LINE_COVERAGE_KEY = "lineCoverage";
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
+    public static final String LINES_COVERED_KEY = "linesCovered";
+    public static final String LINES_TESTED_KEY = "linesTested";
 
     private static final String TAG = "uberalls-client";
 
@@ -89,7 +91,9 @@ public class UberallsClient {
                     ((Double) coverage.getDouble(CLASSES_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(METHOD_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(LINE_COVERAGE_KEY)).floatValue(),
-                    ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue());
+                    ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue(),
+                    ((Double) coverage.getDouble(LINES_COVERED_KEY)).floatValue(),
+                    ((Double) coverage.getDouble(LINES_TESTED_KEY)).floatValue());
         } catch (Exception e) {
             e.printStackTrace(logger.getStream());
         }
