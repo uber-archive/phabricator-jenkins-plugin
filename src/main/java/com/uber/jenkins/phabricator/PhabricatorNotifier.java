@@ -20,7 +20,6 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
@@ -79,8 +78,6 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     private final String lintFileSize;
     private final String coverageReportPattern;
     private transient UberallsClient uberallsClient;
-
-    @VisibleForTesting CoverageProvider testCoverageProvider;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
@@ -319,10 +316,6 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
         if (!buildResult.isBetterOrEqualTo(Result.UNSTABLE)) {
             return null;
-        }
-
-        if (testCoverageProvider != null) {
-            return testCoverageProvider;
         }
 
         Logger logger = new Logger(listener.getLogger());
