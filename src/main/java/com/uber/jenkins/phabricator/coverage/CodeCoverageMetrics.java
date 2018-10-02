@@ -28,13 +28,13 @@ public class CodeCoverageMetrics {
     private final float methodCoveragePercent;
     private final float lineCoveragePercent;
     private final float conditionalCoveragePercent;
-    private final float linesCovered;
-    private final float linesTested;
+    private final long linesCovered;
+    private final long linesTested;
 
     public CodeCoverageMetrics(
             float packagesCoveragePercent, float filesCoveragePercent,
             float classesCoveragePercent, float methodCoveragePercent, float lineCoveragePercent,
-            float conditionalCoveragePercent, float linesCovered, float linesTested) {
+            float conditionalCoveragePercent, long linesCovered, long linesTested) {
         this.packagesCoveragePercent = packagesCoveragePercent;
         this.filesCoveragePercent = filesCoveragePercent;
         this.classesCoveragePercent = classesCoveragePercent;

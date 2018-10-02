@@ -92,8 +92,8 @@ public class UberallsClient {
                     ((Double) coverage.getDouble(METHOD_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(LINE_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue(),
-                    ((Double) coverage.getDouble(LINES_COVERED_KEY)).floatValue(),
-                    ((Double) coverage.getDouble(LINES_TESTED_KEY)).floatValue());
+                    (coverage.getLong(LINES_COVERED_KEY)),
+                    (coverage.getLong(LINES_TESTED_KEY)));
         } catch (Exception e) {
             e.printStackTrace(logger.getStream());
         }
