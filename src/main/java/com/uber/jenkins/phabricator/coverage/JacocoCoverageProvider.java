@@ -83,6 +83,8 @@ public class JacocoCoverageProvider extends CoverageProvider {
         float classCoverage = coverageResult.getClassCoverage().getPercentageFloat();
         float lineCoverage = coverageResult.getLineCoverage().getPercentageFloat();
         float branchCoverage = coverageResult.getBranchCoverage().getPercentageFloat();
+        long linesCovered = coverageResult.getLineCoverage().getCovered();
+        long linesTested = coverageResult.getLineCoverage().getTotal();
 
         return new CodeCoverageMetrics(
                 PERCENTAGE_UNAVAILABLE,
@@ -90,7 +92,9 @@ public class JacocoCoverageProvider extends CoverageProvider {
                 classCoverage,
                 methodCoverage,
                 lineCoverage,
-                branchCoverage
+                branchCoverage,
+                linesCovered,
+                linesTested
         );
     }
 

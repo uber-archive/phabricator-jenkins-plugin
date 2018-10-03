@@ -132,32 +132,37 @@ public class TestUtils {
             float classesCoveragePercent,
             float methodCoveragePercent,
             float lineCoveragePercent,
-            float conditionalCoveragePercent) {
+            float conditionalCoveragePercent,
+            long linesCovered,
+            long linesTested) {
         return spy(new CodeCoverageMetrics(packagesCoveragePercent, filesCoveragePercent,
                 classesCoveragePercent, methodCoveragePercent, lineCoveragePercent,
-                conditionalCoveragePercent));
+                conditionalCoveragePercent, linesCovered, linesTested));
     }
 
     public static CodeCoverageMetrics getDefaultCodeCoverageMetrics() {
-        return getCodeCoverageMetrics(100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
+        return getCodeCoverageMetrics(100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100, 100);
     }
 
     public static CodeCoverageMetrics getCoverageResult(
             Float packageCoverage, Float filesCoverage,
             Float classesCoverage, Float methodCoverage,
-            Float linesCoverage) {
+            Float linesCoverage, long linesCovered,
+            long linesTested) {
         return new CodeCoverageMetrics(
                 packageCoverage,
                 filesCoverage,
                 classesCoverage,
                 methodCoverage,
                 linesCoverage,
-                0.0f
+                0.0f,
+                linesCovered,
+                linesTested
         );
     }
 
     public static CodeCoverageMetrics getEmptyCoverageMetrics() {
-        return new CodeCoverageMetrics(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        return new CodeCoverageMetrics(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0);
     }
 
     public static JSONObject getJSONFromFile(Class klass, String filename) throws IOException {

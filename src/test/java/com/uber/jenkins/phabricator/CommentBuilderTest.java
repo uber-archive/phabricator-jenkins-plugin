@@ -88,7 +88,9 @@ public class CommentBuilderTest {
                 100.0f,
                 100.0f,
                 90.0f,
-                90.0f
+                90.0f,
+                90,
+                100
         );
         commenter.processParentCoverage(parent, TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
@@ -102,7 +104,7 @@ public class CommentBuilderTest {
 
     @Test
     public void testProcessWithDecreaseFailingTheBuild() {
-        CodeCoverageMetrics fiftyPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f);
+        CodeCoverageMetrics fiftyPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f, 50, 100);
         CommentBuilder commenter = createCommenter(Result.SUCCESS, fiftyPercentDrop, false, -10.0f);
         boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
                 TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
@@ -116,7 +118,7 @@ public class CommentBuilderTest {
 
     @Test
     public void testProcessWithDecreaseNotFailingTheBuild() {
-        CodeCoverageMetrics fivePercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 95.0f);
+        CodeCoverageMetrics fivePercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 95.0f, 95, 100);
         CommentBuilder commenter = createCommenter(Result.SUCCESS, fivePercentDrop, false, -10.0f);
         boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
                 TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
@@ -130,7 +132,7 @@ public class CommentBuilderTest {
 
     @Test
     public void testProcessWithDecreaseButHigherThanMinNotFailingTheBuild() {
-        CodeCoverageMetrics fifteenPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 85.0f);
+        CodeCoverageMetrics fifteenPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 85.0f, 85, 100);
         CommentBuilder commenter = createCommenter(Result.SUCCESS, fifteenPercentDrop, false, -10.0f, 80.0f);
         boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
                 TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
@@ -147,7 +149,7 @@ public class CommentBuilderTest {
         CommentBuilder commenter = new CommentBuilder(
                 logger,
                 Result.SUCCESS,
-                TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f), // 50% drop
+                TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f, 50, 100), // 50% drop
                 FAKE_BUILD_URL,
                 false,
                 null // coverageCheckSettings

@@ -144,7 +144,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 "  \"packageCoverage\": 100,\n" +
                 "  \"classesCoverage\": 100,\n" +
                 "  \"methodCoverage\": 100,\n" +
-                "  \"conditionalCoverage\": 100\n" +
+                "  \"conditionalCoverage\": 100,\n" +
+                "  \"linesCovered\": 100,\n" +
+                "  \"linesTested\": 100\n" +
                 "}");
         notifier.getDescriptor().setUberallsURL("http://uber.alls");
         notifier.setUberallsClient(uberalls);
@@ -167,7 +169,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 "  \"packageCoverage\": 100,\n" +
                 "  \"classesCoverage\": 100,\n" +
                 "  \"methodCoverage\": 100,\n" +
-                "  \"conditionalCoverage\": 100\n" +
+                "  \"conditionalCoverage\": 100,\n" +
+                "  \"linesCovered\": 100,\n" +
+                "  \"linesTested\": 100\n" +
                 "}");
         notifier.getDescriptor().setUberallsURL("http://uber.alls");
         notifier.setUberallsClient(uberalls);
@@ -187,7 +191,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 "  \"packageCoverage\": 0,\n" +
                 "  \"classesCoverage\": 0,\n" +
                 "  \"methodCoverage\": 0,\n" +
-                "  \"conditionalCoverage\": 0\n" +
+                "  \"conditionalCoverage\": 100,\n" +
+                "  \"linesCovered\": 100,\n" +
+                "  \"linesTested\": 100\n" +
                 "}");
         notifier.setUberallsClient(uberalls);
 
@@ -207,7 +213,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 "  \"packageCoverage\": 0,\n" +
                 "  \"classesCoverage\": 0,\n" +
                 "  \"methodCoverage\": 0,\n" +
-                "  \"conditionalCoverage\": 0\n" +
+                "  \"conditionalCoverage\": 100,\n" +
+                "  \"linesCovered\": 100,\n" +
+                "  \"linesTested\": 100\n" +
                 "}");
         notifier.setUberallsClient(uberalls);
 

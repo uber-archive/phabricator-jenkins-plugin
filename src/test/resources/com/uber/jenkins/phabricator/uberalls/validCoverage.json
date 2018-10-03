@@ -5,5 +5,7 @@
   "packageCoverage": 100,
   "classesCoverage": 100,
   "methodCoverage": 42,
-  "conditionalCoverage": 0
+  "conditionalCoverage": 0,
+  "linesCovered": 42,
+  "linesTested": 100
 }
