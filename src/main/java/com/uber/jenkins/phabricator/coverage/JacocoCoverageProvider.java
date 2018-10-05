@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Project;
 import hudson.model.Run;
@@ -32,9 +33,9 @@ public class JacocoCoverageProvider extends CoverageProvider {
     private static final int PERCENTAGE_UNAVAILABLE = -1;
 
     public JacocoCoverageProvider(
-            Run<?, ?> build,
+            Run<?, ?> build, FilePath workspace,
             Set<String> includeFiles, String coverageReportPattern) {
-        super(build, includeFiles, coverageReportPattern);
+        super(build, workspace, includeFiles, coverageReportPattern);
     }
 
     private static List<Integer> getPerLineCoverage(ISourceNode fileCoverage) {

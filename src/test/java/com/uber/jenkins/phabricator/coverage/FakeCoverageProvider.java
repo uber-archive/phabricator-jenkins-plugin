@@ -28,7 +28,7 @@ public class FakeCoverageProvider extends CoverageProvider {
     private final Map<String, List<Integer>> coverage;
 
     public FakeCoverageProvider(Map<String, List<Integer>> coverage) {
-        super(null, null, null);
+        super(null, null, null, null);
         this.coverage = coverage;
     }
 

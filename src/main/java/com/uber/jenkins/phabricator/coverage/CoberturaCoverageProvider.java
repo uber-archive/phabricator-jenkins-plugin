@@ -56,9 +56,9 @@ public class CoberturaCoverageProvider extends CoverageProvider {
     private boolean mHasComputedCoverage = false;
 
     public CoberturaCoverageProvider(
-            Run<?, ?> build,
+            Run<?, ?> build, FilePath workspace,
             Set<String> includeFiles, String coverageReportPattern) {
-        super(build, includeFiles, coverageReportPattern);
+        super(build, workspace, includeFiles, coverageReportPattern);
     }
 
     /**

@@ -29,6 +29,7 @@ import com.uber.jenkins.phabricator.utils.Logger;
 
 import java.util.Set;
 
+import hudson.FilePath;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
 
@@ -56,25 +57,25 @@ public abstract class InstanceProvider<T> {
     }
 
     public static CoverageProvider getCoberturaCoverageProvider(
-            final Run<?, ?> build,
+            final Run<?, ?> build, final FilePath workspace,
             final Set<String> includeFiles, final String coverageReportPattern, Logger logger) {
         return new InstanceProvider<CoverageProvider>(Jenkins.getInstance(),
                 COBERTURA_PLUGIN_NAME, logger) {
             @Override
             protected CoverageProvider makeInstance() {
-                return new CoberturaCoverageProvider(build, includeFiles, coverageReportPattern);
+                return new CoberturaCoverageProvider(build, workspace, includeFiles, coverageReportPattern);
             }
         }.getInstance();
     }
 
     public static CoverageProvider getJacocoCoverageProvider(
-            final Run<?, ?> build,
+            final Run<?, ?> build, final FilePath workspace,
             final Set<String> includeFiles, final String coverageReportPattern, Logger logger) {
         return new InstanceProvider<CoverageProvider>(Jenkins.getInstance(),
                 JACOCO_PLUGIN_NAME, logger) {
             @Override
             protected CoverageProvider makeInstance() {
-                return new JacocoCoverageProvider(build, includeFiles, coverageReportPattern);
+                return new JacocoCoverageProvider(build, workspace, includeFiles, coverageReportPattern);
             }
         }.getInstance();
     }
