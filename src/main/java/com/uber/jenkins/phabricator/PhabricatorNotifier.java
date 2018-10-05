@@ -306,7 +306,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
      * @return The current cobertura coverage, if any
      */
     private CoverageProvider getCoverageProvider(
-            Run<?, ?> build, FilePath workspace, 
+            Run<?, ?> build, FilePath workspace,
             TaskListener listener,
             Set<String> includeFiles) {
         Result buildResult;
