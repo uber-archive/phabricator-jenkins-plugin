@@ -27,7 +27,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 
 public abstract class CoverageProvider {
