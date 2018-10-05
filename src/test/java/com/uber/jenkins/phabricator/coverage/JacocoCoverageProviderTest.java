@@ -71,7 +71,7 @@ public class JacocoCoverageProviderTest {
     @Test
     @WithoutJenkins
     public void testGetMetricsNullBuild() {
-        JacocoCoverageProvider provider = new JacocoCoverageProvider(null, null, null);
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(null, null, null, null);
         assertNull(provider.getMetrics());
     }
 
@@ -87,7 +87,7 @@ public class JacocoCoverageProviderTest {
         CoverageReport mockResult = getMockResult();
         when(mockBuildAction.getResult()).thenReturn(mockResult);
 
-        JacocoCoverageProvider provider = new JacocoCoverageProvider(mockRun, null, null);
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(mockRun, null, null, null);
 
         assertTrue(provider.hasCoverage());
         assertEquals(75.0, provider.getCoverageMetrics().getLineCoveragePercent(), 0.1);
@@ -95,7 +95,8 @@ public class JacocoCoverageProviderTest {
 
     @Test
     public void testGetMetricsNoResult() throws IOException {
-        JacocoCoverageProvider provider = new JacocoCoverageProvider(getEmptyBuild(), null, null);
+        FreeStyleBuild build = getEmptyBuild();
+        JacocoCoverageProvider provider = new JacocoCoverageProvider(build, build.getWorkspace(), null, null);
 
         assertNull(provider.getMetrics());
         assertFalse(provider.hasCoverage());
@@ -111,7 +112,7 @@ public class JacocoCoverageProviderTest {
         executedJacocoBuild.replaceAction(buildAction);
 
         JacocoCoverageProvider provider = new JacocoCoverageProvider(executedJacocoBuild,
-                Collections.singleton(JAVA_FILE_PATH), null);
+                executedJacocoBuild.getWorkspace(), Collections.singleton(JAVA_FILE_PATH), null);
 
         assertTrue(provider.hasCoverage());
         assertEquals(66.6, provider.getCoverageMetrics().getLineCoveragePercent(), 0.1);

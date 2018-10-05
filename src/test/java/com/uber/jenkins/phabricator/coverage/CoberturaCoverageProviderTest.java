@@ -59,13 +59,14 @@ public class CoberturaCoverageProviderTest {
     @WithoutJenkins
     @Test
     public void testGetMetricsNullBuild() {
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(null, null, null);
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(null, null, null, null);
         assertNull(provider.getMetrics());
     }
 
     @Test
     public void testGetMetricsNoResult() throws IOException {
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(getEmptyBuild(), null, null);
+        FreeStyleBuild build = getEmptyBuild();
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, build.getWorkspace(), null, null);
         assertNull(provider.getMetrics());
         assertFalse(provider.hasCoverage());
     }
@@ -85,7 +86,7 @@ public class CoberturaCoverageProviderTest {
                 false,
                 0
         ));
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, null, null);
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, build.getWorkspace(), null, null);
         assertTrue(provider.hasCoverage());
 
         CodeCoverageMetrics metrics = provider.getMetrics();
@@ -99,7 +100,7 @@ public class CoberturaCoverageProviderTest {
         FreeStyleBuild build = getExecutedBuild();
         FileUtils.copyFile(testCoverageFile.toFile(), new File(build.getWorkspace().getRemote(), "coverage.xml"));
 
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, null, null);
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, build.getWorkspace(), null, null);
 
         assertTrue(provider.hasCoverage());
 
@@ -112,7 +113,7 @@ public class CoberturaCoverageProviderTest {
     public void testGetMetricsWithoutBuildActionResultDeletesFilesFromMasterAfter() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
         FreeStyleBuild build = project.scheduleBuild2(0).get(100, TimeUnit.MINUTES);
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, null, null);
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, build.getWorkspace(), null, null);
         Path testCoverageFile = Paths.get(getClass().getResource(TEST_COVERAGE_FILE).toURI());
         File cov = new File(build.getWorkspace().getRemote(), "coverage.xml");
         FileUtils.copyFile(testCoverageFile.toFile(), cov);
@@ -125,7 +126,8 @@ public class CoberturaCoverageProviderTest {
 
     @Test
     public void testGetLineCoverageNull() throws Exception {
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(getExecutedBuild(), null, null);
+        FreeStyleBuild build = getExecutedBuild();
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, build.getWorkspace(), null, null);
         assertNull(provider.readLineCoverage());
     }
 
@@ -138,7 +140,7 @@ public class CoberturaCoverageProviderTest {
         IOUtils.copy(in, out);
         out.close();
 
-        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, null, null);
+        CoberturaCoverageProvider provider = new CoberturaCoverageProvider(build, build.getWorkspace(), null, null);
         Map<String, List<Integer>> coverage = provider.readLineCoverage();
 
         assertNotNull(coverage);

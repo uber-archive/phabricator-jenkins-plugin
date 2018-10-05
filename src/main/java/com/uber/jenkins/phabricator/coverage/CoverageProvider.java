@@ -39,9 +39,9 @@ public abstract class CoverageProvider {
     final Set<String> includeFiles;
     final String coverageReportPattern;
 
-    CoverageProvider(Run<?, ?> build, Set<String> includeFiles, String coverageReportPattern) {
+    CoverageProvider(Run<?, ?> build, FilePath workspace, Set<String> includeFiles, String coverageReportPattern) {
         this.build = build;
-        this.workspace = build != null ? ((AbstractBuild) build).getWorkspace() : null;
+        this.workspace = workspace;
         this.includeFiles = includeFiles;
         this.coverageReportPattern =
                 coverageReportPattern != null ? coverageReportPattern : DEFAULT_COVERAGE_REPORT_PATTERN;

@@ -149,7 +149,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            coverageProvider = getCoverageProvider(build, listener, Collections.<String>emptySet());
+            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.<String>emptySet());
             CodeCoverageMetrics coverageResult = null;
             if (coverageProvider != null) {
                 coverageResult = coverageProvider.getMetrics();
@@ -221,7 +221,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
         Set<String> includeFiles = diff.getChangedFiles();
 
-        coverageProvider = getCoverageProvider(build, listener, includeFiles);
+        coverageProvider = getCoverageProvider(build, workspace, listener, includeFiles);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
@@ -306,7 +306,8 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
      * @return The current cobertura coverage, if any
      */
     private CoverageProvider getCoverageProvider(
-            Run<?, ?> build, TaskListener listener,
+            Run<?, ?> build, FilePath workspace, 
+            TaskListener listener,
             Set<String> includeFiles) {
         Result buildResult;
         if (build.getResult() == null) {
@@ -322,13 +323,13 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         List<CoverageProvider> coverageProviders = new ArrayList<CoverageProvider>();
 
         CoverageProvider coberturaCoverage = InstanceProvider.getCoberturaCoverageProvider(build,
-                includeFiles, coverageReportPattern, logger);
+                workspace, includeFiles, coverageReportPattern, logger);
         if (coberturaCoverage != null) {
             coverageProviders.add(coberturaCoverage);
         }
 
         CoverageProvider jacocoCoverage = InstanceProvider.getJacocoCoverageProvider(build,
-                includeFiles, coverageReportPattern, logger);
+                workspace, includeFiles, coverageReportPattern, logger);
         if (jacocoCoverage != null) {
             coverageProviders.add(jacocoCoverage);
         }
