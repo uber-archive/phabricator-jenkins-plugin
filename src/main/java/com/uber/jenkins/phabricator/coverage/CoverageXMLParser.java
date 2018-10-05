@@ -58,35 +58,6 @@ public final class CoverageXMLParser {
     private static final String EMPTY_XML = "<?xml version='1.0' encoding='UTF-8'?>";
     private static final Logger LOGGER = Logger.getLogger(CoverageXMLParser.class.getName());
 
-    private CoverageXMLParser() {}
-
-    static Map<String, List<Integer>> parse(Set<String> includeFiles, File... reports) throws
-            ParserConfigurationException, SAXException,
-            IOException {
-        Map<String, List<Integer>> hits = new HashMap<String, List<Integer>>();
-        for (CoverageHandler handler : ImmutableSet.of(COBERTURA_HANDLER, JACOCO_HANDLER)) {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db;
-            Set<NodeList> coverageData = new HashSet<NodeList>();
-            for (File file : reports) {
-                InputStream is = null;
-                try {
-                    is = new FileInputStream(file);
-                    db = dbf.newDocumentBuilder();
-                    db.setEntityResolver(handler);
-                    coverageData.add(db.parse(is).getElementsByTagName(handler.getCoverageTag()));
-                } finally {
-                    if (is != null) {
-                        is.close();
-                    }
-                }
-            }
-            handler.parseCoverage(coverageData, includeFiles, hits);
-        }
-
-        return hits;
-    }
-
     private static final CoverageHandler COBERTURA_HANDLER = new CoverageHandler() {
         private final Set<String> coberturaDtD = ImmutableSet.<String>builder()
                 .add("http://cobertura.sourceforge.net/xml/coverage-01.dtd")
@@ -190,7 +161,36 @@ public final class CoverageXMLParser {
         }
     };
 
-    private static abstract class CoverageHandler implements EntityResolver {
+    private CoverageXMLParser() {}
+
+    static Map<String, List<Integer>> parse(Set<String> includeFiles, File... reports) throws
+            ParserConfigurationException, SAXException,
+            IOException {
+        Map<String, List<Integer>> hits = new HashMap<String, List<Integer>>();
+        for (CoverageHandler handler : ImmutableSet.of(COBERTURA_HANDLER, JACOCO_HANDLER)) {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db;
+            Set<NodeList> coverageData = new HashSet<NodeList>();
+            for (File file : reports) {
+                InputStream is = null;
+                try {
+                    is = new FileInputStream(file);
+                    db = dbf.newDocumentBuilder();
+                    db.setEntityResolver(handler);
+                    coverageData.add(db.parse(is).getElementsByTagName(handler.getCoverageTag()));
+                } finally {
+                    if (is != null) {
+                        is.close();
+                    }
+                }
+            }
+            handler.parseCoverage(coverageData, includeFiles, hits);
+        }
+
+        return hits;
+    }
+
+    private abstract static class CoverageHandler implements EntityResolver {
 
         abstract String resource(String systemId);
 
