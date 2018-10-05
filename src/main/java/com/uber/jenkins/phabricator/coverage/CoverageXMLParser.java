@@ -60,7 +60,7 @@ public final class CoverageXMLParser {
 
     private CoverageXMLParser() {}
 
-    static Map<String, List<Integer>> parseCobertura(Set<String> includeFiles, File... reports) throws
+    static Map<String, List<Integer>> parse(Set<String> includeFiles, File... reports) throws
             ParserConfigurationException, SAXException,
             IOException {
         Map<String, List<Integer>> hits = new HashMap<String, List<Integer>>();

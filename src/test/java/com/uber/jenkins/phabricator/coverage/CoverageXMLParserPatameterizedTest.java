@@ -65,7 +65,7 @@ public class CoverageXMLParserPatameterizedTest {
             if (createDirectory) {
                 example.mkdir();
             }
-            Map<String, List<Integer>> lineCoverage = CoverageXMLParser.parseCobertura(null, getResource(TEST_COVERAGE_PYTHON));
+            Map<String, List<Integer>> lineCoverage = CoverageXMLParser.parse(null, getResource(TEST_COVERAGE_PYTHON));
             List<Integer> libCoverage = lineCoverage.get("example/lib.py");
             assertEquals(1, libCoverage.get(2).longValue());
             assertNull(libCoverage.get(1));

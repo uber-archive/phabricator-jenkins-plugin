@@ -130,7 +130,7 @@ public class CoberturaCoverageProvider extends CoverageProvider {
             return null;
         }
         try {
-            return CoverageXMLParser.parseCobertura(includedFiles, reports);
+            return CoverageXMLParser.parse(includedFiles, reports);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParserConfigurationException e) {
