@@ -38,13 +38,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(Parameterized.class)
-public class CoberturaXMLParserPatameterizedTest {
+public class CoverageXMLParserPatameterizedTest {
 
     private static final String TEST_COVERAGE_PYTHON = "python-coverage.xml";
 
     public Boolean createDirectory;
 
-    public CoberturaXMLParserPatameterizedTest(Boolean createDirectory) {
+    public CoverageXMLParserPatameterizedTest(Boolean createDirectory) {
         this.createDirectory = createDirectory;
     }
 
@@ -65,7 +65,7 @@ public class CoberturaXMLParserPatameterizedTest {
             if (createDirectory) {
                 example.mkdir();
             }
-            Map<String, List<Integer>> lineCoverage = CoberturaXMLParser.parse(null, getResource(TEST_COVERAGE_PYTHON));
+            Map<String, List<Integer>> lineCoverage = CoverageXMLParser.parse(null, getResource(TEST_COVERAGE_PYTHON));
             List<Integer> libCoverage = lineCoverage.get("example/lib.py");
             assertEquals(1, libCoverage.get(2).longValue());
             assertNull(libCoverage.get(1));
