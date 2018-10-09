@@ -9,6 +9,7 @@ import org.jacoco.core.analysis.ISourceFileCoverage;
 import org.jacoco.core.analysis.ISourceNode;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +17,9 @@ import java.util.Map;
 import java.util.Set;
 
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.Project;
 import hudson.model.Run;
 import hudson.plugins.jacoco.ExecutionFileLoader;
 import hudson.plugins.jacoco.JacocoBuildAction;
-import hudson.plugins.jacoco.JacocoPublisher;
 import hudson.plugins.jacoco.report.CoverageReport;
 
 /**
@@ -115,29 +113,28 @@ public class JacocoCoverageProvider extends CoverageProvider {
         return build.getAction(JacocoBuildAction.class);
     }
 
-    private JacocoPublisher getJacocoPublisher() {
-        Project<?, ?> project = (Project<?, ?>) ((AbstractBuild) build).getProject();
-        return (JacocoPublisher) project.getPublisher(JacocoPublisher.DESCRIPTOR);
-    }
-
     @Override
     public Map<String, List<Integer>> readLineCoverage() {
         JacocoBuildAction jacocoAction = getJacocoBuildAction();
-        JacocoPublisher jacocoPublisher = getJacocoPublisher();
-        if (jacocoAction == null || jacocoPublisher == null) {
+
+        if (jacocoAction == null) {
             return null;
         }
 
         HashMap<String, List<Integer>> lineCoverage = new HashMap<String, List<Integer>>();
 
         String[] includes = null;
-        if (jacocoPublisher.getInclusionPattern() != null) {
-            includes = new String[] {jacocoPublisher.getInclusionPattern()};
-        }
-
         String[] excludes = null;
-        if (jacocoPublisher.getExclusionPattern() != null) {
-            excludes = new String[] {jacocoPublisher.getExclusionPattern()};
+
+        try {
+            Field inclusionsField = JacocoBuildAction.class.getDeclaredField("inclusions");
+            inclusionsField.setAccessible(true);
+            includes = (String[]) inclusionsField.get(jacocoAction);
+            Field exclusionsField = JacocoBuildAction.class.getDeclaredField("exclusions");
+            exclusionsField.setAccessible(true);
+            excludes = (String[]) exclusionsField.get(jacocoAction);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         try {

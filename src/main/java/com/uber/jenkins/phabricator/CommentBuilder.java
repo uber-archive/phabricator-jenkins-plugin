@@ -133,7 +133,7 @@ class CommentBuilder {
             boolean commentOnSuccess,
             boolean commentWithConsoleLinkOnFailure,
             boolean runHarbormaster) {
-        if (result == Result.SUCCESS) {
+        if (result == Result.SUCCESS || result == null) {
             if (comment.length() == 0 && (commentOnSuccess || !runHarbormaster)) {
                 comment.append("Build is green");
             }
