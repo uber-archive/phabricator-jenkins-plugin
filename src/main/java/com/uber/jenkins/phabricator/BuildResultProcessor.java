@@ -293,7 +293,7 @@ public class BuildResultProcessor {
             logger.info(LOGGING_TAG, "No coverage provider available.");
             return;
         }
-        Map<String, List<Integer>> lineCoverage = coverageProvider.readLineCoverage();
+        Map<String, List<Integer>> lineCoverage = coverageProvider.getLineCoverage();
         if (lineCoverage == null || lineCoverage.isEmpty()) {
             logger.info(LOGGING_TAG, "No line coverage available to post to Harbormaster.");
             return;

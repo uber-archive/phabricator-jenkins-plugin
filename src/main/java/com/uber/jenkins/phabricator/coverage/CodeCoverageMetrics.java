@@ -20,6 +20,8 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import java.util.Objects;
+
 public class CodeCoverageMetrics {
 
     private final float packagesCoveragePercent;
@@ -96,5 +98,31 @@ public class CodeCoverageMetrics {
         sb.append(", linesTested = ");
         sb.append(linesTested);
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CodeCoverageMetrics metrics = (CodeCoverageMetrics) o;
+        return Float.compare(metrics.packagesCoveragePercent, packagesCoveragePercent) == 0 &&
+                Float.compare(metrics.filesCoveragePercent, filesCoveragePercent) == 0 &&
+                Float.compare(metrics.classesCoveragePercent, classesCoveragePercent) == 0 &&
+                Float.compare(metrics.methodCoveragePercent, methodCoveragePercent) == 0 &&
+                Float.compare(metrics.lineCoveragePercent, lineCoveragePercent) == 0 &&
+                Float.compare(metrics.conditionalCoveragePercent, conditionalCoveragePercent) == 0 &&
+                linesCovered == metrics.linesCovered &&
+                linesTested == metrics.linesTested;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packagesCoveragePercent, filesCoveragePercent, classesCoveragePercent,
+                methodCoveragePercent,
+                lineCoveragePercent, conditionalCoveragePercent, linesCovered, linesTested);
     }
 }

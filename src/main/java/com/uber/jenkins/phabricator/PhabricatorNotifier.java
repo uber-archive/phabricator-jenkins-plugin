@@ -26,6 +26,7 @@ import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
+import com.uber.jenkins.phabricator.coverage.XmlCoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.provider.InstanceProvider;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
@@ -38,10 +39,12 @@ import com.uber.jenkins.phabricator.utils.Logger;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -61,8 +64,13 @@ import jenkins.tasks.SimpleBuildStep;
 
 public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
+    private static final String DEFAULT_XML_COVERAGE_REPORT_PATTERN = "**/coverage*.xml, **/cobertura*.xml, "
+            + "**/jacoco*.xml";
+    private static final CoverageReportFilenameFilter COVERAGE_FILENAME_FILTER = new CoverageReportFilenameFilter();
+
     private static final String ABORT_TAG = "abort";
     private static final String UBERALLS_TAG = "uberalls";
+    private static final String COVERAGE_TAG = "coverage";
     private static final String CONDUIT_TAG = "conduit";
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
@@ -98,7 +106,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
         this.processLint = processLint;
-        this.coverageReportPattern = coverageReportPattern;
+        this.coverageReportPattern = coverageReportPattern != null ? coverageReportPattern : DEFAULT_XML_COVERAGE_REPORT_PATTERN;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -149,7 +157,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.<String>emptySet());
+            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.emptySet());
             CodeCoverageMetrics coverageResult = null;
             if (coverageProvider != null) {
                 coverageResult = coverageProvider.getMetrics();
@@ -299,11 +307,11 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     }
 
     /**
-     * Get the cobertura coverage for the build
+     * Get the coverage provider for the build
      *
      * @param build The current build
      * @param listener The build listener
-     * @return The current cobertura coverage, if any
+     * @return The current coverage, if any
      */
     private CoverageProvider getCoverageProvider(
             Run<?, ?> build, FilePath workspace,
@@ -319,36 +327,55 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             return null;
         }
 
+        copyCoverageToJenkinsMaster(build, workspace, listener);
+        CoverageProvider coverageProvider = new XmlCoverageProvider(getCoverageReports(build), includeFiles);
+        coverageProvider.computeCoverageIfNeeded();
+        cleanupCoverageFilesOnJenkinsMaster(build);
+
+        if (coverageProvider.hasCoverage()) {
+            return coverageProvider;
+        } else {
+            Logger logger = new Logger(listener.getLogger());
+            logger.info(UBERALLS_TAG, "No coverage results found");
+            return null;
+        }
+    }
+
+    private void copyCoverageToJenkinsMaster(Run<?, ?> build, FilePath workspace, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
-        List<CoverageProvider> coverageProviders = new ArrayList<CoverageProvider>();
+        final FilePath moduleRoot = workspace;
+        final File buildCoberturaDir = build.getRootDir();
+        FilePath buildTarget = new FilePath(buildCoberturaDir);
 
-        CoverageProvider coberturaCoverage = InstanceProvider.getCoberturaCoverageProvider(build,
-                workspace, includeFiles, coverageReportPattern, logger);
-        if (coberturaCoverage != null) {
-            coverageProviders.add(coberturaCoverage);
-        }
-
-        CoverageProvider jacocoCoverage = InstanceProvider.getJacocoCoverageProvider(build,
-                workspace, includeFiles, coverageReportPattern, logger);
-        if (jacocoCoverage != null) {
-            coverageProviders.add(jacocoCoverage);
-        }
-
-        for (Iterator<CoverageProvider> i = coverageProviders.iterator(); i.hasNext(); ) {
-            CoverageProvider coverageProvider = i.next();
-
-            if (!coverageProvider.hasCoverage()) {
-                i.remove();
+        if (moduleRoot != null) {
+            try {
+                int i = 0;
+                for (FilePath report : moduleRoot.list(coverageReportPattern)) {
+                    final FilePath targetPath = new FilePath(buildTarget, "coverage" + (i == 0 ? "" : i) + ".xml");
+                    report.copyTo(targetPath);
+                    i++;
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+                logger.warn(COVERAGE_TAG, "Unable to copy coverage to " + buildTarget);
             }
         }
-        if (!coverageProviders.isEmpty()) {
-            CoverageProvider provider = coverageProviders.get(0);
-            logger.info(UBERALLS_TAG, "Selected Coverage Provider: " + provider);
-            return provider;
-        }
+    }
 
-        logger.info(UBERALLS_TAG, "No coverage results found");
-        return null;
+    private void cleanupCoverageFilesOnJenkinsMaster(Run<?, ?> build) {
+        for (File report : getCoverageReports(build)) {
+            report.delete();
+        }
+    }
+
+    private Set<File> getCoverageReports(Run<?, ?> build) {
+        Set<File> reports = new HashSet<>();
+
+        File[] foundReports = build.getRootDir().listFiles(COVERAGE_FILENAME_FILTER);
+        if (foundReports != null) {
+            Collections.addAll(reports, foundReports);
+        }
+        return reports;
     }
 
     private UnitTestProvider getUnitProvider(Run<?, ?> build, TaskListener listener) {
@@ -448,5 +475,13 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     @Override
     public PhabricatorNotifierDescriptor getDescriptor() {
         return (PhabricatorNotifierDescriptor) super.getDescriptor();
+    }
+
+    private static class CoverageReportFilenameFilter implements FilenameFilter {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.startsWith("coverage") && name.endsWith("xml");
+        }
     }
 }

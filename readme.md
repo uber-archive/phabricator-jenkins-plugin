@@ -78,7 +78,7 @@ Jenkins Job
   2. Click the **Add post-build action** button and select **Post to Phabricator**.
   3. Make sure the **Comment on Success** and **Comment with console link on Failure** checkboxes are selected.
   4. Optionally:
-    1. If you have [Uberalls](https://github.com/uber/uberalls) enabled, enter a path to scan for Cobertura reports.
+    1. If you have [Uberalls](https://github.com/uber/uberalls) enabled, enter a path to scan for Coverage reports.
     2. If you want to post additional text to Phabricator other than "Pass" and "Fail", select the **Add Custom Comment** checkbox. Then create a `.phabricator-comment` file and enter the text you want Jenkins to add to the build status comment in Phabricator.
 ![Add post-build action](/docs/configure-job-post-build.png)
 

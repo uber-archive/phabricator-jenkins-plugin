@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE report
+  PUBLIC '-//JACOCO//DTD Report 1.0//EN'
+  'report.dtd'>
+<report name="jar-infer-lib">
+	<package name="com/uber/nullaway/jarinfer">
+		<class name="com/uber/nullaway/jarinfer/MethodAnnotationsRecord">
+			<method desc="(Lcom/google/common/collect/ImmutableSet;Lcom/google/common/collect/ImmutableMap;)V" line="14" name="&lt;init&gt;">
+				<counter covered="9" missed="0" type="INSTRUCTION"/>
+				<counter covered="4" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()Lcom/google/common/collect/ImmutableSet;" line="20" name="getMethodAnnotations">
+				<counter covered="3" missed="0" type="INSTRUCTION"/>
+				<counter covered="1" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()Lcom/google/common/collect/ImmutableMap;" line="24" name="getArgumentAnnotations">
+				<counter covered="3" missed="0" type="INSTRUCTION"/>
+				<counter covered="1" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<counter covered="15" missed="0" type="INSTRUCTION"/>
+			<counter covered="6" missed="0" type="LINE"/>
+			<counter covered="3" missed="0" type="COMPLEXITY"/>
+			<counter covered="3" missed="0" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</class>
+		<class name="com/uber/nullaway/jarinfer/DefinitelyDerefedParamsDriver">
+			<method desc="()V" line="70" name="&lt;init&gt;">
+				<counter covered="0" missed="3" type="INSTRUCTION"/>
+				<counter covered="0" missed="1" type="LINE"/>
+				<counter covered="0" missed="1" type="COMPLEXITY"/>
+				<counter covered="0" missed="1" type="METHOD"/>
+			</method>
+			<method desc="(ZLjava/lang/String;Ljava/lang/String;)V" line="75" name="LOG">
+				<counter covered="3" missed="14" type="INSTRUCTION"/>
+				<counter covered="1" missed="1" type="BRANCH"/>
+				<counter covered="2" missed="0" type="LINE"/>
+				<counter covered="1" missed="1" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()V" line="91" name="reset">
+				<counter covered="7" missed="0" type="INSTRUCTION"/>
+				<counter covered="4" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Lcom/ibm/wala/classLoader/IMethod;)V" line="103" name="accountCodeBytes">
+				<counter covered="12" missed="0" type="INSTRUCTION"/>
+				<counter covered="1" missed="1" type="BRANCH"/>
+				<counter covered="3" missed="0" type="LINE"/>
+				<counter covered="1" missed="1" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Lcom/ibm/wala/classLoader/IMethod;Lcom/ibm/wala/ipa/callgraph/AnalysisOptions;Lcom/ibm/wala/ipa/callgraph/AnalysisCache;Lcom/ibm/wala/ipa/cha/IClassHierarchy;)Lcom/uber/nullaway/jarinfer/DefinitelyDerefedParams;" line="110" name="getAnalysisDriver">
+				<counter covered="21" missed="0" type="INSTRUCTION"/>
+				<counter covered="4" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Ljava/lang/String;Ljava/lang/String;)Lcom/uber/nullaway/jarinfer/Result;" line="118" name="run">
+				<counter covered="53" missed="0" type="INSTRUCTION"/>
+				<counter covered="4" missed="2" type="BRANCH"/>
+				<counter covered="9" missed="0" type="LINE"/>
+				<counter covered="2" missed="2" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)Lcom/uber/nullaway/jarinfer/Result;" line="145" name="run">
+				<counter covered="366" missed="22" type="INSTRUCTION"/>
+				<counter covered="47" missed="17" type="BRANCH"/>
+				<counter covered="73" missed="5" type="LINE"/>
+				<counter covered="16" missed="17" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Lcom/ibm/wala/classLoader/IMethod;)Z" line="274" name="isAllPrimitiveTypes">
+				<counter covered="26" missed="2" type="INSTRUCTION"/>
+				<counter covered="7" missed="1" type="BRANCH"/>
+				<counter covered="4" missed="0" type="LINE"/>
+				<counter covered="4" missed="1" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Ljava/lang/String;)Ljava/io/InputStream;" line="288" name="getInputStream">
+				<counter covered="50" missed="26" type="INSTRUCTION"/>
+				<counter covered="3" missed="9" type="BRANCH"/>
+				<counter covered="7" missed="4" type="LINE"/>
+				<counter covered="1" missed="6" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Ljava/lang/String;)V" line="309" name="writeModelJAR">
+				<counter covered="60" missed="0" type="INSTRUCTION"/>
+				<counter covered="1" missed="1" type="BRANCH"/>
+				<counter covered="13" missed="0" type="LINE"/>
+				<counter covered="1" missed="1" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Ljava/io/DataOutputStream;)V" line="336" name="writeModel">
+				<counter covered="113" missed="4" type="INSTRUCTION"/>
+				<counter covered="8" missed="2" type="BRANCH"/>
+				<counter covered="26" missed="0" type="LINE"/>
+				<counter covered="4" missed="2" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Lcom/ibm/wala/classLoader/IMethod;)Ljava/lang/String;" line="377" name="getSignature">
+				<counter covered="98" missed="0" type="INSTRUCTION"/>
+				<counter covered="10" missed="0" type="BRANCH"/>
+				<counter covered="12" missed="0" type="LINE"/>
+				<counter covered="6" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Lcom/ibm/wala/types/TypeReference;)Ljava/lang/String;" line="403" name="getSimpleTypeName">
+				<counter covered="72" missed="0" type="INSTRUCTION"/>
+				<counter covered="4" missed="0" type="BRANCH"/>
+				<counter covered="18" missed="0" type="LINE"/>
+				<counter covered="3" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()V" line="71" name="&lt;clinit&gt;">
+				<counter covered="17" missed="0" type="INSTRUCTION"/>
+				<counter covered="6" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<counter covered="898" missed="71" type="INSTRUCTION"/>
+			<counter covered="86" missed="34" type="BRANCH"/>
+			<counter covered="181" missed="10" type="LINE"/>
+			<counter covered="42" missed="32" type="COMPLEXITY"/>
+			<counter covered="13" missed="1" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</class>
+		<class name="com/uber/nullaway/jarinfer/DefinitelyDerefedParams$NullnessHint">
+			<method desc="()V" line="184" name="&lt;clinit&gt;">
+				<counter covered="34" missed="0" type="INSTRUCTION"/>
+				<counter covered="4" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<counter covered="34" missed="0" type="INSTRUCTION"/>
+			<counter covered="4" missed="0" type="LINE"/>
+			<counter covered="1" missed="0" type="COMPLEXITY"/>
+			<counter covered="1" missed="0" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</class>
+		<class name="com/uber/nullaway/jarinfer/DefinitelyDerefedParams">
+			<method desc="(ZLjava/lang/String;Ljava/lang/String;)V" line="51" name="LOG">
+				<counter covered="3" missed="14" type="INSTRUCTION"/>
+				<counter covered="1" missed="1" type="BRANCH"/>
+				<counter covered="2" missed="0" type="LINE"/>
+				<counter covered="1" missed="1" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="(Lcom/ibm/wala/classLoader/IMethod;Lcom/ibm/wala/ssa/IR;Lcom/ibm/wala/cfg/ControlFlowGraph;Lcom/ibm/wala/ipa/cha/IClassHierarchy;)V" line="94" name="&lt;init&gt;">
+				<counter covered="18" missed="0" type="INSTRUCTION"/>
+				<counter covered="7" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()Ljava/util/Set;" line="109" name="analyze">
+				<counter covered="279" missed="25" type="INSTRUCTION"/>
+				<counter covered="32" missed="10" type="BRANCH"/>
+				<counter covered="47" missed="4" type="LINE"/>
+				<counter covered="15" missed="7" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()Lcom/uber/nullaway/jarinfer/DefinitelyDerefedParams$NullnessHint;" line="196" name="analyzeReturnType">
+				<counter covered="90" missed="42" type="INSTRUCTION"/>
+				<counter covered="8" missed="12" type="BRANCH"/>
+				<counter covered="13" missed="8" type="LINE"/>
+				<counter covered="2" missed="9" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()V" line="65" name="&lt;clinit&gt;">
+				<counter covered="34" missed="0" type="INSTRUCTION"/>
+				<counter covered="12" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<counter covered="424" missed="81" type="INSTRUCTION"/>
+			<counter covered="41" missed="23" type="BRANCH"/>
+			<counter covered="81" missed="12" type="LINE"/>
+			<counter covered="20" missed="17" type="COMPLEXITY"/>
+			<counter covered="5" missed="0" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</class>
+		<class name="com/uber/nullaway/jarinfer/StubxWriter">
+			<method desc="()V" line="15" name="&lt;init&gt;">
+				<counter covered="0" missed="3" type="INSTRUCTION"/>
+				<counter covered="0" missed="1" type="LINE"/>
+				<counter covered="0" missed="1" type="COMPLEXITY"/>
+				<counter covered="0" missed="1" type="METHOD"/>
+			</method>
+			<method desc="(Ljava/io/DataOutputStream;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;)V" line="42" name="write">
+				<counter covered="262" missed="98" type="INSTRUCTION"/>
+				<counter covered="24" missed="10" type="BRANCH"/>
+				<counter covered="54" missed="14" type="LINE"/>
+				<counter covered="10" missed="8" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<method desc="()V" line="15" name="&lt;clinit&gt;">
+				<counter covered="6" missed="2" type="INSTRUCTION"/>
+				<counter covered="1" missed="1" type="BRANCH"/>
+				<counter covered="1" missed="0" type="LINE"/>
+				<counter covered="1" missed="1" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<counter covered="268" missed="103" type="INSTRUCTION"/>
+			<counter covered="25" missed="11" type="BRANCH"/>
+			<counter covered="55" missed="14" type="LINE"/>
+			<counter covered="11" missed="10" type="COMPLEXITY"/>
+			<counter covered="2" missed="1" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</class>
+		<class name="com/uber/nullaway/jarinfer/Result">
+			<method desc="()V" line="67" name="&lt;init&gt;">
+				<counter covered="3" missed="0" type="INSTRUCTION"/>
+				<counter covered="1" missed="0" type="LINE"/>
+				<counter covered="1" missed="0" type="COMPLEXITY"/>
+				<counter covered="1" missed="0" type="METHOD"/>
+			</method>
+			<counter covered="3" missed="0" type="INSTRUCTION"/>
+			<counter covered="1" missed="0" type="LINE"/>
+			<counter covered="1" missed="0" type="COMPLEXITY"/>
+			<counter covered="1" missed="0" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</class>
+		<sourcefile name="DefinitelyDerefedParamsDriver.java">
+			<line cb="0" ci="3" mb="0" mi="0" nr="67"/>
+			<line cb="0" ci="0" mb="0" mi="3" nr="70"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="71"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="72"/>
+			<line cb="1" ci="2" mb="1" mi="14" nr="75"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="76"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="78"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="79"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="80"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="81"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="91"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="92"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="93"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="94"/>
+			<line cb="1" ci="3" mb="1" mi="0" nr="103"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="104"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="106"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="110"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="111"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="112"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="113"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="118"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="119"/>
+			<line cb="3" ci="8" mb="1" mi="0" nr="120"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="121"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="122"/>
+			<line cb="0" ci="7" mb="0" mi="0" nr="123"/>
+			<line cb="1" ci="6" mb="1" mi="0" nr="125"/>
+			<line cb="0" ci="10" mb="0" mi="0" nr="126"/>
+			<line cb="0" ci="7" mb="0" mi="0" nr="128"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="145"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="146"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="147"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="148"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="149"/>
+			<line cb="2" ci="10" mb="0" mi="0" nr="150"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="151"/>
+			<line cb="3" ci="8" mb="1" mi="0" nr="152"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="153"/>
+			<line cb="1" ci="2" mb="1" mi="0" nr="154"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="155"/>
+			<line cb="1" ci="6" mb="1" mi="0" nr="157"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="158"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="160"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="161"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="163"/>
+			<line cb="2" ci="7" mb="0" mi="0" nr="164"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="165"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="166"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="167"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="168"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="169"/>
+			<line cb="2" ci="17" mb="0" mi="0" nr="172"/>
+			<line cb="2" ci="6" mb="0" mi="0" nr="173"/>
+			<line cb="2" ci="12" mb="0" mi="0" nr="174"/>
+			<line cb="1" ci="3" mb="1" mi="1" nr="175"/>
+			<line cb="2" ci="9" mb="2" mi="1" nr="178"/>
+			<line cb="0" ci="13" mb="0" mi="0" nr="179"/>
+			<line cb="2" ci="13" mb="0" mi="0" nr="180"/>
+			<line cb="1" ci="4" mb="1" mi="0" nr="183"/>
+			<line cb="1" ci="3" mb="1" mi="0" nr="184"/>
+			<line cb="1" ci="3" mb="1" mi="0" nr="185"/>
+			<line cb="2" ci="3" mb="0" mi="0" nr="186"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="187"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="188"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="189"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="190"/>
+			<line cb="1" ci="2" mb="1" mi="0" nr="191"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="192"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="193"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="194"/>
+			<line cb="3" ci="9" mb="1" mi="0" nr="196"/>
+			<line cb="2" ci="5" mb="0" mi="0" nr="199"/>
+			<line cb="2" ci="4" mb="0" mi="0" nr="200"/>
+			<line cb="2" ci="3" mb="0" mi="0" nr="201"/>
+			<line cb="1" ci="2" mb="1" mi="0" nr="202"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="203"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="205"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="206"/>
+			<line cb="0" ci="11" mb="0" mi="0" nr="207"/>
+			<line cb="3" ci="5" mb="1" mi="0" nr="208"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="209"/>
+			<line cb="0" ci="13" mb="0" mi="0" nr="210"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="216"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="219"/>
+			<line cb="0" ci="0" mb="0" mi="13" nr="220"/>
+			<line cb="0" ci="0" mb="0" mi="3" nr="223"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="224"/>
+			<line cb="2" ci="4" mb="0" mi="0" nr="227"/>
+			<line cb="1" ci="2" mb="1" mi="0" nr="228"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="229"/>
+			<line cb="1" ci="4" mb="1" mi="0" nr="231"/>
+			<line cb="1" ci="3" mb="1" mi="0" nr="233"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="234"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="236"/>
+			<line cb="0" ci="11" mb="0" mi="0" nr="237"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="241"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="242"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="245"/>
+			<line cb="0" ci="20" mb="0" mi="0" nr="246"/>
+			<line cb="1" ci="14" mb="1" mi="1" nr="255"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="256"/>
+			<line cb="0" ci="7" mb="0" mi="0" nr="257"/>
+			<line cb="2" ci="4" mb="0" mi="0" nr="258"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="259"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="261"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="263"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="264"/>
+			<line cb="2" ci="6" mb="0" mi="0" nr="274"/>
+			<line cb="4" ci="11" mb="0" mi="2" nr="275"/>
+			<line cb="1" ci="7" mb="1" mi="0" nr="276"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="278"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="288"/>
+			<line cb="2" ci="20" mb="4" mi="5" nr="289"/>
+			<line cb="0" ci="13" mb="0" mi="0" nr="291"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="292"/>
+			<line cb="1" ci="4" mb="1" mi="0" nr="293"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="294"/>
+			<line cb="0" ci="0" mb="2" mi="4" nr="295"/>
+			<line cb="0" ci="0" mb="0" mi="5" nr="296"/>
+			<line cb="0" ci="0" mb="0" mi="4" nr="297"/>
+			<line cb="0" ci="0" mb="2" mi="8" nr="298"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="300"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="309"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="310"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="311"/>
+			<line cb="1" ci="3" mb="1" mi="0" nr="312"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="313"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="316"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="317"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="318"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="319"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="320"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="322"/>
+			<line cb="0" ci="11" mb="0" mi="0" nr="323"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="324"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="336"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="337"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="338"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="339"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="340"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="341"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="342"/>
+			<line cb="2" ci="11" mb="0" mi="0" nr="344"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="345"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="346"/>
+			<line cb="1" ci="3" mb="1" mi="1" nr="347"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="348"/>
+			<line cb="2" ci="10" mb="0" mi="0" nr="350"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="351"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="352"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="353"/>
+			<line cb="1" ci="6" mb="1" mi="3" nr="356"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="357"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="358"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="359"/>
+			<line cb="2" ci="12" mb="0" mi="0" nr="360"/>
+			<line cb="0" ci="7" mb="0" mi="0" nr="361"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="363"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="364"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="365"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="366"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="377"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="378"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="379"/>
+			<line cb="2" ci="9" mb="0" mi="0" nr="380"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="381"/>
+			<line cb="2" ci="7" mb="0" mi="0" nr="382"/>
+			<line cb="2" ci="6" mb="0" mi="0" nr="383"/>
+			<line cb="0" ci="12" mb="0" mi="0" nr="384"/>
+			<line cb="2" ci="15" mb="0" mi="0" nr="385"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="387"/>
+			<line cb="2" ci="14" mb="0" mi="0" nr="389"/>
+			<line cb="0" ci="10" mb="0" mi="0" nr="390"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="403"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="404"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="405"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="406"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="407"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="408"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="409"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="410"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="411"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="412"/>
+			<line cb="2" ci="5" mb="0" mi="0" nr="413"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="414"/>
+			<line cb="2" ci="4" mb="0" mi="0" nr="415"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="416"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="417"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="418"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="420"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="422"/>
+			<counter covered="901" missed="71" type="INSTRUCTION"/>
+			<counter covered="86" missed="34" type="BRANCH"/>
+			<counter covered="182" missed="10" type="LINE"/>
+			<counter covered="43" missed="32" type="COMPLEXITY"/>
+			<counter covered="14" missed="1" type="METHOD"/>
+			<counter covered="2" missed="0" type="CLASS"/>
+		</sourcefile>
+		<sourcefile name="DefinitelyDerefedParams.java">
+			<line cb="1" ci="2" mb="1" mi="14" nr="51"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="52"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="65"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="67"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="69"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="70"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="71"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="72"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="73"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="74"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="76"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="77"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="79"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="80"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="94"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="95"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="96"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="97"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="98"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="99"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="100"/>
+			<line cb="0" ci="13" mb="0" mi="0" nr="109"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="110"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="111"/>
+			<line cb="1" ci="5" mb="1" mi="4" nr="113"/>
+			<line cb="0" ci="0" mb="2" mi="8" nr="114"/>
+			<line cb="0" ci="0" mb="2" mi="6" nr="115"/>
+			<line cb="0" ci="0" mb="2" mi="4" nr="116"/>
+			<line cb="0" ci="0" mb="0" mi="2" nr="117"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="120"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="121"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="123"/>
+			<line cb="0" ci="12" mb="0" mi="0" nr="124"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="129"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="130"/>
+			<line cb="0" ci="7" mb="0" mi="0" nr="131"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="133"/>
+			<line cb="2" ci="8" mb="0" mi="0" nr="135"/>
+			<line cb="0" ci="15" mb="0" mi="0" nr="136"/>
+			<line cb="2" ci="3" mb="0" mi="0" nr="137"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="138"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="139"/>
+			<line cb="4" ci="6" mb="0" mi="0" nr="141"/>
+			<line cb="0" ci="12" mb="0" mi="0" nr="142"/>
+			<line cb="2" ci="9" mb="0" mi="0" nr="144"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="145"/>
+			<line cb="2" ci="3" mb="0" mi="0" nr="146"/>
+			<line cb="0" ci="12" mb="0" mi="0" nr="147"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="148"/>
+			<line cb="3" ci="7" mb="1" mi="0" nr="149"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="150"/>
+			<line cb="2" ci="5" mb="0" mi="0" nr="151"/>
+			<line cb="1" ci="2" mb="1" mi="0" nr="152"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="153"/>
+			<line cb="2" ci="3" mb="0" mi="0" nr="154"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="155"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="156"/>
+			<line cb="2" ci="4" mb="0" mi="0" nr="157"/>
+			<line cb="2" ci="4" mb="0" mi="0" nr="159"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="160"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="163"/>
+			<line cb="1" ci="12" mb="1" mi="1" nr="164"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="166"/>
+			<line cb="4" ci="6" mb="0" mi="0" nr="169"/>
+			<line cb="0" ci="11" mb="0" mi="0" nr="170"/>
+			<line cb="0" ci="7" mb="0" mi="0" nr="172"/>
+			<line cb="2" ci="13" mb="0" mi="0" nr="176"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="177"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="178"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="179"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="180"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="181"/>
+			<line cb="0" ci="16" mb="0" mi="0" nr="184"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="185"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="186"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="187"/>
+			<line cb="1" ci="5" mb="1" mi="0" nr="196"/>
+			<line cb="0" ci="0" mb="0" mi="13" nr="197"/>
+			<line cb="0" ci="0" mb="0" mi="2" nr="198"/>
+			<line cb="0" ci="13" mb="0" mi="0" nr="200"/>
+			<line cb="1" ci="3" mb="1" mi="0" nr="202"/>
+			<line cb="0" ci="5" mb="0" mi="0" nr="203"/>
+			<line cb="1" ci="5" mb="1" mi="4" nr="206"/>
+			<line cb="0" ci="0" mb="2" mi="8" nr="207"/>
+			<line cb="0" ci="0" mb="2" mi="6" nr="208"/>
+			<line cb="0" ci="0" mb="2" mi="4" nr="209"/>
+			<line cb="0" ci="0" mb="0" mi="2" nr="210"/>
+			<line cb="1" ci="16" mb="1" mi="0" nr="212"/>
+			<line cb="1" ci="9" mb="1" mi="0" nr="213"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="214"/>
+			<line cb="2" ci="3" mb="0" mi="0" nr="215"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="216"/>
+			<line cb="1" ci="7" mb="1" mi="0" nr="217"/>
+			<line cb="0" ci="13" mb="0" mi="0" nr="218"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="219"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="223"/>
+			<line cb="0" ci="0" mb="0" mi="2" nr="224"/>
+			<counter covered="458" missed="81" type="INSTRUCTION"/>
+			<counter covered="41" missed="23" type="BRANCH"/>
+			<counter covered="85" missed="12" type="LINE"/>
+			<counter covered="21" missed="17" type="COMPLEXITY"/>
+			<counter covered="6" missed="0" type="METHOD"/>
+			<counter covered="2" missed="0" type="CLASS"/>
+		</sourcefile>
+		<sourcefile name="MethodAnnotationsRecord.java">
+			<line cb="0" ci="2" mb="0" mi="0" nr="14"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="15"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="16"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="17"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="20"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="24"/>
+			<counter covered="15" missed="0" type="INSTRUCTION"/>
+			<counter covered="6" missed="0" type="LINE"/>
+			<counter covered="3" missed="0" type="COMPLEXITY"/>
+			<counter covered="3" missed="0" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</sourcefile>
+		<sourcefile name="StubxWriter.java">
+			<line cb="1" ci="6" mb="1" mi="5" nr="15"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="42"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="44"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="45"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="46"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="47"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="48"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="49"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="50"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="51"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="52"/>
+			<line cb="2" ci="10" mb="0" mi="0" nr="53"/>
+			<line cb="2" ci="10" mb="0" mi="0" nr="54"/>
+			<line cb="2" ci="6" mb="2" mi="4" nr="55"/>
+			<line cb="0" ci="4" mb="0" mi="0" nr="56"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="57"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="58"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="59"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="60"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="61"/>
+			<line cb="2" ci="10" mb="0" mi="0" nr="63"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="64"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="65"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="67"/>
+			<line cb="1" ci="7" mb="1" mi="4" nr="68"/>
+			<line cb="0" ci="0" mb="0" mi="7" nr="69"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="70"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="71"/>
+			<line cb="1" ci="7" mb="1" mi="4" nr="73"/>
+			<line cb="0" ci="0" mb="2" mi="12" nr="74"/>
+			<line cb="0" ci="0" mb="0" mi="8" nr="75"/>
+			<line cb="0" ci="0" mb="0" mi="9" nr="76"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="77"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="78"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="80"/>
+			<line cb="1" ci="7" mb="1" mi="4" nr="81"/>
+			<line cb="0" ci="0" mb="0" mi="7" nr="82"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="83"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="84"/>
+			<line cb="1" ci="7" mb="1" mi="4" nr="86"/>
+			<line cb="0" ci="0" mb="2" mi="12" nr="87"/>
+			<line cb="0" ci="0" mb="0" mi="8" nr="88"/>
+			<line cb="0" ci="0" mb="0" mi="9" nr="89"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="90"/>
+			<line cb="0" ci="0" mb="0" mi="1" nr="91"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="93"/>
+			<line cb="0" ci="2" mb="0" mi="0" nr="94"/>
+			<line cb="2" ci="11" mb="0" mi="0" nr="95"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="96"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="97"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="98"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="99"/>
+			<line cb="2" ci="11" mb="0" mi="0" nr="101"/>
+			<line cb="2" ci="13" mb="0" mi="0" nr="102"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="103"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="104"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="105"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="106"/>
+			<line cb="0" ci="3" mb="0" mi="0" nr="108"/>
+			<line cb="2" ci="11" mb="0" mi="0" nr="111"/>
+			<line cb="2" ci="14" mb="0" mi="0" nr="113"/>
+			<line cb="2" ci="12" mb="0" mi="0" nr="114"/>
+			<line cb="0" ci="8" mb="0" mi="0" nr="115"/>
+			<line cb="0" ci="6" mb="0" mi="0" nr="116"/>
+			<line cb="0" ci="9" mb="0" mi="0" nr="117"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="118"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="119"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="120"/>
+			<line cb="0" ci="1" mb="0" mi="0" nr="121"/>
+			<counter covered="268" missed="103" type="INSTRUCTION"/>
+			<counter covered="25" missed="11" type="BRANCH"/>
+			<counter covered="55" missed="14" type="LINE"/>
+			<counter covered="11" missed="10" type="COMPLEXITY"/>
+			<counter covered="2" missed="1" type="METHOD"/>
+			<counter covered="1" missed="0" type="CLASS"/>
+		</sourcefile>
+		<counter covered="1642" missed="255" type="INSTRUCTION"/>
+		<counter covered="152" missed="68" type="BRANCH"/>
+		<counter covered="328" missed="36" type="LINE"/>
+		<counter covered="78" missed="59" type="COMPLEXITY"/>
+		<counter covered="25" missed="2" type="METHOD"/>
+		<counter covered="6" missed="0" type="CLASS"/>
+	</package>
+	<counter covered="1642" missed="255" type="INSTRUCTION"/>
+	<counter covered="152" missed="68" type="BRANCH"/>
+	<counter covered="328" missed="36" type="LINE"/>
+	<counter covered="78" missed="59" type="COMPLEXITY"/>
+	<counter covered="25" missed="2" type="METHOD"/>
+	<counter covered="6" missed="0" type="CLASS"/>
+</report>

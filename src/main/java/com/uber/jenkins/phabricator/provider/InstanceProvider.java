@@ -20,23 +20,14 @@
 
 package com.uber.jenkins.phabricator.provider;
 
-import com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider;
-import com.uber.jenkins.phabricator.coverage.CoverageProvider;
-import com.uber.jenkins.phabricator.coverage.JacocoCoverageProvider;
 import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.Logger;
 
-import java.util.Set;
-
-import hudson.FilePath;
-import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 public abstract class InstanceProvider<T> {
 
-    private static final String COBERTURA_PLUGIN_NAME = "cobertura";
-    private static final String JACOCO_PLUGIN_NAME = "jacoco";
     private static final String JUNIT_PLUGIN_NAME = "junit";
 
     private static final String LOGGER_TAG = "plugin-provider";
@@ -54,30 +45,6 @@ public abstract class InstanceProvider<T> {
         this.jenkins = jenkins;
         this.pluginName = pluginName;
         this.logger = logger;
-    }
-
-    public static CoverageProvider getCoberturaCoverageProvider(
-            final Run<?, ?> build, final FilePath workspace,
-            final Set<String> includeFiles, final String coverageReportPattern, Logger logger) {
-        return new InstanceProvider<CoverageProvider>(Jenkins.getInstance(),
-                COBERTURA_PLUGIN_NAME, logger) {
-            @Override
-            protected CoverageProvider makeInstance() {
-                return new CoberturaCoverageProvider(build, workspace, includeFiles, coverageReportPattern);
-            }
-        }.getInstance();
-    }
-
-    public static CoverageProvider getJacocoCoverageProvider(
-            final Run<?, ?> build, final FilePath workspace,
-            final Set<String> includeFiles, final String coverageReportPattern, Logger logger) {
-        return new InstanceProvider<CoverageProvider>(Jenkins.getInstance(),
-                JACOCO_PLUGIN_NAME, logger) {
-            @Override
-            protected CoverageProvider makeInstance() {
-                return new JacocoCoverageProvider(build, workspace, includeFiles, coverageReportPattern);
-            }
-        }.getInstance();
     }
 
     public static UnitTestProvider getUnitTestProvider(Logger logger) {
