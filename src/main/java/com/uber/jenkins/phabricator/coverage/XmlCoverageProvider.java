@@ -91,12 +91,12 @@ public class XmlCoverageProvider extends CoverageProvider {
         }
         // Aggregate coverage metrics
         metrics = new CodeCoverageMetrics(
-                cc.pkg.getPrecent(),
-                cc.file.getPrecent(),
-                cc.cls.getPrecent(),
-                cc.method.getPrecent(),
-                cc.line.getPrecent(),
-                cc.branch.getPrecent(),
+                cc.pkg.getPercent(),
+                cc.file.getPercent(),
+                cc.cls.getPercent(),
+                cc.method.getPercent(),
+                cc.line.getPercent(),
+                cc.branch.getPercent(),
                 cc.line.covered,
                 cc.line.covered + cc.line.missed
         );
@@ -386,7 +386,7 @@ public class XmlCoverageProvider extends CoverageProvider {
         long covered = 0;
         long missed = 0;
 
-        float getPrecent() {
+        float getPercent() {
             long total = covered + missed;
             if (total == 0) {
                 return 100.0f;
