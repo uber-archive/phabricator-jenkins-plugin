@@ -1,10 +1,10 @@
 # Changelog
 
-### 1.9.8 (Unreleased)
+### 2.0.1 (Unreleased)
 
-* Abort existing builds when a new build referencing same diff is scheduled (Gautam Korlam)
-* Add a gateway option - used as an override to url in Conduit credentials
-* Add Subversion support (Li-Wen Hsu)
+### 2.0.0
+
+Many new improvements and bugfixes. Since the previous version was released so long ago, it is not feasible to list all the changes that have been made since then. This will be made better in future versions.
 
 ### 1.9.7 (2016/08/09)
 
