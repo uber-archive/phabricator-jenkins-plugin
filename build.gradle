@@ -8,7 +8,7 @@ plugins {
 
 group = 'org.jenkins-ci.plugins'
 archivesBaseName = 'phabricator-plugin'
-version = '2.0.0'
+version = '2.0.1-SNAPSHOT'
 description = 'Integrate Jenkins with Phabricator Differentials and Uberalls'
 
 sourceCompatibility = 1.8
