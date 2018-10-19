@@ -61,7 +61,7 @@ public class CoverageProviderTest {
                 CoverageProvider.getRelativePathFromProjectRoot(includeFiles,
                         "Greet.java"));
         // partial match
-        assertEquals("kageB/Greet.java", CoverageProvider.getRelativePathFromProjectRoot(includeFiles,
+        assertNull(CoverageProvider.getRelativePathFromProjectRoot(includeFiles,
                 "kageB/Greet.java"));
     }
 }

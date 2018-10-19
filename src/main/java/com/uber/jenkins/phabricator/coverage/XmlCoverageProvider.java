@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,26 +45,20 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class XmlCoverageProvider extends CoverageProvider {
 
-    private final XmlCoverageHandler[] xmlCoverageHandlers;
+    private final List<XmlCoverageHandler> xmlCoverageHandlers;
     private final Set<File> coverageReports;
     private final DocumentBuilder db;
     private final CoverageCounters cc;
-
-    public XmlCoverageProvider(Set<File> coverageReports, Set<String> includeFiles) {
-        this(coverageReports, includeFiles, new CoberturaXmlCoverageHandler(),
-                new JacocoXmlCoverageHandler());
-    }
 
     XmlCoverageProvider(Set<File> coverageReports) {
         this(coverageReports, null);
     }
 
-    private XmlCoverageProvider(
-            Set<File> coverageReports, Set<String> includeFiles,
-            XmlCoverageHandler... xmlCoverageHandlers) {
+    public XmlCoverageProvider(Set<File> coverageReports, Set<String> includeFiles) {
         super(includeFiles);
         this.coverageReports = coverageReports;
-        this.xmlCoverageHandlers = xmlCoverageHandlers;
+        this.xmlCoverageHandlers = Arrays.asList(new CoberturaXmlCoverageHandler(),
+                new JacocoXmlCoverageHandler());
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setValidating(false);
@@ -334,11 +329,9 @@ public class XmlCoverageProvider extends CoverageProvider {
                                 if (coverageNode != null && "line".equals(coverageNode.getNodeName())) {
                                     int hitCount = Integer.valueOf(
                                             coverageNode.getAttributes().getNamedItem("ci").getTextContent());
-                                    if (hitCount > 0) {
-                                        int lineNumber = Integer.valueOf(
-                                                coverageNode.getAttributes().getNamedItem("nr").getTextContent());
-                                        hitCounts.put(lineNumber, hitCount);
-                                    }
+                                    int lineNumber = Integer.valueOf(
+                                            coverageNode.getAttributes().getNamedItem("nr").getTextContent());
+                                    hitCounts.put(lineNumber, hitCount > 0 ? 1 : 0);
                                 }
                             }
                         }

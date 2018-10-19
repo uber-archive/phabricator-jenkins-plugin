@@ -81,7 +81,7 @@ public abstract class CoverageProvider {
             return coverageFile;
         } else {
             int maxMatch = 0;
-            String maxMatchFile = coverageFile;
+            String maxMatchFile = null;
             for (String includedFile : includeFiles) {
                 int currmatch = suffixMatch(includedFile, coverageFile);
                 if (currmatch > maxMatch) {

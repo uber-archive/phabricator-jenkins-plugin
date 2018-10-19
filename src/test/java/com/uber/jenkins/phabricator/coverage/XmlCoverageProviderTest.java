@@ -57,8 +57,8 @@ public class XmlCoverageProviderTest {
 
         assertTrue(provider.hasCoverage());
         Map<String, List<Integer>> coverage = provider.getLineCoverage();
-        assertEquals(7, coverage.get("com/uber/nullaway/jarinfer/StubxWriter.java").get(72).longValue());
-        assertNull(coverage.get("com/uber/nullaway/jarinfer/StubxWriter.java").get(73));
+        assertEquals(1, coverage.get("com/uber/nullaway/jarinfer/StubxWriter.java").get(72).longValue());
+        assertEquals(0, coverage.get("com/uber/nullaway/jarinfer/StubxWriter.java").get(73).longValue());
         assertEquals(new CodeCoverageMetrics(100.0f, 100.0f, 100.f, 92.59259f, 90.10989f, 69.09091f, 328, 364),
                 provider.getMetrics());
     }
