@@ -41,6 +41,7 @@ import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -84,7 +85,7 @@ public class BuildResultProcessorTest {
     }
 
     @Test
-    public void testProcessCoverage() throws Exception {
+    public void testProcessCoverage() {
         CoverageProvider provider = new FakeCoverageProvider(TestUtils.getDefaultLineCoverage());
         processor.processCoverage(provider);
         assertNotNull(processor.getCoverage());
@@ -94,7 +95,7 @@ public class BuildResultProcessorTest {
 
     @Test
     public void testProcessEmptyCoverage() {
-        CoverageProvider provider = new FakeCoverageProvider(null);
+        CoverageProvider provider = new FakeCoverageProvider(Collections.emptyMap());
         processor.processCoverage(provider);
         assertNull(processor.getCoverage());
     }

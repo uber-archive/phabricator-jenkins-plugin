@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator.coverage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Convert {filename: int[] hitCount} data into the Harbormaster format
@@ -54,17 +55,9 @@ public final class CoverageConverter {
     }
 
     private static String convertFileCoverage(List<Integer> lineCoverage) {
-        StringBuilder sb = new StringBuilder();
-        for (Integer line : lineCoverage) {
-            // Can't use a case statement because NULL
-            if (line == null) {
-                sb.append('N');
-            } else if (line == 0) {
-                sb.append('U');
-            } else {
-                sb.append('C');
-            }
-        }
-        return sb.toString();
+        return lineCoverage
+                .stream()
+                .map(i -> i != null ? (i == 0 ? "U" : "C") : "N")
+                .collect(Collectors.joining());
     }
 }

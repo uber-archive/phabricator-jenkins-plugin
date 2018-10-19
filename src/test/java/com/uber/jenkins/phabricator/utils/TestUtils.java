@@ -66,8 +66,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleProject;
-import hudson.plugins.cobertura.CoberturaPublisher;
-import hudson.plugins.cobertura.renderers.SourceEncoding;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tasks.Publisher;
 import hudson.tasks.junit.JUnitResultArchiver;
@@ -89,7 +87,6 @@ public class TestUtils {
     public static final String TEST_PHID = "PHID-not-real";
     public static final String TEST_CREDENTIALS_ID = "not-a-real-uuid-for-credentials";
     public static final String TEST_CONDUIT_URL = "http://example.gophers";
-    public static final String TEST_CONDUIT_GATEWAY = "http://foo.bar";
     public static final String TEST_DESCRIPTION = "foobar";
     private static final String TEST_UNIT_NAMESPACE = "unit namespace";
     private static final String TEST_UNIT_NAME = "fake test name";
@@ -276,21 +273,6 @@ public class TestUtils {
         ));
         coverage.put("file.go", lineCoverage);
         return coverage;
-    }
-
-    public static CoberturaPublisher getDefaultCoberturaPublisher() {
-        return new CoberturaPublisher(
-                COBERTURA_XML,
-                true,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                SourceEncoding.UTF_8,
-                1
-        );
     }
 
     public static UnitResult getDefaultUnitResult() {

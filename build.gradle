@@ -11,8 +11,8 @@ archivesBaseName = 'phabricator-plugin'
 version = '1.9.8-SNAPSHOT'
 description = 'Integrate Jenkins with Phabricator Differentials and Uberalls'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
@@ -47,8 +47,6 @@ dependencies {
   jenkinsPlugins 'org.jenkins-ci.plugins:credentials:1.22@jar'
 
   optionalJenkinsPlugins 'org.jenkins-ci.plugins:junit:1.6@jar'
-  optionalJenkinsPlugins 'org.jenkins-ci.plugins:cobertura:1.11@jar'
-  optionalJenkinsPlugins 'org.jenkins-ci.plugins:jacoco:2.2.1@jar'
   providedCompile 'org.jacoco:org.jacoco.report:0.7.8'
 
   testCompile 'junit:junit:4.12'

@@ -20,37 +20,56 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.Run;
-
 public abstract class CoverageProvider {
 
-    private static final String DEFAULT_COVERAGE_REPORT_PATTERN = "**/coverage*.xml, **/cobertura*.xml";
-
-    final Run<?, ?> build;
-    final FilePath workspace;
     final Set<String> includeFiles;
-    final String coverageReportPattern;
+    final Map<String, List<Integer>> lineCoverage = new HashMap<>();
+    CodeCoverageMetrics metrics = null;
 
-    CoverageProvider(Run<?, ?> build, FilePath workspace, Set<String> includeFiles, String coverageReportPattern) {
-        this.build = build;
-        this.workspace = workspace;
+    private boolean hasComputedCoverage = false;
+
+    CoverageProvider(Set<String> includeFiles) {
         this.includeFiles = includeFiles;
-        this.coverageReportPattern =
-                coverageReportPattern != null ? coverageReportPattern : DEFAULT_COVERAGE_REPORT_PATTERN;
     }
+
+    public Map<String, List<Integer>> getLineCoverage() {
+        computeCoverageIfNeeded();
+        return lineCoverage;
+    }
+
+    public boolean hasCoverage() {
+        computeCoverageIfNeeded();
+        return metrics != null && metrics.getLinesCovered() > 0;
+    }
+
+    CodeCoverageMetrics getCoverageMetrics() {
+        computeCoverageIfNeeded();
+        return metrics;
+    }
+
+    public void computeCoverageIfNeeded() {
+        if (!hasComputedCoverage) {
+            computeCoverage();
+            hasComputedCoverage = true;
+        }
+    }
+
+    /**
+     * Use this method to compute and set the coverage metrics and line coverage
+     */
+    protected abstract void computeCoverage();
 
     /**
      * Languages like Kotlin/Scala which can have multiple top level classes in a file. For such classes,
      * (package path + source file name) will not match where they are actually present in the filesystem.
-     * So this method does two separate marches 1) with just file name and 2) with package name + sourcefile name.
+     * So this method does two separate matches 1) with just file name and 2) with package name + sourcefile name.
      * Multiple classes with same name and different packages will match correctly. In case a full match is not
      * possible, we fall back to file name match. We only check against files included as part of a diff which means
      * that the possibility of a bad match is very unlikely (only if two files with same name are touched as part of
@@ -62,7 +81,7 @@ public abstract class CoverageProvider {
             return coverageFile;
         } else {
             int maxMatch = 0;
-            String maxMatchFile = coverageFile;
+            String maxMatchFile = null;
             for (String includedFile : includeFiles) {
                 int currmatch = suffixMatch(includedFile, coverageFile);
                 if (currmatch > maxMatch) {
@@ -84,22 +103,23 @@ public abstract class CoverageProvider {
         }
 
         int rIndex = 1;
-        while (coverageFileSize - rIndex >= 0 && coverageFile.charAt(coverageFileSize - rIndex) == changedFile.charAt(
+        while (coverageFileSize > rIndex && coverageFile.charAt(coverageFileSize - rIndex) == changedFile.charAt(
                 changedFileSize - rIndex)) {
             rIndex++;
         }
 
-        // Make sure the match is atleast a full match on the filename and not an accidental partial match
-        if (rIndex < coverageFileSize && coverageFile.charAt(rIndex - 1) != '/') {
+        // Full path match
+        if (changedFileSize == rIndex) {
+            return rIndex;
+        }
+
+        // Make sure the match is not an accidental partial match
+        if (changedFileSize > rIndex && changedFile.charAt(changedFileSize - rIndex - 1) != '/') {
             return 0;
         }
 
-        return rIndex - 1;
+        return rIndex;
     }
-
-    public abstract Map<String, List<Integer>> readLineCoverage();
-
-    public abstract boolean hasCoverage();
 
     /**
      * Get the coverage metrics for the provider
@@ -113,11 +133,4 @@ public abstract class CoverageProvider {
         }
         return getCoverageMetrics();
     }
-
-    @Nullable
-    String getRelativePathFromProjectRoot(String file) {
-        return getRelativePathFromProjectRoot(includeFiles, file);
-    }
-
-    protected abstract CodeCoverageMetrics getCoverageMetrics();
 }

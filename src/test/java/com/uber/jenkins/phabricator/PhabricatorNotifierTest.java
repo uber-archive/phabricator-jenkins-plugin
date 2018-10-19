@@ -20,7 +20,7 @@
 
 package com.uber.jenkins.phabricator;
 
-import com.uber.jenkins.phabricator.coverage.CoverageXMLParser;
+import com.uber.jenkins.phabricator.coverage.XmlCoverageProvider;
 import com.uber.jenkins.phabricator.lint.LintResult;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.uberalls.UberallsClient;
@@ -46,14 +46,12 @@ import static org.mockito.Mockito.when;
 
 public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
-    private static final String COVERAGE_REPORT_FILTER = "**/coverage*.xml, **/cobertura*.xml";
-
     private PhabricatorNotifier notifier;
 
     @Before
     public void setUp() throws IOException {
         p = createProject();
-        notifier = getDefaultTestNotifierWithCoverageReportPattern(COVERAGE_REPORT_FILTER);
+        notifier = getTestNotifier(null);
     }
 
     @Test
@@ -123,8 +121,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPostCoverage() throws Exception {
-        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoverageXMLParser.class, "go-torch-coverage.xml");
-        p.getPublishersList().add(TestUtils.getDefaultCoberturaPublisher());
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, XmlCoverageProvider.class, "go-torch-coverage.xml");
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.SUCCESS, build.getResult());
@@ -133,7 +130,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testFailBuildOnDecreasedCoverage() throws Exception {
-        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoverageXMLParser.class, "go-torch-coverage2.xml");
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, XmlCoverageProvider.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
         notifier = getDecreasedLineCoverageNotifier(0.0);
 
@@ -158,7 +155,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPassBuildOnDecreasedCoverageButGreaterThanMinPercent() throws Exception {
-        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoverageXMLParser.class, "go-torch-coverage2.xml");
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, XmlCoverageProvider.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
         notifier = getNotifierWithCoverageCheck(0.0, 90.0);
 
@@ -182,7 +179,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPassBuildOnSameCoverage() throws Exception {
-        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoverageXMLParser.class, "go-torch-coverage2.xml");
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, XmlCoverageProvider.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
         notifier = getDecreasedLineCoverageNotifier(0.0);
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
@@ -203,7 +200,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPassBuildOnPositiveMaximumCoverageDecrease() throws Exception {
-        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, CoverageXMLParser.class, "go-torch-coverage2.xml");
+        TestUtils.addCopyBuildStep(p, TestUtils.COBERTURA_XML, XmlCoverageProvider.class, "go-torch-coverage2.xml");
         UberallsClient uberalls = TestUtils.getDefaultUberallsClient();
         notifier = getDecreasedLineCoverageNotifier(0.01);
         when(uberalls.getCoverage(any(String.class))).thenReturn("{\n" +
@@ -225,7 +222,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPostCoverageWithoutPublisher() throws Exception {
-        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoverageXMLParser.class,
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, XmlCoverageProvider.class,
                 "go-torch-coverage.xml");
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
@@ -237,9 +234,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
     public void testPostCoverageWithoutPublisherWithEmptyReportPattern() throws Exception {
         String[] emptyPatterns = {null, ""};
         for (String emptyPattern : emptyPatterns) {
-            notifier = getDefaultTestNotifierWithCoverageReportPattern(emptyPattern);
+            notifier = getTestNotifier(emptyPattern);
 
-            TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoverageXMLParser.class,
+            TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, XmlCoverageProvider.class,
                     "go-torch-coverage.xml");
 
             FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
@@ -250,9 +247,9 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
     @Test
     public void testPostCoverageWithoutPublisherWithNoFilesMatchingReportPattern() throws Exception {
-        notifier = getDefaultTestNotifierWithCoverageReportPattern("*.html");
+        notifier = getTestNotifier("*.html");
 
-        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, CoverageXMLParser.class,
+        TestUtils.addCopyBuildStep(p, "src/coverage/" + TestUtils.COBERTURA_XML, XmlCoverageProvider.class,
                 "go-torch-coverage.xml");
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
@@ -295,7 +292,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 false,
                 0.0,
                 0.0,
-                COVERAGE_REPORT_FILTER,
+                null,
                 true,
                 ".phabricator-comment",
                 "1000",
@@ -343,7 +340,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 maxCoverageDecrease,
                 minCoverage,
-                COVERAGE_REPORT_FILTER,
+                null,
                 true,
                 ".phabricator-comment",
                 "1001",
@@ -355,14 +352,14 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         );
     }
 
-    private PhabricatorNotifier getDefaultTestNotifierWithCoverageReportPattern(String coverageReportPattern) {
+    private PhabricatorNotifier getTestNotifier(String codeCoveragePattern) {
         return new PhabricatorNotifier(
                 false,
                 true,
                 false,
                 0.0,
                 0.0,
-                coverageReportPattern,
+                codeCoveragePattern,
                 true,
                 ".phabricator-comment",
                 "1001",
