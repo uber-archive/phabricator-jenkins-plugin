@@ -106,7 +106,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         this.commentWithConsoleLinkOnFailure = commentWithConsoleLinkOnFailure;
         this.customComment = customComment;
         this.processLint = processLint;
-        this.coverageReportPattern = coverageReportPattern != null ? coverageReportPattern : DEFAULT_XML_COVERAGE_REPORT_PATTERN;
+        this.coverageReportPattern = coverageReportPattern;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -347,10 +347,13 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         final File buildCoberturaDir = build.getRootDir();
         FilePath buildTarget = new FilePath(buildCoberturaDir);
 
+        String finalCoverageReportPattern = coverageReportPattern != null ? coverageReportPattern :
+                DEFAULT_XML_COVERAGE_REPORT_PATTERN;
+
         if (moduleRoot != null) {
             try {
                 int i = 0;
-                for (FilePath report : moduleRoot.list(coverageReportPattern)) {
+                for (FilePath report : moduleRoot.list(finalCoverageReportPattern)) {
                     final FilePath targetPath = new FilePath(buildTarget, "coverage" + (i == 0 ? "" : i) + ".xml");
                     report.copyTo(targetPath);
                     i++;
