@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.0.1 (Unreleased)
+### 2.0.2 (Unreleased)
+
+### 2.0.1
+
+* Fix coverage report pattern NPE
 
 ### 2.0.0
 
