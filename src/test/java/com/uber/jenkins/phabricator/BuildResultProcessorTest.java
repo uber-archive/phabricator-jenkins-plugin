@@ -114,18 +114,18 @@ public class BuildResultProcessorTest {
 
     @Test
     public void testProcessLintViolations() throws Exception {
-        String content = "{\"name\": \"Syntax Error\"," +
+        String content = "{\"App.java\":[{\"name\": \"Syntax Error\"," +
                 "\"code\": \"EXAMPLE\"," +
                 "\"severity\": \"error\"," +
-                "\"path\": \"path/to/example\"," +
                 "\"line\": 17," +
-                "\"char\": 3}";
+                "\"char\": 3}]";
         final LintResult result = new LintResult("Syntax Error", "EXAMPLE", "error", "path/to/example", 17, 3, "");
 
         ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
             @Override
             public JSONObject perform(String action, JSONObject params) throws IOException, ConduitAPIException {
                 if (action == "harbormaster.sendmessage") {
+
                     JSONObject json = (JSONObject) ((JSONArray) params.get("lint")).get(0);
                     JSONObject parsed = result.toHarbormaster();
                     assertNotNull(parsed);
@@ -145,12 +145,12 @@ public class BuildResultProcessorTest {
     @Test
     public void testProcessLintViolationsWithNonJsonLines() throws Exception {
         String content =
-                "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n"
+                "{\"App.java\":[{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n"
                         +
                         "Features should only be in memory when they are attached.\" }\n" +
-                        "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"App.java\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n"
+                        "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n"
                         +
-                        "Features should only be in memory when they are attached.\" }\n";
+                        "Features should only be in memory when they are attached.\" }]\n";
 
         ConduitAPIClient conduitAPIClient = new ConduitAPIClient(null, null) {
             @Override

@@ -37,6 +37,7 @@ import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
@@ -160,11 +161,19 @@ public class BuildResultProcessor {
                 String lint = "";
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    lint += line;
                     try {
-                        JSONObject json = JSONObject.fromObject(lint);
-                        lintResults.add(LintResult.fromJsonObject(json));
-                        lint = "";
+                        JSONObject json = JSONObject.fromObject(line);
+
+                        if (json.keys().hasNext()) {
+                            String path = (String) json.keys().next();
+
+                            JSONArray data = (JSONArray) json.get(path);
+                            for (int i = 0; i < data.size(); i++) {
+                                JSONObject itemObject = data.getJSONObject(i);
+                                itemObject.put("path", path);
+                                lintResults.add(LintResult.fromJsonObject(itemObject));
+                            }
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace(logger.getStream());
                     }
