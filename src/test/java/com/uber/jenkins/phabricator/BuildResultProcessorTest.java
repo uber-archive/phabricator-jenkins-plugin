@@ -145,7 +145,7 @@ public class BuildResultProcessorTest {
     @Test
     public void testProcessLintViolationsWithNonJsonLines() throws Exception {
         String content =
-                "{\"App.java\":[{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"path\": \"Main.java\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n"
+                "{\"App.java\":[{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"line\": 21, \"char\": 5, \"description\": \"Potential leak detected.\n"
                         +
                         "Features should only be in memory when they are attached.\" },\n" +
                         "{ \"name\": \"PotentialLeak\", \"code\": \"\", \"severity\": \"error\", \"line\": 22, \"char\": 5, \"description\": \"Potential leak detected.\n"
