@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage line-rate="0.005225342913128674" branch-rate="0.003992015968063872" lines-covered="8" lines-valid="1531" branches-covered="2" branches-valid="501" complexity="2.1768488745980705" version="2.1.1" timestamp="1537982333809">
+<coverage line-rate="0.005225342913128674" branch-rate="0.003992015968063872" lines-covered="8" lines-valid="1531"
+		  branches-covered="2.0" branches-valid="501.0" complexity="2.1768488745980705" version="2.1.1"
+		  timestamp="1537982333809">
 	<packages>
 				<package name="com.uber.jenkins.phabricator.packageA" line-rate="0.8" branch-rate="0.5" complexity="2.0">
 			<classes>

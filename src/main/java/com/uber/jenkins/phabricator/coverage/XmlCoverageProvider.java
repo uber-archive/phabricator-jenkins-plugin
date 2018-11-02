@@ -112,6 +112,14 @@ public class XmlCoverageProvider extends CoverageProvider {
         }
     }
 
+    private static Long getLongValue(NamedNodeMap attrs, String attr) {
+        return Math.round(Double.valueOf(attrs.getNamedItem(attr).getTextContent()));
+    }
+
+    private static Integer getIntValue(NamedNodeMap attrs, String attr) {
+        return Math.round(Float.valueOf(attrs.getNamedItem(attr).getTextContent()));
+    }
+
     private abstract static class XmlCoverageHandler {
 
         abstract boolean isApplicable(Document document);
@@ -138,10 +146,6 @@ public class XmlCoverageProvider extends CoverageProvider {
                 }
                 lineCoverage.put(entry.getKey(), sortedCounts);
             }
-        }
-
-        static int getIntValue(Node node, String attributeName) {
-            return Integer.parseInt(node.getAttributes().getNamedItem(attributeName).getTextContent());
         }
     }
 
@@ -209,8 +213,9 @@ public class XmlCoverageProvider extends CoverageProvider {
                                 continue;
                             }
 
-                            Integer lineNumber = getIntValue(line, NODE_NUMBER);
-                            hitCounts.put(lineNumber, getIntValue(line, NODE_HITS));
+                            NamedNodeMap attrs = line.getAttributes();
+                            Integer lineNumber = getIntValue(attrs, NODE_NUMBER);
+                            hitCounts.put(lineNumber, getIntValue(attrs, NODE_HITS));
                         }
                     }
                 }
@@ -222,8 +227,8 @@ public class XmlCoverageProvider extends CoverageProvider {
             NamedNodeMap attrs = root.getAttributes();
             // Branch coverage is only supported for cobertura coverage-04.dtd format
             if (attrs.getNamedItem("branches-covered") != null) {
-                long branchesCovered = Long.valueOf(attrs.getNamedItem("branches-covered").getTextContent());
-                long branchesValid = Long.valueOf(attrs.getNamedItem("branches-valid").getTextContent());
+                long branchesCovered = getLongValue(attrs, "branches-covered");
+                long branchesValid = getLongValue(attrs, "branches-valid");
                 cc.branch.covered = branchesCovered;
                 cc.branch.missed = branchesValid - branchesCovered;
             }
@@ -252,7 +257,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                             if (!lineNode.getNodeName().equals("line")) {
                                 continue;
                             }
-                            int hits = Integer.valueOf(lineNode.getAttributes().getNamedItem("hits").getTextContent());
+                            int hits = getIntValue(lineNode.getAttributes(), "hits");
                             if (hits > 0) {
                                 cc.line.covered += 1;
                                 methodCovered = true;
@@ -327,10 +332,9 @@ public class XmlCoverageProvider extends CoverageProvider {
                             for (int k = 0; k < coverage.getLength(); k++) {
                                 Node coverageNode = coverage.item(k);
                                 if (coverageNode != null && "line".equals(coverageNode.getNodeName())) {
-                                    int hitCount = Integer.valueOf(
-                                            coverageNode.getAttributes().getNamedItem("ci").getTextContent());
-                                    int lineNumber = Integer.valueOf(
-                                            coverageNode.getAttributes().getNamedItem("nr").getTextContent());
+                                    NamedNodeMap attrs = coverageNode.getAttributes();
+                                    long hitCount = getIntValue(attrs, "ci");
+                                    int lineNumber = getIntValue(attrs, "nr");
                                     hitCounts.put(lineNumber, hitCount > 0 ? 1 : 0);
                                 }
                             }
