@@ -30,6 +30,7 @@ public class XmlCoverageProviderTest {
     private static final String TEST_COVERAGE_FILE_2 = "go-torch-coverage2.xml";
     private static final String TEST_COVERAGE_FILE_3 = "go-torch-coverage3.xml";
     private static final String TEST_COVERAGE_FILE_MULTIPLE_INCLUDE = "multiple-include-coverage.xml";
+    private static final String TEST_COVERAGE_FILE_INVALID = "invalid-coverage.xml";
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -113,6 +114,12 @@ public class XmlCoverageProviderTest {
         assertEquals(1, greetBCoverage.get(6).longValue());
         assertNull(eetCoverage);
         assertNull(partialMatchCoverage);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void invalidCoverage() {
+        CoverageProvider provider = new XmlCoverageProvider(getResources(TEST_COVERAGE_FILE_INVALID));
+        provider.getLineCoverage();
     }
 
     private Set<File> getResources(String... resources) {
