@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.0.2 (Unreleased)
+### 2.0.3 (Unreleased)
+
+### 2.0.2
+
+* Handle non int/long values in coverage reports (#293)
 
 ### 2.0.1
 
