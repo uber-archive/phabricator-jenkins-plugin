@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -197,12 +197,18 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         final String buildUrl = whichBuildUrl;
 
         if (!isDifferential) {
+            Result buildResult;
+            if (build.getResult() == null) {
+                buildResult = Result.SUCCESS;
+            } else {
+                buildResult = build.getResult();
+            }
             // Process harbormaster for non-differential builds
             Task.Result result = new NonDifferentialHarbormasterTask(
                     logger,
                     phid,
                     conduitClient,
-                    build.getResult(),
+                    buildResult,
                     buildUrl
             ).run();
             if (result == Task.Result.SUCCESS) {

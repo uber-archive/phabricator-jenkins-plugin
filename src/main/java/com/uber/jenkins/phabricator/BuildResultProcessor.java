@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber
+// Copyright (c) 2018 Uber
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ public class BuildResultProcessor {
         this.workspace = workspace;
 
         this.commentAction = "none";
-        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
+        this.commenter = new CommentBuilder(logger, coverageResult, buildUrl, preserveFormatting,
                 coverageCheckSettings);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
@@ -123,7 +123,7 @@ public class BuildResultProcessor {
      * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
      */
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure) {
-        commenter.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure, runHarbormaster);
+        commenter.processBuildResult(getBuildResult(), commentOnSuccess, commentWithConsoleLinkOnFailure, runHarbormaster);
     }
 
     /**

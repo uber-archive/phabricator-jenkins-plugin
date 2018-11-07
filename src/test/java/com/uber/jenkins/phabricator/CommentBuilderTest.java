@@ -1,4 +1,4 @@
-// Copyright (c) 2015 Uber Technologies, Inc.
+// Copyright (c) 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ public class CommentBuilderTest {
 
     @Before
     public void setUp() {
-        commenter = createCommenter(Result.SUCCESS, TestUtils.getDefaultCodeCoverageMetrics());
+        commenter = createCommenter(TestUtils.getDefaultCodeCoverageMetrics());
     }
 
     @Test
@@ -55,13 +55,13 @@ public class CommentBuilderTest {
 
     @Test
     public void testHasNoCoverageAvailable() {
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, null);
+        CommentBuilder commenter = createCommenter(null);
         assertFalse(commenter.hasCoverageAvailable());
     }
 
     @Test
     public void testHasNoLineCoverage() {
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, TestUtils.getEmptyCoverageMetrics());
+        CommentBuilder commenter = createCommenter(TestUtils.getEmptyCoverageMetrics());
         assertFalse(commenter.hasCoverageAvailable());
     }
 
@@ -105,7 +105,7 @@ public class CommentBuilderTest {
     @Test
     public void testProcessWithDecreaseFailingTheBuild() {
         CodeCoverageMetrics fiftyPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f, 50, 100);
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, fiftyPercentDrop, false, -10.0f);
+        CommentBuilder commenter = createCommenter(fiftyPercentDrop, false, -10.0f);
         boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
                 TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
@@ -119,7 +119,7 @@ public class CommentBuilderTest {
     @Test
     public void testProcessWithDecreaseNotFailingTheBuild() {
         CodeCoverageMetrics fivePercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 95.0f, 95, 100);
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, fivePercentDrop, false, -10.0f);
+        CommentBuilder commenter = createCommenter(fivePercentDrop, false, -10.0f);
         boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
                 TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
@@ -133,7 +133,7 @@ public class CommentBuilderTest {
     @Test
     public void testProcessWithDecreaseButHigherThanMinNotFailingTheBuild() {
         CodeCoverageMetrics fifteenPercentDrop = TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 85.0f, 85, 100);
-        CommentBuilder commenter = createCommenter(Result.SUCCESS, fifteenPercentDrop, false, -10.0f, 80.0f);
+        CommentBuilder commenter = createCommenter(fifteenPercentDrop, false, -10.0f, 80.0f);
         boolean passCoverage = commenter.processParentCoverage(TestUtils.getDefaultCodeCoverageMetrics(),
                 TestUtils.TEST_SHA, FAKE_BRANCH_NAME);
         String comment = commenter.getComment();
@@ -148,7 +148,6 @@ public class CommentBuilderTest {
     public void testProcessWithoutCoverageCheckSettings() {
         CommentBuilder commenter = new CommentBuilder(
                 logger,
-                Result.SUCCESS,
                 TestUtils.getCoverageResult(100.0f, 100.0f, 100.0f, 100.0f, 50.0f, 50, 100), // 50% drop
                 FAKE_BUILD_URL,
                 false,
@@ -167,7 +166,7 @@ public class CommentBuilderTest {
 
     @Test
     public void testProcessBuildResultSuccess() {
-        commenter.processBuildResult(false, false, true);
+        commenter.processBuildResult(Result.SUCCESS, false, false, true);
         assertTrue(
                 "no message expected for successful builds unless asked for",
                 commenter.getComment().length() == 0
@@ -176,42 +175,42 @@ public class CommentBuilderTest {
 
     @Test
     public void testProcessBuildResultSuccessWithComment() {
-        commenter.processBuildResult(true, false, false);
+        commenter.processBuildResult(Result.SUCCESS, true, false, false);
         assertEquals("Build is green", commenter.getComment());
     }
 
     @Test
     public void testProcessBuildResultUnstable() {
-        CommentBuilder commenter = createCommenter(Result.UNSTABLE, null);
-        commenter.processBuildResult(true, false, false);
+        CommentBuilder commenter = createCommenter(null);
+        commenter.processBuildResult(Result.UNSTABLE, true, false, false);
         assertEquals("Build is unstable", commenter.getComment());
     }
 
     @Test
     public void testProcessBuildResultUnknownStatus() {
-        CommentBuilder commenter = createCommenter(Result.NOT_BUILT, null);
-        commenter.processBuildResult(true, false, false);
+        CommentBuilder commenter = createCommenter(null);
+        commenter.processBuildResult(Result.NOT_BUILT, true, false, false);
         assertFalse(commenter.hasComment());
     }
 
     @Test
     public void testProcessBuildResultWithFailureMessage() {
-        CommentBuilder commenter = createCommenter(Result.FAILURE, null);
-        commenter.processBuildResult(false, true, false);
+        CommentBuilder commenter = createCommenter(null);
+        commenter.processBuildResult(Result.FAILURE, false, true, false);
         assertEquals("Build has FAILED", commenter.getComment());
     }
 
     @Test
     public void testProcessBuildResultWithoutFailureMessage() {
-        CommentBuilder commenter = createCommenter(Result.FAILURE, null);
-        commenter.processBuildResult(false, false, true);
+        CommentBuilder commenter = createCommenter(null);
+        commenter.processBuildResult(Result.FAILURE, false, false, true);
         assertEquals(0, commenter.getComment().length());
     }
 
     @Test
     public void testProcessBuildResultAborted() {
-        CommentBuilder commenter = createCommenter(Result.ABORTED, null);
-        commenter.processBuildResult(false, false, false);
+        CommentBuilder commenter = createCommenter(null);
+        commenter.processBuildResult(Result.ABORTED, false, false, false);
         assertEquals("Build was aborted", commenter.getComment());
     }
 
@@ -223,14 +222,14 @@ public class CommentBuilderTest {
 
     @Test
     public void testAddUserCommentWithPreservingFormatting() {
-        commenter = createCommenter(Result.SUCCESS, TestUtils.getDefaultCodeCoverageMetrics(), true);
+        commenter = createCommenter(TestUtils.getDefaultCodeCoverageMetrics(), true);
         commenter.addUserComment("hello, world");
         assertEquals("hello, world\n", commenter.getComment());
     }
 
     @Test
     public void testAddUserCommentWithStatus() {
-        commenter.processBuildResult(false, false, false);
+        commenter.processBuildResult(Result.SUCCESS, false, false, false);
         commenter.addUserComment("hello, world");
         assertEquals("Build is green\n\n```\nhello, world\n```\n\n", commenter.getComment());
     }
@@ -257,24 +256,24 @@ public class CommentBuilderTest {
         assertTrue(comment.contains("Link to build"));
     }
 
-    private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage) {
-        return createCommenter(result, coverage, false);
+    private CommentBuilder createCommenter(CodeCoverageMetrics coverage) {
+        return createCommenter(coverage, false);
     }
 
-    private CommentBuilder createCommenter(Result result, CodeCoverageMetrics coverage, boolean preserveFormatting) {
-        return createCommenter(result, coverage, preserveFormatting, 0.0);
+    private CommentBuilder createCommenter(CodeCoverageMetrics coverage, boolean preserveFormatting) {
+        return createCommenter(coverage, preserveFormatting, 0.0);
     }
 
     private CommentBuilder createCommenter(
-            Result result, CodeCoverageMetrics coverage, boolean preserveFormatting,
+            CodeCoverageMetrics coverage, boolean preserveFormatting,
             double maxCoverageDecreaseInPercent) {
-        return createCommenter(result, coverage, preserveFormatting, maxCoverageDecreaseInPercent, 100.0);
+        return createCommenter(coverage, preserveFormatting, maxCoverageDecreaseInPercent, 100.0);
     }
 
     private CommentBuilder createCommenter(
-            Result result, CodeCoverageMetrics coverage, boolean preserveFormatting,
+            CodeCoverageMetrics coverage, boolean preserveFormatting,
             double maxCoverageDecreaseInPercent, double minCoverageInPercent) {
-        return new CommentBuilder(logger, result, coverage, FAKE_BUILD_URL, preserveFormatting,
+        return new CommentBuilder(logger, coverage, FAKE_BUILD_URL, preserveFormatting,
                 new CoverageCheckSettings(true, maxCoverageDecreaseInPercent, minCoverageInPercent));
     }
 }
