@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.coverage;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -39,6 +40,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -58,6 +60,7 @@ public class XmlCoverageProvider extends CoverageProvider {
         super(includeFiles);
         this.coverageReports = coverageReports;
         this.xmlCoverageHandlers = Arrays.asList(new CoberturaXmlCoverageHandler(),
+                new CloverXmlCoverageHandler(),
                 new JacocoXmlCoverageHandler());
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -181,7 +184,19 @@ public class XmlCoverageProvider extends CoverageProvider {
 
         @Override
         boolean isApplicable(Document document) {
-            return document.getDocumentElement().getTagName().equals("coverage");
+            Element documentElement = document.getDocumentElement();
+            if(!documentElement.getTagName().equals("coverage")) {
+                return false;
+            }
+
+            NodeList children = documentElement.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                if (children.item(i).getNodeName().equals("packages")) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         @Override
@@ -384,6 +399,156 @@ public class XmlCoverageProvider extends CoverageProvider {
                     default:
                         break;
                 }
+            }
+        }
+    }
+
+    private static class CloverXmlCoverageHandler extends XmlCoverageHandler {
+
+        @Override
+        boolean isApplicable(Document document) {
+            Element documentElement = document.getDocumentElement();
+            if(!documentElement.getTagName().equals("coverage")) {
+                return false;
+            }
+
+            NodeList children = documentElement.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                if (children.item(i).getNodeName().equals("project")) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        void parseCoverage(
+                Document document, Set<String> includeFiles,
+                CoverageCounters cc,
+                Map<String, List<Integer>> lineCoverage) {
+            Map<String, SortedMap<Integer, Integer>> internalCounts = new HashMap<String, SortedMap<Integer, Integer>>();
+            NodeList packages = document.getElementsByTagName("package");
+
+            // Compute line coverage
+            for (int i = 0; i < packages.getLength(); i++) {
+                Node packageNode = packages.item(i);
+                NodeList fileNodes = packageNode.getChildNodes();
+                for (int j = 0; j < fileNodes.getLength(); j++) {
+                    Node fileNode = fileNodes.item(j);
+                    if(!fileNode.hasAttributes()) {
+                        continue;
+                    }
+
+                    String fileName = fileNode.getAttributes().getNamedItem("name").getTextContent();
+                    String finalFileName = getRelativePathFromProjectRoot(includeFiles, fileName);
+                    if (finalFileName != null) {
+                        SortedMap<Integer, Integer> hitCounts = internalCounts.computeIfAbsent(
+                                finalFileName, it -> new TreeMap<>());
+                        NodeList coverage = fileNode.getChildNodes();
+                        for (int k = 0; k < coverage.getLength(); k++) {
+                            Node coverageNode = coverage.item(k);
+                            if (coverageNode != null && "line".equals(coverageNode.getNodeName())) {
+                                NamedNodeMap attrs = coverageNode.getAttributes();
+                                if ("stmt".equals(attrs.getNamedItem("type").getTextContent())) {
+                                    long hitCount = getIntValue(attrs, "count");
+                                    int lineNumber = getIntValue(attrs, "num");
+                                    hitCounts.put(lineNumber, hitCount > 0 ? 1 : 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            computeLineCoverage(internalCounts, lineCoverage);
+
+            // Update Counters
+            for (int i = 0; i < packages.getLength(); i++) {
+                Node packageNode = packages.item(i);
+                NodeList packageChildren = packageNode.getChildNodes();
+                boolean packageCovered = false;
+                for( int j = 0; j < packageChildren.getLength(); j++) {
+                    Node fileNode = packageChildren.item(j);
+                    if(!fileNode.getNodeName().equals("file")) {
+                        continue;
+                    }
+
+                    NodeList fileChildren = fileNode.getChildNodes();
+                    boolean fileCovered = false;
+                    for (int k = 0; k < fileChildren.getLength(); k++) {
+                        Node fileChild = fileChildren.item(k);
+
+                        if (fileChild.getNodeName().equals("line")) {
+                            Node lineChild = fileChild;
+                            NamedNodeMap lineAttributes = lineChild.getAttributes();
+                            String typeAttributeText = lineAttributes.getNamedItem("type").getTextContent();
+                            if(typeAttributeText.equals("stmt")) {
+                                int lineHits = getIntValue(lineAttributes, "count");
+                                if (lineHits > 0) {
+                                    fileCovered = true;
+                                    cc.line.covered += 1;
+                                } else {
+                                    cc.line.missed += 1;
+                                }
+                            } else if(typeAttributeText.equals("method")) {
+                                int methodHits = getIntValue(lineAttributes, "count");
+                                if (methodHits > 0) {
+                                    fileCovered = true;
+                                    cc.method.covered += 1;
+                                } else {
+                                    cc.method.missed += 1;
+                                }
+                            }
+                        }
+
+                        if (fileChild.getNodeName().equals("class")) {
+                            Node classNode = fileChild;
+                            NodeList classChildren = classNode.getChildNodes();
+                            for( int l = 0; l < classChildren.getLength(); l++ ) {
+                                Node metricNode = classChildren.item(l);
+                                if(metricNode.getNodeName().equals("metrics")) {
+                                    Integer coveredstatements = getIntValue(metricNode.getAttributes(), "coveredstatements");
+                                    if(coveredstatements > 0) {
+                                        fileCovered = true;
+                                        cc.cls.covered += 1;
+                                    } else {
+                                        cc.cls.missed += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(fileCovered) {
+                        packageCovered = true;
+                        cc.file.covered += 1;
+                    } else {
+                        cc.file.missed += 1;
+                    }
+                }
+                if (packageCovered) {
+                    cc.pkg.covered += 1;
+                } else {
+                    cc.pkg.missed += 1;
+                }
+            }
+        }
+
+        /**
+         * The coverage file is an absolute path, but the include files are relative paths. But the coverage file might
+         * have been generated on a different node, where the directory structure differs. So we try to match the
+         * coverageFile to the includeFile that seems the most related
+         */
+        @Nullable
+        private static String getRelativePathFromProjectRoot(Set<String> includeFiles, String coverageFile) {
+            if (includeFiles == null || includeFiles.isEmpty()) {
+                return coverageFile;
+            } else {
+                for (String includedFile : includeFiles) {
+                    if(coverageFile.contains(includedFile)) {
+                        return includedFile;
+                    }
+                }
+                return null;
             }
         }
     }

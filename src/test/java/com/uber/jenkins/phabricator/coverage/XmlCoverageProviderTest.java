@@ -20,6 +20,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -62,6 +63,34 @@ public class XmlCoverageProviderTest {
         assertEquals(0, coverage.get("com/uber/nullaway/jarinfer/StubxWriter.java").get(73).longValue());
         assertEquals(new CodeCoverageMetrics(100.0f, 100.0f, 100.f, 92.59259f, 90.10989f, 69.09091f, 328, 364),
                 provider.getMetrics());
+    }
+
+    @Test
+    public void cloverPhpunit() {
+        CoverageProvider provider = new XmlCoverageProvider(getResources("clover-phpunit-coverage.xml"));
+
+        assertTrue(provider.hasCoverage());
+
+        Map<String, List<Integer>> lineCoverage = provider.getLineCoverage();
+        String expectedKey = "/home/ubuntu/example-php/src/Example/Example.php";
+
+        assertNull(lineCoverage.get(expectedKey).get(4));
+        assertEquals(1, lineCoverage.get(expectedKey).get(6).longValue());
+        assertEquals(0, lineCoverage.get(expectedKey).get(7).longValue());
+        assertEquals(1, lineCoverage.get(expectedKey).get(10).longValue());
+        assertEquals(new CodeCoverageMetrics(100.0f, 100.0f, 100.f, 100.0f, 66.66667f, 100.0f, 2, 3),
+                provider.getMetrics());
+    }
+
+    @Test public void cloverWithIncludeFiles() {
+        CoverageProvider provider = new XmlCoverageProvider(getResources("clover-phpunit-coverage.xml"),
+                Collections.singleton("src/Example/Example.php"));
+
+        assertTrue(provider.hasCoverage());
+
+        Map<String, List<Integer>> lineCoverage = provider.getLineCoverage();
+        List<Integer> exampleCoverage = lineCoverage.get("src/Example/Example.php");
+        assertNotNull(exampleCoverage);
     }
 
     @Test
