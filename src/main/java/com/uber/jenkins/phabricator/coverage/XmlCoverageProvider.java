@@ -185,7 +185,7 @@ public class XmlCoverageProvider extends CoverageProvider {
         @Override
         boolean isApplicable(Document document) {
             Element documentElement = document.getDocumentElement();
-            if(!documentElement.getTagName().equals("coverage")) {
+            if (!documentElement.getTagName().equals("coverage")) {
                 return false;
             }
 
@@ -408,7 +408,7 @@ public class XmlCoverageProvider extends CoverageProvider {
         @Override
         boolean isApplicable(Document document) {
             Element documentElement = document.getDocumentElement();
-            if(!documentElement.getTagName().equals("coverage")) {
+            if (!documentElement.getTagName().equals("coverage")) {
                 return false;
             }
 
@@ -436,7 +436,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                 NodeList fileNodes = packageNode.getChildNodes();
                 for (int j = 0; j < fileNodes.getLength(); j++) {
                     Node fileNode = fileNodes.item(j);
-                    if(!fileNode.hasAttributes()) {
+                    if (!fileNode.hasAttributes()) {
                         continue;
                     }
 
@@ -467,9 +467,9 @@ public class XmlCoverageProvider extends CoverageProvider {
                 Node packageNode = packages.item(i);
                 NodeList packageChildren = packageNode.getChildNodes();
                 boolean packageCovered = false;
-                for( int j = 0; j < packageChildren.getLength(); j++) {
+                for (int j = 0; j < packageChildren.getLength(); j++) {
                     Node fileNode = packageChildren.item(j);
-                    if(!fileNode.getNodeName().equals("file")) {
+                    if (!fileNode.getNodeName().equals("file")) {
                         continue;
                     }
 
@@ -482,7 +482,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                             Node lineChild = fileChild;
                             NamedNodeMap lineAttributes = lineChild.getAttributes();
                             String typeAttributeText = lineAttributes.getNamedItem("type").getTextContent();
-                            if(typeAttributeText.equals("stmt")) {
+                            if (typeAttributeText.equals("stmt")) {
                                 int lineHits = getIntValue(lineAttributes, "count");
                                 if (lineHits > 0) {
                                     fileCovered = true;
@@ -490,7 +490,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                                 } else {
                                     cc.line.missed += 1;
                                 }
-                            } else if(typeAttributeText.equals("method")) {
+                            } else if (typeAttributeText.equals("method")) {
                                 int methodHits = getIntValue(lineAttributes, "count");
                                 if (methodHits > 0) {
                                     fileCovered = true;
@@ -504,11 +504,11 @@ public class XmlCoverageProvider extends CoverageProvider {
                         if (fileChild.getNodeName().equals("class")) {
                             Node classNode = fileChild;
                             NodeList classChildren = classNode.getChildNodes();
-                            for( int l = 0; l < classChildren.getLength(); l++ ) {
+                            for (int l = 0; l < classChildren.getLength(); l++) {
                                 Node metricNode = classChildren.item(l);
-                                if(metricNode.getNodeName().equals("metrics")) {
+                                if (metricNode.getNodeName().equals("metrics")) {
                                     Integer coveredstatements = getIntValue(metricNode.getAttributes(), "coveredstatements");
-                                    if(coveredstatements > 0) {
+                                    if (coveredstatements > 0) {
                                         fileCovered = true;
                                         cc.cls.covered += 1;
                                     } else {
@@ -518,7 +518,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                             }
                         }
                     }
-                    if(fileCovered) {
+                    if (fileCovered) {
                         packageCovered = true;
                         cc.file.covered += 1;
                     } else {
@@ -544,7 +544,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                 return coverageFile;
             } else {
                 for (String includedFile : includeFiles) {
-                    if(coverageFile.contains(includedFile)) {
+                    if (coverageFile.contains(includedFile)) {
                         return includedFile;
                     }
                 }
