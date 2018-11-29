@@ -35,40 +35,55 @@ public class ApplyPatchTaskTest {
 
     @Test
     public void testApplyPatchWithValidArc() throws Exception {
-        ApplyPatchTask task = getTask("echo", "true");
-        Task.Result result = task.run();
+        ApplyPatchTask task;
+        Task.Result result;
+
+        task = getTask("echo", "git", "true");
+        result = task.run();
+        assertEquals(Task.Result.SUCCESS, result);
+
+        task = getTask("echo", "hg", "true");
+        result = task.run();
         assertEquals(Task.Result.SUCCESS, result);
     }
 
     @Test
     public void testApplyPatchForSvnWithValidArc() throws Exception {
-        ApplyPatchTask task = new ApplyPatchTask(
-                TestUtils.getDefaultLogger(),
-                TestUtils.createLauncherFactory(j),
-                TestUtils.TEST_SHA,
-                TestUtils.TEST_DIFFERENTIAL_ID,
-                TestUtils.TEST_CONDUIT_URL,
-                TestUtils.TEST_CONDUIT_TOKEN,
-                "echo", "true", false, false, false, false, "svn");
+        ApplyPatchTask task = getTask("echo", "svn", "true");
         Task.Result result = task.run();
         assertEquals(Task.Result.SUCCESS, result);
     }
 
     @Test
     public void testApplyPatchWithInvalidArc() throws Exception {
-        ApplyPatchTask task = getTask("false", "echo");
-        Task.Result result = task.run();
+        ApplyPatchTask task;
+        Task.Result result;
+
+        task = getTask("false", "git", "echo");
+        result = task.run();
+        assertEquals(Task.Result.FAILURE, result);
+
+        task = getTask("false", "hg", "echo");
+        result = task.run();
         assertEquals(Task.Result.FAILURE, result);
     }
 
     @Test
     public void testBothGitAndArcFailing() throws Exception {
-        ApplyPatchTask task = getTask("false", "false");
-        assertEquals(Task.Result.FAILURE, task.run());
+        ApplyPatchTask task;
+        Task.Result result;
+
+        task = getTask("false", "git", "false");
+        result = task.run();
+        assertEquals(Task.Result.FAILURE, result);
+
+        task = getTask("false", "hg", "false");
+        result = task.run();
+        assertEquals(Task.Result.FAILURE, result);
     }
 
-    private ApplyPatchTask getTask(String arcPath, String gitPath) throws Exception {
-        return new ApplyPatchTask(
+    private ApplyPatchTask getTask(String arcPath, String scmType, String scmPath) throws Exception {
+        final ApplyPatchTask task = new ApplyPatchTask(
                 TestUtils.getDefaultLogger(),
                 TestUtils.createLauncherFactory(j),
                 TestUtils.TEST_SHA,
@@ -76,12 +91,24 @@ public class ApplyPatchTaskTest {
                 TestUtils.TEST_CONDUIT_URL,
                 TestUtils.TEST_CONDUIT_TOKEN,
                 arcPath,
-                gitPath, // git path
                 false, // createCommit
                 false, // skipForcedClean
                 false, // createBranch
                 false,  // patchWithForceFlag
-                "git" // scmType
+                scmType
         );
+        switch (scmType) {
+            case "git":
+                task.setGitPath(scmPath);
+                break;
+            case "hg":
+                task.setHgPath(scmPath);
+                break;
+            case "svn":
+            default:
+                break; // do nothing
+        }
+
+        return task;
     }
 }

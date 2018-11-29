@@ -2,22 +2,23 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
   <f:entry title="SCM type" field="scmType" description="SCM used in this job">
           <f:radio name="scmType" title="git" value="git" checked="${instance.scmType == 'git' || instance.scmType == null}" />
+          <f:radio name="scmType" title="hg" value="hg" checked="${instance.scmType == 'hg'}" />
           <f:radio name="scmType" title="svn" value="svn" checked="${instance.scmType == 'svn'}" />
   </f:entry>
-  <f:entry title="Create git commit" field="createCommit"
-           description="Create a git commit with the patch">
+  <f:entry title="Create commit" field="createCommit"
+           description="Create a commit with the patch. Supports: git, hg">
       <f:checkbox />
   </f:entry>
   <f:entry title="Apply patch to master" field="applyToMaster"
            description="If true, always arc patch apply to master">
       <f:checkbox />
   </f:entry>
-  <f:entry title="Skip Forced Git clean" field="skipForcedClean"
-           description="Skip 'git clean -fd -f' step.">
+  <f:entry title="Skip forced clean" field="skipForcedClean"
+           description="Skip repository clean step. Git: 'git clean -fd -f', hg: 'hg purge --dirs --files'">
       <f:checkbox default="false" />
   </f:entry>
-  <f:entry title="Create git branch" field="createBranch"
-           description="Create a git branch with the patch">
+  <f:entry title="Create branch" field="createBranch"
+           description="Create a branch with the patch. Supports: git, hg">
       <f:checkbox />
   </f:entry>
   <f:entry title="Run 'arc patch' with '--force'" field="patchWithForceFlag"
