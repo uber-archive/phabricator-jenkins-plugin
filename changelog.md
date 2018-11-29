@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.0.3 (Unreleased)
+### 2.0.4 (Unreleased)
+
+### 2.0.3
+
+* Fix cobertura line coverage metric and use unique name for copied coverage reports
 
 ### 2.0.2
 
