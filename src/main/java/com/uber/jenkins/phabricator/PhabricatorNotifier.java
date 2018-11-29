@@ -72,6 +72,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     private static final String UBERALLS_TAG = "uberalls";
     private static final String COVERAGE_TAG = "coverage";
     private static final String CONDUIT_TAG = "conduit";
+    private static final String PHABRICATOR_COVERAGE = "phabricator-coverage";
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -354,7 +355,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             try {
                 int i = 0;
                 for (FilePath report : moduleRoot.list(finalCoverageReportPattern)) {
-                    final FilePath targetPath = new FilePath(buildTarget, "coverage" + (i == 0 ? "" : i) + ".xml");
+                    final FilePath targetPath = new FilePath(buildTarget, PHABRICATOR_COVERAGE + (i == 0 ? "" : i) + ".xml");
                     report.copyTo(targetPath);
                     i++;
                 }
@@ -484,7 +485,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
         @Override
         public boolean accept(File dir, String name) {
-            return name.startsWith("coverage") && name.endsWith("xml");
+            return name.startsWith(PHABRICATOR_COVERAGE) && name.endsWith("xml");
         }
     }
 }
