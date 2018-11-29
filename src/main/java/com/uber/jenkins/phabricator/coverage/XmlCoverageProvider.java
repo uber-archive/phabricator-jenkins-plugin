@@ -225,7 +225,14 @@ public class XmlCoverageProvider extends CoverageProvider {
 
                             NamedNodeMap attrs = line.getAttributes();
                             Integer lineNumber = getIntValue(attrs, NODE_NUMBER);
-                            hitCounts.put(lineNumber, getIntValue(attrs, NODE_HITS));
+                            int hits = getIntValue(attrs, NODE_HITS);
+                            hitCounts.put(lineNumber, hits);
+
+                            if (hits > 0) {
+                                cc.line.covered += 1;
+                            } else {
+                                cc.line.missed += 1;
+                            }
                         }
                     }
                 }
@@ -253,6 +260,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                     if (!classNode.getNodeName().equals("class")) {
                         continue;
                     }
+
                     NodeList methods = getChildrenWithMatchingTag(classNode, "methods");
                     boolean classCovered = false;
                     for (int k = 0; k < methods.getLength(); k++) {
@@ -269,10 +277,8 @@ public class XmlCoverageProvider extends CoverageProvider {
                             }
                             int hits = getIntValue(lineNode.getAttributes(), "hits");
                             if (hits > 0) {
-                                cc.line.covered += 1;
                                 methodCovered = true;
-                            } else {
-                                cc.line.missed += 1;
+                                break;
                             }
                         }
                         if (methodCovered) {
