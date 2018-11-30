@@ -90,8 +90,8 @@ public class XmlCoverageProvider extends CoverageProvider {
                 cc.file.getPercent(),
                 cc.cls.getPercent(),
                 cc.method.getPercent(),
-                cc.lineCoveragePercentOverride != null ? cc.lineCoveragePercentOverride : cc.line.getPercent(),
-                cc.branchCoveragePercentOverride != null ? cc.branchCoveragePercentOverride : cc.branch.getPercent(),
+                Math.max(cc.lineCoveragePercentOverride, cc.line.getPercent()),
+                Math.max(cc.branchCoveragePercentOverride, cc.branch.getPercent()),
                 cc.line.covered,
                 cc.line.covered + cc.line.missed
         );
@@ -253,7 +253,6 @@ public class XmlCoverageProvider extends CoverageProvider {
                 cc.line.covered = linesCovered;
                 cc.line.missed = linesValid - linesCovered;
             } else if (attrs.getNamedItem("line-rate") != null) {
-                hasLineCoverageInfo = true;
                 cc.lineCoveragePercentOverride = getFloatValue(attrs, "line-rate") * 100;
             }
 
@@ -444,8 +443,8 @@ public class XmlCoverageProvider extends CoverageProvider {
 
     private static class CoverageCounters {
 
-        Float lineCoveragePercentOverride = null;
-        Float branchCoveragePercentOverride = null;
+        Float lineCoveragePercentOverride = 0.0f;
+        Float branchCoveragePercentOverride = 0.0f;
         private final CoverageCounter pkg = new CoverageCounter();
         private final CoverageCounter cls = new CoverageCounter();
         private final CoverageCounter method = new CoverageCounter();
