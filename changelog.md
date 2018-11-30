@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.0.4 (Unreleased)
+### 2.0.5 (Unreleased)
+
+### 2.0.4
+
+* Fix line coverage info to be more accurate
 
 ### 2.0.3
 
