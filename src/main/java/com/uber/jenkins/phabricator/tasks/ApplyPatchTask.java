@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.tasks;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -87,6 +88,7 @@ public class ApplyPatchTask extends Task {
     /**
      * Allows to override default exeturable path used for git
      */
+    @VisibleForTesting
     void setGitPath(String gitPath) {
         this.gitPath = gitPath;
     }
@@ -94,6 +96,7 @@ public class ApplyPatchTask extends Task {
     /**
      * Allows to override default exeturable path used for git
      */
+    @VisibleForTesting
     void setHgPath(String hgPath) {
         this.hgPath = hgPath;
     }
@@ -164,7 +167,6 @@ public class ApplyPatchTask extends Task {
         return exitCode;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     private void prepareRepositoryState() throws InterruptedException, IOException {
         List<String> resetToBaseCommit = Collections.emptyList();
         List<String> cleanWorkingDir = Collections.emptyList();
