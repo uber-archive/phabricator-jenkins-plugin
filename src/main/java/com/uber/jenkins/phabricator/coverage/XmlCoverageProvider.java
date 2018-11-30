@@ -90,8 +90,8 @@ public class XmlCoverageProvider extends CoverageProvider {
                 cc.file.getPercent(),
                 cc.cls.getPercent(),
                 cc.method.getPercent(),
-                cc.line.getPercent(),
-                cc.branch.getPercent(),
+                cc.lineCoveragePercentOverride != null ? cc.lineCoveragePercentOverride : cc.line.getPercent(),
+                cc.branchCoveragePercentOverride != null ? cc.branchCoveragePercentOverride : cc.branch.getPercent(),
                 cc.line.covered,
                 cc.line.covered + cc.line.missed
         );
@@ -125,6 +125,15 @@ public class XmlCoverageProvider extends CoverageProvider {
         String content = attrs.getNamedItem(attr).getTextContent();
         try {
             return Math.round(Float.valueOf(content));
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(content + " is not a valid coverage number", e);
+        }
+    }
+
+    private static Float getFloatValue(NamedNodeMap attrs, String attr) {
+        String content = attrs.getNamedItem(attr).getTextContent();
+        try {
+            return Float.valueOf(content);
         } catch (NumberFormatException e) {
             throw new IllegalStateException(content + " is not a valid coverage number", e);
         }
@@ -225,14 +234,7 @@ public class XmlCoverageProvider extends CoverageProvider {
 
                             NamedNodeMap attrs = line.getAttributes();
                             Integer lineNumber = getIntValue(attrs, NODE_NUMBER);
-                            int hits = getIntValue(attrs, NODE_HITS);
-                            hitCounts.put(lineNumber, hits);
-
-                            if (hits > 0) {
-                                cc.line.covered += 1;
-                            } else {
-                                cc.line.missed += 1;
-                            }
+                            hitCounts.put(lineNumber, getIntValue(attrs, NODE_HITS));
                         }
                     }
                 }
@@ -242,12 +244,26 @@ public class XmlCoverageProvider extends CoverageProvider {
             // Update Counters
             Node root = document.getDocumentElement();
             NamedNodeMap attrs = root.getAttributes();
-            // Branch coverage is only supported for cobertura coverage-04.dtd format
+            // Check if cobertura coverage-04.dtd format
+            boolean hasLineCoverageInfo = false;
+            if (attrs.getNamedItem("lines-covered") != null) {
+                hasLineCoverageInfo = true;
+                long linesCovered = getLongValue(attrs, "lines-covered");
+                long linesValid = getLongValue(attrs, "lines-valid");
+                cc.line.covered = linesCovered;
+                cc.line.missed = linesValid - linesCovered;
+            } else if (attrs.getNamedItem("line-rate") != null) {
+                hasLineCoverageInfo = true;
+                cc.lineCoveragePercentOverride = getFloatValue(attrs, "line-rate") * 100;
+            }
+
             if (attrs.getNamedItem("branches-covered") != null) {
                 long branchesCovered = getLongValue(attrs, "branches-covered");
                 long branchesValid = getLongValue(attrs, "branches-valid");
                 cc.branch.covered = branchesCovered;
                 cc.branch.missed = branchesValid - branchesCovered;
+            } else if (attrs.getNamedItem("branch-rate") != null) {
+                cc.branchCoveragePercentOverride = getFloatValue(attrs, "branch-rate") * 100;
             }
 
             NodeList packages = document.getElementsByTagName("package");
@@ -261,6 +277,22 @@ public class XmlCoverageProvider extends CoverageProvider {
                         continue;
                     }
 
+                    if (!hasLineCoverageInfo) {
+                        NodeList classLines = getChildrenWithMatchingTag(classNode, "lines");
+                        for (int l = 0; l < classLines.getLength(); l++) {
+                            Node lineNode = classLines.item(l);
+                            if (!lineNode.getNodeName().equals("line")) {
+                                continue;
+                            }
+                            int hits = getIntValue(lineNode.getAttributes(), "hits");
+                            if (hits > 0) {
+                                cc.line.covered += 1;
+                            } else {
+                                cc.line.missed += 1;
+                            }
+                        }
+                    }
+
                     NodeList methods = getChildrenWithMatchingTag(classNode, "methods");
                     boolean classCovered = false;
                     for (int k = 0; k < methods.getLength(); k++) {
@@ -268,6 +300,7 @@ public class XmlCoverageProvider extends CoverageProvider {
                         if (!methodNode.getNodeName().equals("method")) {
                             continue;
                         }
+
                         NodeList lines = getChildrenWithMatchingTag(methodNode, "lines");
                         boolean methodCovered = false;
                         for (int l = 0; l < lines.getLength(); l++) {
@@ -411,6 +444,8 @@ public class XmlCoverageProvider extends CoverageProvider {
 
     private static class CoverageCounters {
 
+        Float lineCoveragePercentOverride = null;
+        Float branchCoveragePercentOverride = null;
         private final CoverageCounter pkg = new CoverageCounter();
         private final CoverageCounter cls = new CoverageCounter();
         private final CoverageCounter method = new CoverageCounter();
