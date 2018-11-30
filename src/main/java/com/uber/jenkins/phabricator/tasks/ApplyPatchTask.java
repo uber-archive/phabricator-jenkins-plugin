@@ -86,7 +86,7 @@ public class ApplyPatchTask extends Task {
     }
 
     /**
-     * Allows to override default exeturable path used for git
+     * Allows to override default executable path used for git
      */
     @VisibleForTesting
     void setGitPath(String gitPath) {
@@ -94,7 +94,7 @@ public class ApplyPatchTask extends Task {
     }
 
     /**
-     * Allows to override default exeturable path used for git
+     * Allows to override default executable path used for git
      */
     @VisibleForTesting
     void setHgPath(String hgPath) {
