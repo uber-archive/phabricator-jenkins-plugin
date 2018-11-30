@@ -90,8 +90,8 @@ public class XmlCoverageProvider extends CoverageProvider {
                 cc.file.getPercent(),
                 cc.cls.getPercent(),
                 cc.method.getPercent(),
-                cc.line.getPercent(),
-                cc.branch.getPercent(),
+                cc.lineCoveragePercentOverride != null ? cc.lineCoveragePercentOverride : cc.line.getPercent(),
+                cc.branchCoveragePercentOverride != null ? cc.branchCoveragePercentOverride : cc.branch.getPercent(),
                 cc.line.covered,
                 cc.line.covered + cc.line.missed
         );
@@ -125,6 +125,15 @@ public class XmlCoverageProvider extends CoverageProvider {
         String content = attrs.getNamedItem(attr).getTextContent();
         try {
             return Math.round(Float.valueOf(content));
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(content + " is not a valid coverage number", e);
+        }
+    }
+
+    private static Float getFloatValue(NamedNodeMap attrs, String attr) {
+        String content = attrs.getNamedItem(attr).getTextContent();
+        try {
+            return Float.valueOf(content);
         } catch (NumberFormatException e) {
             throw new IllegalStateException(content + " is not a valid coverage number", e);
         }
@@ -243,6 +252,9 @@ public class XmlCoverageProvider extends CoverageProvider {
                 long linesValid = getLongValue(attrs, "lines-valid");
                 cc.line.covered = linesCovered;
                 cc.line.missed = linesValid - linesCovered;
+            } else if (attrs.getNamedItem("line-rate") != null) {
+                hasLineCoverageInfo = true;
+                cc.lineCoveragePercentOverride = getFloatValue(attrs, "line-rate") * 100;
             }
 
             if (attrs.getNamedItem("branches-covered") != null) {
@@ -250,6 +262,8 @@ public class XmlCoverageProvider extends CoverageProvider {
                 long branchesValid = getLongValue(attrs, "branches-valid");
                 cc.branch.covered = branchesCovered;
                 cc.branch.missed = branchesValid - branchesCovered;
+            } else if (attrs.getNamedItem("branch-rate") != null) {
+                cc.branchCoveragePercentOverride = getFloatValue(attrs, "branch-rate") * 100;
             }
 
             NodeList packages = document.getElementsByTagName("package");
@@ -436,5 +450,7 @@ public class XmlCoverageProvider extends CoverageProvider {
         private final CoverageCounter line = new CoverageCounter();
         private final CoverageCounter branch = new CoverageCounter();
         private final CoverageCounter file = new CoverageCounter();
+        Float lineCoveragePercentOverride = null;
+        Float branchCoveragePercentOverride = null;
     }
 }
