@@ -444,13 +444,13 @@ public class XmlCoverageProvider extends CoverageProvider {
 
     private static class CoverageCounters {
 
+        Float lineCoveragePercentOverride = null;
+        Float branchCoveragePercentOverride = null;
         private final CoverageCounter pkg = new CoverageCounter();
         private final CoverageCounter cls = new CoverageCounter();
         private final CoverageCounter method = new CoverageCounter();
         private final CoverageCounter line = new CoverageCounter();
         private final CoverageCounter branch = new CoverageCounter();
         private final CoverageCounter file = new CoverageCounter();
-        Float lineCoveragePercentOverride = null;
-        Float branchCoveragePercentOverride = null;
     }
 }
