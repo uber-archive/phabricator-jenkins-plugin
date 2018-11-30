@@ -34,7 +34,7 @@
     </f:entry>
     <f:entry title="Coverage report pattern" field="coverageReportPattern"
              description="The coverage xml report pattern. Use this if any jenkins coverage plugins are not applied.">
-      <f:textbox default="**/coverage*.xml, **/cobertura*.xml" />
+      <f:textbox default="**/coverage*.xml, **/cobertura*.xml, **/jacoco*.xml" />
     </f:entry>
   </f:optionalBlock>
 

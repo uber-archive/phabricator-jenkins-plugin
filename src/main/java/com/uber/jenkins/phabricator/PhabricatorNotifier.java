@@ -42,7 +42,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -329,6 +328,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
 
         copyCoverageToJenkinsMaster(build, workspace, listener);
+
         CoverageProvider coverageProvider = new XmlCoverageProvider(getCoverageReports(build), includeFiles);
         coverageProvider.computeCoverageIfNeeded();
         cleanupCoverageFilesOnJenkinsMaster(build);
@@ -336,25 +336,23 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         if (coverageProvider.hasCoverage()) {
             return coverageProvider;
         } else {
-            Logger logger = new Logger(listener.getLogger());
-            logger.info(UBERALLS_TAG, "No coverage results found");
+            new Logger(listener.getLogger()).info(UBERALLS_TAG, "No coverage results found");
             return null;
         }
     }
 
     private void copyCoverageToJenkinsMaster(Run<?, ?> build, FilePath workspace, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
-        final FilePath moduleRoot = workspace;
-        final File buildCoberturaDir = build.getRootDir();
-        FilePath buildTarget = new FilePath(buildCoberturaDir);
+        final File buildDir = build.getRootDir();
+        FilePath buildTarget = new FilePath(buildDir);
 
         String finalCoverageReportPattern = coverageReportPattern != null ? coverageReportPattern :
                 DEFAULT_XML_COVERAGE_REPORT_PATTERN;
 
-        if (moduleRoot != null) {
+        if (workspace != null) {
             try {
                 int i = 0;
-                for (FilePath report : moduleRoot.list(finalCoverageReportPattern)) {
+                for (FilePath report : workspace.list(finalCoverageReportPattern)) {
                     final FilePath targetPath = new FilePath(buildTarget, PHABRICATOR_COVERAGE + (i == 0 ? "" : i) + ".xml");
                     report.copyTo(targetPath);
                     i++;
