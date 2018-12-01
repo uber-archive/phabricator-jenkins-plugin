@@ -88,10 +88,10 @@ Harbormaster
 With Phabricator, Jenkins, and your Jenkins jobs configured it's time to configure a new Harbormaster build plan. This build plan will trigger the Jenkins job using a Herald rule that will be configured in the next section.
 
 1. Navigate to `https://phabricator.example/harbormaster/plan/` with your base Phabricator URL in place of `phabricator.example`.
-2. Click the **New Build Plan** button in the top right corner of the page.
+2. Click the **Create Build Plan** button in the top right corner of the page.
 3. Enter a name for the build plan in the **Plan Name** field. For these instructions, we'll use "test-example" as the build name.
 4. Click the **Create Build Plan** button.
-5. Click the **Add Build Step button**.
+5. Click the **Add Build Step** button.
 6. Click the **Make HTTP Request** step.
 7. Use this template URI to fill in the URI field for the build plan: `https://ci.example.com/buildByToken/buildWithParameters?job=test-example&DIFF_ID=${buildable.diff}&PHID=${target.phid}`
 
