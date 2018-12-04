@@ -339,7 +339,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
         // First check if any coverage plugins are applied. These take precedence over other providers
         // Only one coverage plugin provider is supported per build
-        if(Jenkins.getInstance().getPlugin("cobertura") != null) {
+        if (Jenkins.getInstance().getPlugin("cobertura") != null) {
             CoberturaBuildAction coberturaBuildAction = build.getAction(CoberturaBuildAction.class);
             if (coberturaBuildAction != null) { // Choose only a single coverage provider
                 logger.info(UBERALLS_TAG, "Using coverage metrics from Cobertura Jenkins Plugin");
