@@ -84,6 +84,10 @@ public class XmlCoverageProvider extends CoverageProvider {
         } catch (SAXException | IOException e) {
             e.printStackTrace();
         }
+        computeMetrics();
+    }
+
+    protected void computeMetrics() {
         // Aggregate coverage metrics
         metrics = new CodeCoverageMetrics(
                 cc.pkg.getPercent(),
