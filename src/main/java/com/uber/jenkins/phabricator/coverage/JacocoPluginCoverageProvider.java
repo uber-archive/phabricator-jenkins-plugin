@@ -26,14 +26,11 @@ import hudson.plugins.jacoco.report.CoverageReport;
 
 import java.io.File;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Provide Jacoco coverage data via the Jenkins Jacoco Plugin
  */
 public class JacocoPluginCoverageProvider extends XmlCoverageProvider {
-
-    private static final Logger LOGGER = Logger.getLogger(JacocoPluginCoverageProvider.class.getName());
 
     private final JacocoBuildAction buildAction;
 

@@ -22,7 +22,6 @@ package com.uber.jenkins.phabricator.coverage;
 
 import java.io.File;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import hudson.plugins.cobertura.CoberturaBuildAction;
@@ -34,8 +33,6 @@ import hudson.plugins.cobertura.targets.CoverageResult;
  * Provide Cobertura coverage data via the Jenkins Cobertura Plugin
  */
 public class CoberturaPluginCoverageProvider extends XmlCoverageProvider {
-
-    private static final Logger LOGGER = Logger.getLogger(CoberturaPluginCoverageProvider.class.getName());
 
     private final CoberturaBuildAction buildAction;
 
@@ -68,8 +65,8 @@ public class CoberturaPluginCoverageProvider extends XmlCoverageProvider {
         float methodCoverage = getCoveragePercentage(result, CoverageMetric.METHOD);
         float lineCoverage = getCoveragePercentage(result, CoverageMetric.LINE);
         float conditionalCoverage = getCoveragePercentage(result, CoverageMetric.CONDITIONAL);
-        long linesCovered = (long) result.getCoverage(CoverageMetric.LINE).numerator;
-        long linesTested = (long) result.getCoverage(CoverageMetric.LINE).denominator;
+        long linesCovered = (long) getCoverageRatio(result, CoverageMetric.LINE).numerator;
+        long linesTested = (long) getCoverageRatio(result, CoverageMetric.LINE).denominator;
 
         return new CodeCoverageMetrics(
                 packagesCoverage,
@@ -81,6 +78,14 @@ public class CoberturaPluginCoverageProvider extends XmlCoverageProvider {
                 linesCovered,
                 linesTested
         );
+    }
+
+    private static Ratio getCoverageRatio(CoverageResult result, CoverageMetric metric) {
+        Ratio ratio = result.getCoverage(metric);
+        if (ratio == null) {
+            return Ratio.create(0,0);
+        }
+        return ratio;
     }
 
     private static float getCoveragePercentage(CoverageResult result, CoverageMetric metric) {
