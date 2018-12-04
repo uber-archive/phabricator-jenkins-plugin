@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.uber.jenkins.phabricator.LauncherFactory;
 import com.uber.jenkins.phabricator.conduit.ArcanistClient;
 import com.uber.jenkins.phabricator.utils.Logger;
+import hudson.model.Computer;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ApplyPatchTask extends Task {
     private static final String DEFAULT_GIT_PATH = "git";
@@ -65,7 +68,7 @@ public class ApplyPatchTask extends Task {
             boolean patchWithForceFlag, String scmType) {
         super(logger);
 
-        this.arcPath = arcPath;
+        this.arcPath = isWindows() ? arcPath + ".bat" : arcPath;
         this.gitPath = DEFAULT_GIT_PATH;
         this.hgPath = DEFAULT_HG_PATH;
 
@@ -78,7 +81,6 @@ public class ApplyPatchTask extends Task {
         this.diffID = diffID;
         this.conduitUrl = conduitUrl;
         this.conduitToken = conduitToken;
-
         this.createCommit = createCommit;
         this.skipForcedClean = skipForcedClean;
         this.createBranch = createBranch;
@@ -210,6 +212,26 @@ public class ApplyPatchTask extends Task {
             return 0;
         }
         return starter.launch().cmds(cmds).stdout(logStream).join();
+    }
+
+    /**
+     * @return true if the current executor is on Windows
+     */
+    private boolean isWindows() {
+        try {
+            Computer remoteComputer = Computer.currentComputer();
+            if (remoteComputer != null) {
+                Map<Object, Object> remoteProperties = remoteComputer.getSystemProperties();
+                if (remoteProperties.containsKey("os.name")) {
+                    return StringUtils.startsWithIgnoreCase(remoteProperties.get("os.name").toString(), "Windows");
+                }
+            }
+        } catch (IOException e) {
+            info("IOException attempting to determine whether the OS is Windows.\n" + e.getMessage());
+        } catch (InterruptedException e) {
+            info("InterruptedException attempting to determine whether the OS is Windows.\n" + e.getMessage());
+        }
+        return false;
     }
 
     /**
