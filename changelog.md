@@ -1,6 +1,13 @@
 # Changelog
 
-### 2.0.6 (Unreleased)
+### 2.1.1 (Unreleased)
+
+### 2.1.0
+
+* Add windows detection when executing `arc` (Colin Harms)
+* Make coverage plugin check more robust
+* Add support for Clover coverage xml reports (Dennis Claassen)
+* Add Mercurial Support (Ilya Arkhanhelsky)
 
 ### 2.0.5
 
