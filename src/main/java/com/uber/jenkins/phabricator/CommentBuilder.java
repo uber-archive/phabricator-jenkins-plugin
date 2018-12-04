@@ -23,9 +23,11 @@ package com.uber.jenkins.phabricator;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import hudson.model.Result;
 
 class CommentBuilder {
+
     private static final String UBERALLS_TAG = "uberalls";
     private final Logger logger;
     private final CodeCoverageMetrics currentCoverage;
@@ -35,8 +37,9 @@ class CommentBuilder {
     private final boolean preserveFormatting;
     private final CoverageCheckSettings coverageCheckSettings;
 
-    CommentBuilder(Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
-                          boolean preserveFormatting, CoverageCheckSettings coverageCheckSettings) {
+    CommentBuilder(
+            Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
+            boolean preserveFormatting, CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
         this.result = result;
         this.currentCoverage = currentCoverage;
@@ -48,6 +51,7 @@ class CommentBuilder {
 
     /**
      * Get the final comment to post to Phabricator
+     *
      * @return
      */
     String getComment() {
@@ -56,6 +60,7 @@ class CommentBuilder {
 
     /**
      * Determine whether to attempt to process coverage
+     *
      * @return
      */
     boolean hasCoverageAvailable() {
@@ -64,10 +69,10 @@ class CommentBuilder {
 
     /**
      * Query uberalls for parent coverage and add appropriate comment
+     *
      * @param parentCoverage the parent coverage returned from uberalls
      * @param baseCommit
      * @param branchName the name of the current branch
-     *
      * @return boolean if we fail coverage reporting from threshold
      */
     boolean processParentCoverage(CodeCoverageMetrics parentCoverage, String baseCommit, String branchName) {
@@ -104,9 +109,9 @@ class CommentBuilder {
         if (isBuildFailingCoverageCheck(lineCoveragePercent, coverageDelta)) {
             passCoverage = false;
             String message = "Build failed because coverage is lower than minimum " +
-                             coverageCheckSettings.getMinCoverageInPercent() +
-                             "% and decreased more than allowed " +
-                             Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()) + "%";
+                    coverageCheckSettings.getMinCoverageInPercent() +
+                    "% and decreased more than allowed " +
+                    Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()) + "%";
             logger.info(UBERALLS_TAG, message);
             comment.append("\n");
             comment.append(message);
@@ -118,12 +123,16 @@ class CommentBuilder {
 
     private boolean isBuildFailingCoverageCheck(double lineCoveragePercent, double coverageDelta) {
         return (coverageCheckSettings != null
-            && coverageCheckSettings.isCoverageCheckEnabled()
-            && lineCoveragePercent < coverageCheckSettings.getMinCoverageInPercent()
-            && coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(coverageCheckSettings.getMaxCoverageDecreaseInPercent()));
+                && coverageCheckSettings.isCoverageCheckEnabled()
+                && lineCoveragePercent < coverageCheckSettings.getMinCoverageInPercent()
+                && coverageDelta < 0 && Math.abs(coverageDelta) > Math.abs(
+                coverageCheckSettings.getMaxCoverageDecreaseInPercent()));
     }
 
-    void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure, boolean runHarbormaster) {
+    void processBuildResult(
+            boolean commentOnSuccess,
+            boolean commentWithConsoleLinkOnFailure,
+            boolean runHarbormaster) {
         if (result == Result.SUCCESS) {
             if (comment.length() == 0 && (commentOnSuccess || !runHarbormaster)) {
                 comment.append("Build is green");
@@ -143,6 +152,7 @@ class CommentBuilder {
 
     /**
      * Add user-defined content via a .phabricator-comment file
+     *
      * @param customComment the contents of the file
      */
     void addUserComment(String customComment) {
@@ -163,6 +173,7 @@ class CommentBuilder {
 
     /**
      * Determine if there exists a comment already
+     *
      * @return
      */
     boolean hasComment() {
@@ -173,7 +184,7 @@ class CommentBuilder {
      * Add a build link to the comment
      */
     void addBuildLink() {
-        comment.append(String.format(" %s for more details.", buildURL));
+        comment.append(String.format("\nSee %s for more details.", buildURL));
     }
 
     /**

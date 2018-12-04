@@ -4,9 +4,6 @@ sudo: true
 matrix:
   fast_finish: true
   include:
-    - jdk: openjdk7
-      env: TASKS="check"
-      dist: precise
     - jdk: oraclejdk8
       env: TASKS="check"
     - jdk: oraclejdk8

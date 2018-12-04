@@ -22,14 +22,17 @@ package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
-import hudson.FilePath;
 
 import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
+
+import hudson.FilePath;
 
 import static java.lang.Integer.parseInt;
 
 public class RemoteFileFetcher {
+
     private static final int DEFAULT_MAX_SIZE = 1000;
     private static final String LOGGER_TAG = "file-fetcher";
 
@@ -47,6 +50,7 @@ public class RemoteFileFetcher {
 
     /**
      * Attempt to read a remote  file
+     *
      * @return the content of the remote comment file, if present
      * @throws InterruptedException if there is an error fetching the file
      * @throws IOException if any network error occurs
@@ -73,7 +77,7 @@ public class RemoteFileFetcher {
             maxLength = parseInt(maxSize, 10);
         }
         if (source.length() < maxLength) {
-            maxLength = (int)source.length();
+            maxLength = (int) source.length();
         }
         byte[] buffer = new byte[maxLength];
         IOUtils.read(source.read(), buffer);

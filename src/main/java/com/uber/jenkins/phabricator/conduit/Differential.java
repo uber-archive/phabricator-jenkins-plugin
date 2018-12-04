@@ -23,7 +23,6 @@ package com.uber.jenkins.phabricator.conduit;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildAction;
 import com.uber.jenkins.phabricator.PhabricatorPostbuildSummaryAction;
 
-import hudson.model.Run;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
@@ -32,6 +31,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+
+import hudson.model.Run;
 
 public class Differential {
 

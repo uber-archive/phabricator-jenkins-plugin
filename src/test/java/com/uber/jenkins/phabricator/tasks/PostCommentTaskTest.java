@@ -24,7 +24,9 @@ import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import net.sf.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,12 +36,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 public class PostCommentTaskTest {
-    private Logger logger;
-    private DifferentialClient differentialClient;
 
     private final String TEST_COMMENT = "They are selling like hotcakes!";
     private final String TEST_COMMENT_ACTION = "none";
     private final String TEST_REVISION_ID = "something";
+    private Logger logger;
+    private DifferentialClient differentialClient;
 
     @Before
     public void setup() {

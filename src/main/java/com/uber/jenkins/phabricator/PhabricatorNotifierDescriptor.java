@@ -22,6 +22,13 @@ package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
+
+import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Job;
@@ -29,10 +36,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * Descriptor for {@link PhabricatorNotifier}. Used as a singleton.
@@ -45,8 +48,10 @@ import org.kohsuke.stapler.StaplerRequest;
 @SuppressWarnings("UnusedDeclaration")
 @Extension
 public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Publisher> {
+
     private String credentialsID;
     private String uberallsURL;
+    private boolean isBlueOceanEnabled;
 
     public PhabricatorNotifierDescriptor() {
         super(PhabricatorNotifier.class);
@@ -65,17 +70,6 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         return "Post to Phabricator";
     }
 
-    @SuppressWarnings("unused")
-    public ListBoxModel doFillCredentialsIDItems(@AncestorInPath Jenkins context,
-                                                 @QueryParameter String remoteBase) {
-        return ConduitCredentialsDescriptor.doFillCredentialsIDItems(
-                context);
-    }
-
-    public ConduitCredentials getCredentials(Job owner) {
-        return ConduitCredentialsDescriptor.getCredentials(owner, credentialsID);
-    }
-
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         // To persist global configuration information,
@@ -83,6 +77,18 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
         req.bindJSON(this, formData.getJSONObject("uberalls"));
         save();
         return super.configure(req, formData);
+    }
+
+    @SuppressWarnings("unused")
+    public ListBoxModel doFillCredentialsIDItems(
+            @AncestorInPath Jenkins context,
+            @QueryParameter String remoteBase) {
+        return ConduitCredentialsDescriptor.doFillCredentialsIDItems(
+                context);
+    }
+
+    public ConduitCredentials getCredentials(Job owner) {
+        return ConduitCredentialsDescriptor.getCredentials(owner, credentialsID);
     }
 
     public String getCredentialsID() {
@@ -102,5 +108,13 @@ public final class PhabricatorNotifierDescriptor extends BuildStepDescriptor<Pub
 
     public void setUberallsURL(String value) {
         uberallsURL = value;
+    }
+
+    public boolean getIsBlueOceanEnabled() {
+        return isBlueOceanEnabled;
+    }
+
+    public void setIsBlueOceanEnabled(boolean value) {
+        isBlueOceanEnabled = value;
     }
 }

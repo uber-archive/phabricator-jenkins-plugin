@@ -27,17 +27,20 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
-import hudson.model.Item;
-import hudson.model.Job;
-import hudson.security.ACL;
-import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
+
 import org.kohsuke.stapler.AncestorInPath;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.model.Item;
+import hudson.model.Job;
+import hudson.security.ACL;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
+
 public class ConduitCredentialsDescriptor {
+
     private static List<ConduitCredentials> availableCredentials(Job owner) {
         return CredentialsProvider.lookupCredentials(
                 ConduitCredentials.class,

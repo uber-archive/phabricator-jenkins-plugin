@@ -21,7 +21,9 @@
 package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import net.sf.json.JSONObject;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.localserver.LocalTestServer;
 
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FakeConduit {
+
     private LocalTestServer server;
     private List<String> requestBodies;
 

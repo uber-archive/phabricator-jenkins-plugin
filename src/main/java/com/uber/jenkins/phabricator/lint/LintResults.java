@@ -31,6 +31,7 @@ import java.util.List;
  * Represent a list of lint results
  */
 public class LintResults {
+
     private final List<LintResult> results;
 
     public LintResults() {
@@ -47,6 +48,7 @@ public class LintResults {
 
     /**
      * Convert a suite of unit results to Harbormaster JSON format
+     *
      * @return Harbormaster-formatted unit results
      */
     public List<JSONObject> toHarbormaster() {

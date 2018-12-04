@@ -22,12 +22,8 @@ package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.utils.Logger;
 import com.uber.jenkins.phabricator.utils.TestUtils;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.tasks.Builder;
+
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,12 +32,19 @@ import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import org.apache.commons.lang.StringUtils;
+
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.tasks.Builder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class RemoteFileFetcherTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -117,7 +120,8 @@ public class RemoteFileFetcherTest {
     private Builder echoBuilder(final String fileName, final String content) {
         return new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws
+                    InterruptedException, IOException {
                 build.getWorkspace().child(fileName).write(content, "UTF-8");
                 return true;
             }

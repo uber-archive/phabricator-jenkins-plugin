@@ -21,63 +21,74 @@
 package com.uber.jenkins.phabricator.tasks;
 
 import com.uber.jenkins.phabricator.utils.TestUtils;
+
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.jvnet.hudson.test.JenkinsRule;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Parameterized.class)
 public class ApplyPatchTaskTest {
+    private static final BiConsumer<ApplyPatchTask, String> setHgPath = ApplyPatchTask::setHgPath;
+    private static final BiConsumer<ApplyPatchTask, String> setGitPath = ApplyPatchTask::setGitPath;
+    private static final BiConsumer<ApplyPatchTask, String> setSvnPath = (t, p) -> { };
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    @Test
-    public void testApplyPatchWithValidArc() throws Exception {
-        ApplyPatchTask task = getTask("echo", "true");
-        Task.Result result = task.run();
-        assertEquals(Task.Result.SUCCESS, result);
+    @Parameterized.Parameter
+    public String scm;
+    @Parameterized.Parameter(1)
+    public BiConsumer<ApplyPatchTask, String> setScmPath;
+
+    @Parameterized.Parameters
+    public static Object[] configurations() {
+        return new Object[] {
+            new Object[] {"git", setGitPath},
+            new Object[] {"hg", setHgPath},
+            new Object[] {"svn", setSvnPath}
+        };
     }
 
     @Test
-    public void testApplyPatchForSvnWithValidArc() throws Exception {
-        ApplyPatchTask task = new ApplyPatchTask(
-                TestUtils.getDefaultLogger(),
-                TestUtils.createLauncherFactory(j),
-                TestUtils.TEST_SHA,
-                TestUtils.TEST_DIFFERENTIAL_ID,
-                TestUtils.TEST_CONDUIT_TOKEN,
-                "echo", "true", false, false, false, false, "svn");
-        Task.Result result = task.run();
-        assertEquals(Task.Result.SUCCESS, result);
+    public void testApplyPatchWithValidArc() throws Exception {
+        assertEquals(Task.Result.SUCCESS, getTask("echo", scm, "true").run());
     }
 
     @Test
     public void testApplyPatchWithInvalidArc() throws Exception {
-        ApplyPatchTask task = getTask("false", "echo");
-        Task.Result result = task.run();
-        assertEquals(Task.Result.FAILURE, result);
+        assertEquals(Task.Result.FAILURE, getTask("false", scm, "echo").run());
     }
 
     @Test
-    public void testBothGitAndArcFailing() throws Exception {
-        ApplyPatchTask task = getTask("false", "false");
-        assertEquals(Task.Result.FAILURE, task.run());
+    public void testBothScmAndArcFailing() throws Exception {
+        assertEquals(Task.Result.FAILURE, getTask("false", scm, "false").run());
     }
 
-    private ApplyPatchTask getTask(String arcPath, String gitPath) throws Exception {
-        return new ApplyPatchTask(
+    private ApplyPatchTask getTask(String arcPath, String scmType, String scmPath) throws Exception {
+        final ApplyPatchTask task = new ApplyPatchTask(
                 TestUtils.getDefaultLogger(),
                 TestUtils.createLauncherFactory(j),
                 TestUtils.TEST_SHA,
                 TestUtils.TEST_DIFFERENTIAL_ID,
+                TestUtils.TEST_CONDUIT_URL,
                 TestUtils.TEST_CONDUIT_TOKEN,
                 arcPath,
-                gitPath, // git path
                 false, // createCommit
                 false, // skipForcedClean
                 false, // createBranch
                 false,  // patchWithForceFlag
-                "git" // scmType
+                scmType
         );
+
+        setScmPath.accept(task, scmPath);
+
+        return task;
     }
 }

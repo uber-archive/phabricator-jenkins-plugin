@@ -25,6 +25,10 @@
                description="Location of the Uberalls instance">
         <f:textbox />
       </f:entry>
+      <f:entry title="Blue Ocean URI's" field="isBlueOceanEnabled"
+               description="Make use of Blue Ocean URI's in notifications posted to Phabricator">
+        <f:checkbox default="false" />
+      </f:entry>
     </f:optionalBlock>
   </f:section>
 </j:jelly>

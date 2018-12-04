@@ -20,27 +20,16 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class FakeCoverageProvider extends CoverageProvider {
-    private final Map<String, List<Integer>> coverage;
 
-    public FakeCoverageProvider(Map<String, List<Integer>> coverage) {
-        this.coverage = coverage;
+    public FakeCoverageProvider(Map<String, List<Integer>> lineCoverage) {
+        super(null);
+        this.lineCoverage.putAll(lineCoverage);
     }
 
     @Override
-    public Map<String, List<Integer>> readLineCoverage() {
-        return coverage;
-    }
-
-    @Override
-    public boolean hasCoverage() {
-        return true;
-    }
-
-    @Override
-    protected CodeCoverageMetrics getCoverageMetrics() {
-        return null;
-    }
+    protected void computeCoverage() { }
 }

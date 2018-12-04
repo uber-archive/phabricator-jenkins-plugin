@@ -26,6 +26,9 @@ import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
+import com.uber.jenkins.phabricator.coverage.CoberturaPluginCoverageProvider;
+import com.uber.jenkins.phabricator.coverage.JacocoPluginCoverageProvider;
+import com.uber.jenkins.phabricator.coverage.XmlCoverageProvider;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.provider.InstanceProvider;
 import com.uber.jenkins.phabricator.tasks.NonDifferentialBuildTask;
@@ -35,6 +38,18 @@ import com.uber.jenkins.phabricator.uberalls.UberallsClient;
 import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
+import hudson.plugins.cobertura.CoberturaBuildAction;
+import hudson.plugins.jacoco.JacocoBuildAction;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -48,27 +63,19 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import jenkins.model.CauseOfInterruption;
 import jenkins.model.InterruptedBuildAction;
-import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 
-import org.apache.commons.io.FilenameUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
-    public static final String COBERTURA_CLASS_NAME = "com.uber.jenkins.phabricator.coverage.CoberturaCoverageProvider";
 
-    private static final String JUNIT_PLUGIN_NAME = "junit";
-    private static final String JUNIT_CLASS_NAME = "com.uber.jenkins.phabricator.unit.JUnitTestProvider";
-    private static final String COBERTURA_PLUGIN_NAME = "cobertura";
+    private static final String DEFAULT_XML_COVERAGE_REPORT_PATTERN = "**/coverage*.xml, **/cobertura*.xml, "
+            + "**/jacoco*.xml";
+    private static final CoverageReportFilenameFilter COVERAGE_FILENAME_FILTER = new CoverageReportFilenameFilter();
+
     private static final String ABORT_TAG = "abort";
     private static final String UBERALLS_TAG = "uberalls";
+    private static final String COVERAGE_TAG = "coverage";
     private static final String CONDUIT_TAG = "conduit";
+    private static final String PHABRICATOR_COVERAGE = "phabricator-coverage";
     // Post a comment on success. Useful for lengthy builds.
     private final boolean commentOnSuccess;
     private final boolean uberallsEnabled;
@@ -86,11 +93,12 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public PhabricatorNotifier(boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
-                               double coverageThreshold, double minCoverageThreshold, String coverageReportPattern,
-                               boolean preserveFormatting, String commentFile, String commentSize,
-                               boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
-                               String lintFile, String lintFileSize) {
+    public PhabricatorNotifier(
+            boolean commentOnSuccess, boolean uberallsEnabled, boolean coverageCheck,
+            double coverageThreshold, double minCoverageThreshold, String coverageReportPattern,
+            boolean preserveFormatting, String commentFile, String commentSize,
+            boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
+            String lintFile, String lintFileSize) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.coverageCheckSettings = new CoverageCheckSettings(coverageCheck, coverageThreshold, minCoverageThreshold);
@@ -110,13 +118,17 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     }
 
     @Override
-    public final void perform(final Run<?, ?> build, FilePath workspace, final Launcher launcher,
-                                 final TaskListener listener) throws InterruptedException, IOException {
+    public final void perform(
+            final Run<?, ?> build, FilePath workspace, final Launcher launcher,
+            final TaskListener listener) throws InterruptedException, IOException {
         EnvVars environment = build.getEnvironment(listener);
         Logger logger = new Logger(listener.getLogger());
 
         final String branch = environment.get("GIT_BRANCH");
-        final String gitUrl = environment.get("GIT_URL");
+        String gitUrl = environment.get("GIT_URL");
+        if (gitUrl == null) {
+            gitUrl = environment.get("GIT_URL_1");
+        }
 
         final UberallsClient uberallsClient = getUberallsClient(logger, gitUrl, branch);
 
@@ -149,7 +161,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
                 build.addAction(PhabricatorPostbuildAction.createShortText(branch, null));
             }
 
-            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.<String>emptySet());
+            coverageProvider = getCoverageProvider(build, workspace, listener, Collections.emptySet());
             CodeCoverageMetrics coverageResult = null;
             if (coverageProvider != null) {
                 coverageResult = coverageProvider.getMetrics();
@@ -177,7 +189,16 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             throw new AbortException();
         }
 
-        final String buildUrl = environment.get("BUILD_URL");
+        String whichBuildUrl;
+
+        if (getDescriptor().getIsBlueOceanEnabled()) {
+            whichBuildUrl = environment.get("RUN_DISPLAY_URL");
+        } else {
+            whichBuildUrl = environment.get("BUILD_URL");
+        }
+
+        // Still do finalization to prevent manipulation
+        final String buildUrl = whichBuildUrl;
 
         if (!isDifferential) {
             // Process harbormaster for non-differential builds
@@ -210,28 +231,25 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             diff.decorate(build, this.getPhabricatorURL(build.getParent()));
         }
 
-        Set<String> includeFileNames = new HashSet<String>();
-        for (String file : diff.getChangedFiles()) {
-            includeFileNames.add(FilenameUtils.getName(file));
-        }
+        Set<String> includeFiles = diff.getChangedFiles();
 
-        coverageProvider = getCoverageProvider(build, workspace, listener, includeFileNames);
+        coverageProvider = getCoverageProvider(build, workspace, listener, includeFiles);
         CodeCoverageMetrics coverageResult = null;
         if (coverageProvider != null) {
             coverageResult = coverageProvider.getMetrics();
         }
 
         BuildResultProcessor resultProcessor = new BuildResultProcessor(
-            logger,
-            build,
-            workspace,
-            diff,
-            diffClient,
-            environment.get(PhabricatorPlugin.PHID_FIELD),
-            coverageResult,
-            buildUrl,
-            preserveFormatting,
-            coverageCheckSettings
+                logger,
+                build,
+                workspace,
+                diff,
+                diffClient,
+                environment.get(PhabricatorPlugin.PHID_FIELD),
+                coverageResult,
+                buildUrl,
+                preserveFormatting,
+                coverageCheckSettings
         );
 
         if (uberallsEnabled) {
@@ -271,10 +289,10 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
 
         setUberallsClient(new UberallsClient(
-            getDescriptor().getUberallsURL(),
-            logger,
-            gitUrl,
-            branch
+                getDescriptor().getUberallsURL(),
+                logger,
+                gitUrl,
+                branch
         ));
         return uberallsClient;
     }
@@ -293,15 +311,17 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     }
 
     /**
-     * Get the cobertura coverage for the build
+     * Get the coverage provider for the build
      *
-     * @param build    The current build
+     * @param build The current build
      * @param listener The build listener
-     * @return The current cobertura coverage, if any
+     * @return The current coverage, if any
      */
-    private CoverageProvider getCoverageProvider(Run<?, ?> build, FilePath workspace, TaskListener listener,
-                                                 Set<String> includeFileNames) {
-        Result buildResult = null;
+    private CoverageProvider getCoverageProvider(
+            Run<?, ?> build, FilePath workspace,
+            TaskListener listener,
+            Set<String> includeFiles) {
+        Result buildResult;
         if (build.getResult() == null) {
             buildResult = Result.SUCCESS;
         } else {
@@ -311,42 +331,79 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             return null;
         }
 
+        // First check if any coverage plugins are applied. These take precedence over other providers
+        // Only one coverage plugin provider is supported per build
+        CoberturaBuildAction coberturaBuildAction = build.getAction(CoberturaBuildAction.class);
+        JacocoBuildAction jacocoBuildAction = build.getAction(JacocoBuildAction.class);
+        CoverageProvider coverageProvider;
         Logger logger = new Logger(listener.getLogger());
-        InstanceProvider<CoverageProvider> provider = new InstanceProvider<CoverageProvider>(
-                Jenkins.getInstance(),
-                COBERTURA_PLUGIN_NAME,
-                COBERTURA_CLASS_NAME,
-                logger
-        );
-        CoverageProvider coverage = provider.getInstance();
 
-        if (coverage == null) {
-            return null;
-        }
-
-        coverage.setBuild(build);
-        coverage.setWorkspace(workspace);
-        coverage.setIncludeFileNames(includeFileNames);
-        coverage.setCoverageReportPattern(coverageReportPattern);
-        if (coverage.hasCoverage()) {
-            return coverage;
+        copyCoverageToJenkinsMaster(build, workspace, listener);
+        if (coberturaBuildAction != null) { // Choose only a single coverage provider
+            logger.info(UBERALLS_TAG, "Using coverage metrics from Cobertura Jenkins Plugin");
+            coverageProvider = new CoberturaPluginCoverageProvider(getCoverageReports(build), includeFiles, coberturaBuildAction);
+        } else if (jacocoBuildAction != null) {
+            logger.info(UBERALLS_TAG, "Using coverage metrics from Jacoco Jenkins Plugin");
+            coverageProvider = new JacocoPluginCoverageProvider(getCoverageReports(build), includeFiles, jacocoBuildAction);
         } else {
-            logger.info(UBERALLS_TAG, "No cobertura results found");
+            logger.info(UBERALLS_TAG, "Trying to obtain coverage metrics by parsing coverage xml files");
+            coverageProvider = new XmlCoverageProvider(getCoverageReports(build), includeFiles);
+        }
+
+        coverageProvider.computeCoverageIfNeeded();
+        cleanupCoverageFilesOnJenkinsMaster(build);
+
+        if (coverageProvider.hasCoverage()) {
+            return coverageProvider;
+        } else {
+            logger.info(UBERALLS_TAG, "No coverage results found");
             return null;
         }
+    }
+
+    private void copyCoverageToJenkinsMaster(Run<?, ?> build, FilePath workspace, TaskListener listener) {
+        Logger logger = new Logger(listener.getLogger());
+        final File buildDir = build.getRootDir();
+        FilePath buildTarget = new FilePath(buildDir);
+
+        String finalCoverageReportPattern = coverageReportPattern != null ? coverageReportPattern :
+                DEFAULT_XML_COVERAGE_REPORT_PATTERN;
+
+        if (workspace != null) {
+            try {
+                int i = 0;
+                for (FilePath report : workspace.list(finalCoverageReportPattern)) {
+                    final FilePath targetPath = new FilePath(buildTarget, PHABRICATOR_COVERAGE + (i == 0 ? "" : i) + ".xml");
+                    report.copyTo(targetPath);
+                    i++;
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+                logger.warn(COVERAGE_TAG, "Unable to copy coverage to " + buildTarget);
+            }
+        }
+    }
+
+    private void cleanupCoverageFilesOnJenkinsMaster(Run<?, ?> build) {
+        for (File report : getCoverageReports(build)) {
+            report.delete();
+        }
+    }
+
+    private Set<File> getCoverageReports(Run<?, ?> build) {
+        Set<File> reports = new HashSet<>();
+
+        File[] foundReports = build.getRootDir().listFiles(COVERAGE_FILENAME_FILTER);
+        if (foundReports != null) {
+            Collections.addAll(reports, foundReports);
+        }
+        return reports;
     }
 
     private UnitTestProvider getUnitProvider(Run<?, ?> build, TaskListener listener) {
         Logger logger = new Logger(listener.getLogger());
 
-        InstanceProvider<UnitTestProvider> provider = new InstanceProvider<UnitTestProvider>(
-                Jenkins.getInstance(),
-                JUNIT_PLUGIN_NAME,
-                JUNIT_CLASS_NAME,
-                logger
-        );
-
-        UnitTestProvider unitProvider = provider.getInstance();
+        UnitTestProvider unitProvider = InstanceProvider.getUnitTestProvider(logger);
         if (unitProvider == null) {
             return null;
         }
@@ -440,5 +497,13 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     @Override
     public PhabricatorNotifierDescriptor getDescriptor() {
         return (PhabricatorNotifierDescriptor) super.getDescriptor();
+    }
+
+    private static class CoverageReportFilenameFilter implements FilenameFilter {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.startsWith(PHABRICATOR_COVERAGE) && name.endsWith("xml");
+        }
     }
 }

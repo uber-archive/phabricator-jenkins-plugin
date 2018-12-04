@@ -23,10 +23,12 @@ package com.uber.jenkins.phabricator.uberalls;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.utils.CommonUtils;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -42,12 +44,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class UberallsClient {
+
     public static final String PACKAGE_COVERAGE_KEY = "packageCoverage";
     public static final String FILES_COVERAGE_KEY = "filesCoverage";
     public static final String CLASSES_COVERAGE_KEY = "classesCoverage";
     public static final String METHOD_COVERAGE_KEY = "methodCoverage";
     public static final String LINE_COVERAGE_KEY = "lineCoverage";
     public static final String CONDITIONAL_COVERAGE_KEY = "conditionalCoverage";
+    public static final String LINES_COVERED_KEY = "linesCovered";
+    public static final String LINES_TESTED_KEY = "linesTested";
 
     private static final String TAG = "uberalls-client";
 
@@ -86,7 +91,9 @@ public class UberallsClient {
                     ((Double) coverage.getDouble(CLASSES_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(METHOD_COVERAGE_KEY)).floatValue(),
                     ((Double) coverage.getDouble(LINE_COVERAGE_KEY)).floatValue(),
-                    ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue());
+                    ((Double) coverage.getDouble(CONDITIONAL_COVERAGE_KEY)).floatValue(),
+                    (coverage.getLong(LINES_COVERED_KEY)),
+                    (coverage.getLong(LINES_TESTED_KEY)));
         } catch (Exception e) {
             e.printStackTrace(logger.getStream());
         }
@@ -95,7 +102,7 @@ public class UberallsClient {
     }
 
     public boolean recordCoverage(String sha, CodeCoverageMetrics codeCoverageMetrics) {
-        if (codeCoverageMetrics != null && codeCoverageMetrics.isValid()) {
+        if (codeCoverageMetrics != null) {
             JSONObject params = new JSONObject();
             params.put("sha", sha);
             params.put("branch", branch);
@@ -106,6 +113,8 @@ public class UberallsClient {
             params.put(METHOD_COVERAGE_KEY, codeCoverageMetrics.getMethodCoveragePercent());
             params.put(LINE_COVERAGE_KEY, codeCoverageMetrics.getLineCoveragePercent());
             params.put(CONDITIONAL_COVERAGE_KEY, codeCoverageMetrics.getConditionalCoveragePercent());
+            params.put(LINES_COVERED_KEY, codeCoverageMetrics.getLinesCovered());
+            params.put(LINES_TESTED_KEY, codeCoverageMetrics.getLinesTested());
 
             try {
                 HttpClient client = getClient();
@@ -124,14 +133,14 @@ public class UberallsClient {
                 }
                 return true;
             } catch (URISyntaxException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
             } catch (HttpResponseException e) {
                 // e.g. 404, pass
                 logger.info(TAG, "HTTP Response error recording metrics: " + e);
             } catch (ClientProtocolException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(logger.getStream());
             }
         }
 
@@ -142,8 +151,8 @@ public class UberallsClient {
         URIBuilder builder;
         try {
             builder = getBuilder()
-                .setParameter("sha", sha)
-                .setParameter("repository", repository);
+                    .setParameter("sha", sha)
+                    .setParameter("repository", repository);
 
             HttpClient client = getClient();
             HttpMethod request = new GetMethod(builder.build().toString());

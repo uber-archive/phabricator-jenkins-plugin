@@ -37,15 +37,17 @@ public class NonDifferentialBuildTask extends Task {
 
     /**
      * GenericBuildTask constructor.
+     *
      * @param logger The logger.
      * @param uberallsClient The uberalls client.
      * @param codeCoverageMetrics The coverage metrics.
      * @param uberallsEnabled Whether uberalls is enabled.
      * @param commitSha The commit sha.
      */
-    public NonDifferentialBuildTask(Logger logger, UberallsClient uberallsClient,
-                                    CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
-                                    String commitSha) {
+    public NonDifferentialBuildTask(
+            Logger logger, UberallsClient uberallsClient,
+            CodeCoverageMetrics codeCoverageMetrics, boolean uberallsEnabled,
+            String commitSha) {
         super(logger);
         this.uberallsClient = uberallsClient;
         this.codeCoverageMetrics = codeCoverageMetrics;
@@ -67,7 +69,7 @@ public class NonDifferentialBuildTask extends Task {
     @Override
     protected void setup() {
         // Handle bad input.
-        if (codeCoverageMetrics == null || !codeCoverageMetrics.isValid()) {
+        if (codeCoverageMetrics == null) {
             info("Coverage result not found. Ignoring build.");
             result = Result.IGNORED;
         } else if (!uberallsEnabled || CommonUtils.isBlank(uberallsClient.getBaseURL())) {

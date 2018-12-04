@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
+<coverage line-rate="0.005225342913128674" branch-rate="0.003992015968063872" lines-covered="8" lines-valid="1531"
+		  branches-covered="2.0" branches-valid="501.0" complexity="2.1768488745980705" version="2.1.1"
+		  timestamp="1537982333809">
+	<packages>
+				<package name="com.uber.jenkins.phabricator.packageA" line-rate="0.8" branch-rate="0.5" complexity="2.0">
+			<classes>
+				<class name="com.uber.jenkins.phabricator.packageA.Greet" filename="com/uber/jenkins/phabricator/packageA/Greet.java" line-rate="0.8" branch-rate="0.5" complexity="2.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="1.0" branch-rate="1.0" complexity="0">
+							<lines>
+								<line number="3" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="method" signature="(Z)V" line-rate="0.75" branch-rate="0.5" complexity="0">
+							<lines>
+								<line number="6" hits="1" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="7" hits="0" branch="false"/>
+								<line number="9" hits="1" branch="false"/>
+								<line number="11" hits="1" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="3" hits="1" branch="false"/>
+						<line number="6" hits="1" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="7" hits="0" branch="false"/>
+						<line number="9" hits="1" branch="false"/>
+						<line number="11" hits="1" branch="false"/>
+					</lines>
+				</class>
+			</classes>
+		</package>
+		<package name="com.uber.jenkins.phabricator.packageB" line-rate="0.8" branch-rate="0.5" complexity="2.0">
+			<classes>
+				<class name="com.uber.jenkins.phabricator.packageB.Greet" filename="com/uber/jenkins/phabricator/packageB/Greet.java" line-rate="0.8" branch-rate="0.5" complexity="2.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="1.0" branch-rate="1.0" complexity="0">
+							<lines>
+								<line number="3" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="method" signature="(Z)V" line-rate="0.75" branch-rate="0.5" complexity="0">
+							<lines>
+								<line number="6" hits="1" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="7" hits="1" branch="false"/>
+								<line number="9" hits="0" branch="false"/>
+								<line number="11" hits="1" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="3" hits="1" branch="false"/>
+						<line number="6" hits="1" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="7" hits="1" branch="false"/>
+						<line number="9" hits="0" branch="false"/>
+						<line number="11" hits="1" branch="false"/>
+					</lines>
+				</class>
+			</classes>
+		</package>
+	</packages>
+</coverage>

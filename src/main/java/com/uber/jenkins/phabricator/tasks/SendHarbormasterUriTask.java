@@ -21,6 +21,7 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
@@ -60,10 +61,10 @@ public class SendHarbormasterUriTask extends Task {
                 this.result = Result.SUCCESS;
             }
         } catch (ConduitAPIException e) {
-            e.printStackTrace();
+            printStackTrace(e);
             this.result = Result.FAILURE;
         } catch (IOException e) {
-            e.printStackTrace();
+            printStackTrace(e);
             this.result = Result.FAILURE;
         }
     }

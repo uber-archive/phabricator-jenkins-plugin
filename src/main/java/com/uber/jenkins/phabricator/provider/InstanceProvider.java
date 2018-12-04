@@ -20,48 +20,55 @@
 
 package com.uber.jenkins.phabricator.provider;
 
+import com.uber.jenkins.phabricator.unit.JUnitTestProvider;
+import com.uber.jenkins.phabricator.unit.UnitTestProvider;
 import com.uber.jenkins.phabricator.utils.Logger;
+
 import jenkins.model.Jenkins;
 
-public class InstanceProvider<T> {
+public abstract class InstanceProvider<T> {
+
+    private static final String JUNIT_PLUGIN_NAME = "junit";
+
     private static final String LOGGER_TAG = "plugin-provider";
-    private final Provider<T> provider;
-    private final String className;
-    private final Logger logger;
+    private final Jenkins jenkins;
     private final String pluginName;
+    private final Logger logger;
 
     /**
      * Encapsulate lazily loading a concrete implementation when a plugin is available
+     *
      * @param jenkins the instance of Jenkins
      * @param pluginName the name of the plugin, e.g. "cobertura" or "junit" (maven name)
-     * @param className the concrete class name (com.uber.phabricator...)
-     * @param logger the logger to use
      */
-    public InstanceProvider(Jenkins jenkins, String pluginName, String className, Logger logger) {
-        this.provider = new BaseProvider<T>(
-                jenkins,
-                pluginName,
-                logger
-        );
+    private InstanceProvider(Jenkins jenkins, String pluginName, Logger logger) {
+        this.jenkins = jenkins;
         this.pluginName = pluginName;
-        this.className = className;
         this.logger = logger;
+    }
+
+    public static UnitTestProvider getUnitTestProvider(Logger logger) {
+        return new InstanceProvider<UnitTestProvider>(Jenkins.getInstance(),
+                JUNIT_PLUGIN_NAME, logger) {
+            @Override
+            protected UnitTestProvider makeInstance() {
+                return new JUnitTestProvider();
+            }
+        }.getInstance();
     }
 
     /**
      * Get an instance of the desired implementation, if available
+     *
      * @return the class desired
      */
-    public T getInstance() {
-        if (!provider.isAvailable()) {
+    final T getInstance() {
+        if (jenkins.getPlugin(pluginName) == null) {
             logger.info(LOGGER_TAG, String.format("'%s' plugin not installed.", pluginName));
             return null;
         }
-        T instance = provider.getInstance(className);
-        if (instance == null) {
-            logger.warn(LOGGER_TAG,
-                    String.format("Unable to instantiate plugin provider for '%s'. This should not happen.", pluginName));
-        }
-        return instance;
+        return makeInstance();
     }
+
+    abstract T makeInstance();
 }

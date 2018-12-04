@@ -20,20 +20,22 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
-import hudson.Launcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import hudson.Launcher;
+
 import static org.junit.Assert.assertEquals;
 
 public class ArcanistClientTest {
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
     @Test
     public void testEcho() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "hello", null);
+        ArcanistClient client = new ArcanistClient("echo", "hello", null, null);
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);
@@ -41,7 +43,7 @@ public class ArcanistClientTest {
 
     @Test
     public void testEchoWithToken() throws Exception {
-        ArcanistClient client = new ArcanistClient("echo", "tokentest", "notarealtoken");
+        ArcanistClient client = new ArcanistClient("echo", "tokentest", "testurl", "notarealtoken");
 
         int result = client.callConduit(getLauncher().launch(), System.err);
         assertEquals(result, 0);

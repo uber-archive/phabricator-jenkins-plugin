@@ -21,6 +21,7 @@
 package com.uber.jenkins.phabricator.conduit;
 
 public class ConduitAPIException extends Exception {
+
     public final int code;
 
     public ConduitAPIException(String message) {

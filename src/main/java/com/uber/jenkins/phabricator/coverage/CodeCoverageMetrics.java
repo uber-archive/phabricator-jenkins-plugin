@@ -20,27 +20,31 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-public class CodeCoverageMetrics {
-    private float packagesCoveragePercent = -1;
-    private float filesCoveragePercent = -1;
-    private float classesCoveragePercent = -1;
-    private float methodCoveragePercent = -1;
-    private float lineCoveragePercent = -1;
-    private float conditionalCoveragePercent = -1;
+import java.util.Objects;
 
-    public CodeCoverageMetrics(float packagesCoveragePercent, float filesCoveragePercent,
-                               float classesCoveragePercent, float methodCoveragePercent, float lineCoveragePercent,
-                               float conditionalCoveragePercent) {
+public class CodeCoverageMetrics {
+
+    private final float packagesCoveragePercent;
+    private final float filesCoveragePercent;
+    private final float classesCoveragePercent;
+    private final float methodCoveragePercent;
+    private final float lineCoveragePercent;
+    private final float conditionalCoveragePercent;
+    private final long linesCovered;
+    private final long linesTested;
+
+    public CodeCoverageMetrics(
+            float packagesCoveragePercent, float filesCoveragePercent,
+            float classesCoveragePercent, float methodCoveragePercent, float lineCoveragePercent,
+            float conditionalCoveragePercent, long linesCovered, long linesTested) {
         this.packagesCoveragePercent = packagesCoveragePercent;
         this.filesCoveragePercent = filesCoveragePercent;
         this.classesCoveragePercent = classesCoveragePercent;
         this.methodCoveragePercent = methodCoveragePercent;
         this.lineCoveragePercent = lineCoveragePercent;
         this.conditionalCoveragePercent = conditionalCoveragePercent;
-    }
-
-    public boolean isValid() {
-        return lineCoveragePercent != -1;
+        this.linesCovered = linesCovered;
+        this.linesTested = linesTested;
     }
 
     public float getPackageCoveragePercent() {
@@ -67,6 +71,14 @@ public class CodeCoverageMetrics {
         return conditionalCoveragePercent;
     }
 
+    public float getLinesCovered() {
+        return linesCovered;
+    }
+
+    public float getLinesTested() {
+        return linesTested;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("package coverage = ");
@@ -81,6 +93,36 @@ public class CodeCoverageMetrics {
         sb.append(lineCoveragePercent);
         sb.append(", conditional coverage = ");
         sb.append(conditionalCoveragePercent);
+        sb.append(", lines covered = ");
+        sb.append(linesCovered);
+        sb.append(", linesTested = ");
+        sb.append(linesTested);
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CodeCoverageMetrics metrics = (CodeCoverageMetrics) o;
+        return Float.compare(metrics.packagesCoveragePercent, packagesCoveragePercent) == 0 &&
+                Float.compare(metrics.filesCoveragePercent, filesCoveragePercent) == 0 &&
+                Float.compare(metrics.classesCoveragePercent, classesCoveragePercent) == 0 &&
+                Float.compare(metrics.methodCoveragePercent, methodCoveragePercent) == 0 &&
+                Float.compare(metrics.lineCoveragePercent, lineCoveragePercent) == 0 &&
+                Float.compare(metrics.conditionalCoveragePercent, conditionalCoveragePercent) == 0 &&
+                linesCovered == metrics.linesCovered &&
+                linesTested == metrics.linesTested;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packagesCoveragePercent, filesCoveragePercent, classesCoveragePercent,
+                methodCoveragePercent,
+                lineCoveragePercent, conditionalCoveragePercent, linesCovered, linesTested);
     }
 }

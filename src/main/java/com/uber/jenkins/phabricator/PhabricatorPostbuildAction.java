@@ -20,13 +20,15 @@
 
 package com.uber.jenkins.phabricator;
 
-import hudson.model.BuildBadgeAction;
 import org.kohsuke.stapler.export.Exported;
+
+import hudson.model.BuildBadgeAction;
 
 /**
  * Ripped from https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildAction.java
  */
 public class PhabricatorPostbuildAction implements BuildBadgeAction {
+
     private final String iconPath;
     private final String text;
     private final String color = "#1FBAD6";
@@ -45,48 +47,56 @@ public class PhabricatorPostbuildAction implements BuildBadgeAction {
         return new PhabricatorPostbuildAction(text, link);
     }
 
-    /* Action methods */
-    public String getUrlName() {
-        return "";
+    public String getIconFileName() {
+        return null;
     }
 
     public String getDisplayName() {
         return "";
     }
 
-    public String getIconFileName() {
-        return null;
+    /* Action methods */
+    public String getUrlName() {
+        return "";
     }
 
-    @Exported public boolean isTextOnly() {
+    @Exported
+    public boolean isTextOnly() {
         return (iconPath == null);
     }
 
-    @Exported public String getIconPath() {
+    @Exported
+    public String getIconPath() {
         return iconPath;
     }
 
-    @Exported public String getText() {
+    @Exported
+    public String getText() {
         return text;
     }
 
-    @Exported public String getColor() {
+    @Exported
+    public String getColor() {
         return color;
     }
 
-    @Exported public String getBackground() {
+    @Exported
+    public String getBackground() {
         return background;
     }
 
-    @Exported public String getBorder() {
+    @Exported
+    public String getBorder() {
         return border;
     }
 
-    @Exported public String getBorderColor() {
+    @Exported
+    public String getBorderColor() {
         return borderColor;
     }
 
-    @Exported public String getLink() {
+    @Exported
+    public String getLink() {
         return link;
     }
 }

@@ -20,77 +20,117 @@
 
 package com.uber.jenkins.phabricator.coverage;
 
-import hudson.FilePath;
-import hudson.model.Run;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 public abstract class CoverageProvider {
-    private Run<?, ?> build;
-    private FilePath workspace;
-    private Set<String> includeFileNames;
-    private String coverageReportPattern;
 
-    /**
-     * Set the list of file names to get coverage metrics for
-     * @param includeFileNames The list of file names to get coverage metrics for
-     */
-    public void setIncludeFileNames(Set<String> includeFileNames) {
-        this.includeFileNames = includeFileNames;
+    final Set<String> includeFiles;
+    final Map<String, List<Integer>> lineCoverage = new HashMap<>();
+    CodeCoverageMetrics metrics = null;
+
+    private boolean hasComputedCoverage = false;
+
+    CoverageProvider(Set<String> includeFiles) {
+        this.includeFiles = includeFiles;
     }
 
-    protected Set<String> getIncludeFileNames() {
-        return includeFileNames;
+    public Map<String, List<Integer>> getLineCoverage() {
+        computeCoverageIfNeeded();
+        return lineCoverage;
     }
 
-    /**
-     * Set the owning build for this provider
-     * @param build The build that is associated with the current run
-     */
-    public void setBuild(Run<?, ?> build) {
-        this.build = build;
+    public boolean hasCoverage() {
+        computeCoverageIfNeeded();
+        return metrics != null && metrics.getLinesCovered() > 0;
     }
 
-    protected Run<?, ?> getBuild() {
-        return build;
+    CodeCoverageMetrics getCoverageMetrics() {
+        computeCoverageIfNeeded();
+        return metrics;
     }
 
-    public void setWorkspace(FilePath workspace) {
-        this.workspace = workspace;
-    }
-
-    protected FilePath getWorkspace() {
-        return workspace;
+    public void computeCoverageIfNeeded() {
+        if (!hasComputedCoverage) {
+            computeCoverage();
+            hasComputedCoverage = true;
+        }
     }
 
     /**
-     * Set the coverage report pattern to scan for
-     * @param coverageReportPattern The coverage report pattern to scan for
+     * Use this method to compute and set the coverage metrics and line coverage
      */
-    public void setCoverageReportPattern(String coverageReportPattern) {
-        this.coverageReportPattern = coverageReportPattern;
+    protected abstract void computeCoverage();
+
+    /**
+     * Languages like Kotlin/Scala which can have multiple top level classes in a file. For such classes,
+     * (package path + source file name) will not match where they are actually present in the filesystem.
+     * So this method does two separate matches 1) with just file name and 2) with package name + sourcefile name.
+     * Multiple classes with same name and different packages will match correctly. In case a full match is not
+     * possible, we fall back to file name match. We only check against files included as part of a diff which means
+     * that the possibility of a bad match is very unlikely (only if two files with same name are touched as part of
+     * the diff), but that is the best we can accomplish.
+     */
+    @Nullable
+    static String getRelativePathFromProjectRoot(Set<String> includeFiles, String coverageFile) {
+        if (includeFiles == null || includeFiles.isEmpty()) {
+            return coverageFile;
+        } else {
+            int maxMatch = 0;
+            String maxMatchFile = null;
+            for (String includedFile : includeFiles) {
+                int currmatch = suffixMatch(includedFile, coverageFile);
+                if (currmatch > maxMatch) {
+                    maxMatch = currmatch;
+                    maxMatchFile = includedFile;
+                }
+            }
+
+            return maxMatchFile;
+        }
     }
 
-    String getCoverageReportPattern() {
-        return coverageReportPattern;
+    private static int suffixMatch(String changedFile, String coverageFile) {
+        int changedFileSize = changedFile.length();
+        int coverageFileSize = coverageFile.length();
+
+        if (coverageFileSize > changedFileSize) {
+            return 0;
+        }
+
+        int rIndex = 1;
+        while (coverageFileSize > rIndex && coverageFile.charAt(coverageFileSize - rIndex) == changedFile.charAt(
+                changedFileSize - rIndex)) {
+            rIndex++;
+        }
+
+        // Full path match
+        if (changedFileSize == rIndex) {
+            return rIndex;
+        }
+
+        // Make sure the match is not an accidental partial match
+        if (changedFileSize > rIndex && changedFile.charAt(changedFileSize - rIndex - 1) != '/') {
+            return 0;
+        }
+
+        return rIndex;
     }
-
-    public abstract Map<String, List<Integer>> readLineCoverage();
-
-    public abstract boolean hasCoverage();
 
     /**
      * Get the coverage metrics for the provider
+     *
      * @return The metrics, if any are available
      */
+    @Nullable
     public CodeCoverageMetrics getMetrics() {
         if (!hasCoverage()) {
             return null;
         }
         return getCoverageMetrics();
     }
-
-    protected abstract CodeCoverageMetrics getCoverageMetrics();
 }
