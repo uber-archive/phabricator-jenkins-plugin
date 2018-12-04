@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.1.1 (Unreleased)
+### 2.1.2 (Unreleased)
+
+### 2.1.1
+
+* Guard against NPE in computing coverage lines
 
 ### 2.1.0
 
