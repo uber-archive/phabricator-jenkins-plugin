@@ -41,6 +41,7 @@ import com.uber.jenkins.phabricator.utils.Logger;
 
 import hudson.plugins.cobertura.CoberturaBuildAction;
 import hudson.plugins.jacoco.JacocoBuildAction;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -331,21 +332,30 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             return null;
         }
 
-        // First check if any coverage plugins are applied. These take precedence over other providers
-        // Only one coverage plugin provider is supported per build
-        CoberturaBuildAction coberturaBuildAction = build.getAction(CoberturaBuildAction.class);
-        JacocoBuildAction jacocoBuildAction = build.getAction(JacocoBuildAction.class);
-        CoverageProvider coverageProvider;
+        copyCoverageToJenkinsMaster(build, workspace, listener);
+
+        CoverageProvider coverageProvider = null;
         Logger logger = new Logger(listener.getLogger());
 
-        copyCoverageToJenkinsMaster(build, workspace, listener);
-        if (coberturaBuildAction != null) { // Choose only a single coverage provider
-            logger.info(UBERALLS_TAG, "Using coverage metrics from Cobertura Jenkins Plugin");
-            coverageProvider = new CoberturaPluginCoverageProvider(getCoverageReports(build), includeFiles, coberturaBuildAction);
-        } else if (jacocoBuildAction != null) {
-            logger.info(UBERALLS_TAG, "Using coverage metrics from Jacoco Jenkins Plugin");
-            coverageProvider = new JacocoPluginCoverageProvider(getCoverageReports(build), includeFiles, jacocoBuildAction);
-        } else {
+        // First check if any coverage plugins are applied. These take precedence over other providers
+        // Only one coverage plugin provider is supported per build
+        if(Jenkins.getInstance().getPlugin("cobertura") != null) {
+            CoberturaBuildAction coberturaBuildAction = build.getAction(CoberturaBuildAction.class);
+            if (coberturaBuildAction != null) { // Choose only a single coverage provider
+                logger.info(UBERALLS_TAG, "Using coverage metrics from Cobertura Jenkins Plugin");
+                coverageProvider = new CoberturaPluginCoverageProvider(getCoverageReports(build), includeFiles, coberturaBuildAction);
+            }
+        }
+
+        if (coverageProvider == null && Jenkins.getInstance().getPlugin("jacoco") != null) {
+            JacocoBuildAction jacocoBuildAction = build.getAction(JacocoBuildAction.class);
+            if (jacocoBuildAction != null) {
+                logger.info(UBERALLS_TAG, "Using coverage metrics from Jacoco Jenkins Plugin");
+                coverageProvider = new JacocoPluginCoverageProvider(getCoverageReports(build), includeFiles, jacocoBuildAction);
+            }
+        }
+
+        if (coverageProvider == null) {
             logger.info(UBERALLS_TAG, "Trying to obtain coverage metrics by parsing coverage xml files");
             coverageProvider = new XmlCoverageProvider(getCoverageReports(build), includeFiles);
         }
