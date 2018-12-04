@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.0.5 (Unreleased)
+### 2.0.6 (Unreleased)
+
+### 2.0.5
+
+* Revert back to relying on coverage plugin results if they exist
 
 ### 2.0.4
 
