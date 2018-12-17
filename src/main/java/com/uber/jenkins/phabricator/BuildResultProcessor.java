@@ -81,12 +81,14 @@ public class BuildResultProcessor {
         this.workspace = workspace;
 
         this.commentAction = "none";
-        this.commenter = new CommentBuilder(logger, build.getResult(), coverageResult, buildUrl, preserveFormatting,
+        this.commenter = new CommentBuilder(logger, coverageResult, buildUrl, preserveFormatting,
                 coverageCheckSettings);
         this.runHarbormaster = !CommonUtils.isBlank(phid);
     }
 
     public Result getBuildResult() {
+        // In Pipeline jobs, as long as no failure happens, the build status stays null.
+        // The PhabricatorNotifier needs to interpret null as "not failed (yet)".
         if (this.build.getResult() == null) {
             return Result.SUCCESS;
         } else {
@@ -123,7 +125,7 @@ public class BuildResultProcessor {
      * @param commentWithConsoleLinkOnFailure whether a failure should trigger a console link
      */
     public void processBuildResult(boolean commentOnSuccess, boolean commentWithConsoleLinkOnFailure) {
-        commenter.processBuildResult(commentOnSuccess, commentWithConsoleLinkOnFailure, runHarbormaster);
+        commenter.processBuildResult(getBuildResult(), commentOnSuccess, commentWithConsoleLinkOnFailure, runHarbormaster);
     }
 
     /**

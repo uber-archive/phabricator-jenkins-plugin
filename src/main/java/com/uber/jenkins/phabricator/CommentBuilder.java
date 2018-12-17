@@ -33,15 +33,13 @@ class CommentBuilder {
     private final CodeCoverageMetrics currentCoverage;
     private final StringBuilder comment;
     private final String buildURL;
-    private final Result result;
     private final boolean preserveFormatting;
     private final CoverageCheckSettings coverageCheckSettings;
 
     CommentBuilder(
-            Logger logger, Result result, CodeCoverageMetrics currentCoverage, String buildURL,
+            Logger logger, CodeCoverageMetrics currentCoverage, String buildURL,
             boolean preserveFormatting, CoverageCheckSettings coverageCheckSettings) {
         this.logger = logger;
-        this.result = result;
         this.currentCoverage = currentCoverage;
         this.buildURL = buildURL;
         this.preserveFormatting = preserveFormatting;
@@ -130,6 +128,7 @@ class CommentBuilder {
     }
 
     void processBuildResult(
+            Result result,
             boolean commentOnSuccess,
             boolean commentWithConsoleLinkOnFailure,
             boolean runHarbormaster) {

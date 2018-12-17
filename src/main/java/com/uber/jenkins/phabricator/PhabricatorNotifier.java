@@ -202,12 +202,20 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         final String buildUrl = whichBuildUrl;
 
         if (!isDifferential) {
+            Result buildResult;
+            // In Pipeline jobs, as long as no failure happens, the build status stays null.
+            // The PhabricatorNotifier needs to interpret null as "not failed (yet)".
+            if (build.getResult() == null) {
+                buildResult = Result.SUCCESS;
+            } else {
+                buildResult = build.getResult();
+            }
             // Process harbormaster for non-differential builds
             Task.Result result = new NonDifferentialHarbormasterTask(
                     logger,
                     phid,
                     conduitClient,
-                    build.getResult(),
+                    buildResult,
                     buildUrl
             ).run();
             if (result == Task.Result.SUCCESS) {
