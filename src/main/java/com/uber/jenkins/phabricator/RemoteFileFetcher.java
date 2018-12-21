@@ -80,7 +80,9 @@ public class RemoteFileFetcher {
             maxLength = (int) source.length();
         }
         byte[] buffer = new byte[maxLength];
-        IOUtils.read(source.read(), buffer);
+        InputStream stream = source.read();
+        IOUtils.read(stream, buffer);
+        stream.close();
 
         return new String(buffer);
     }
