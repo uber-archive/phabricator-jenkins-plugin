@@ -86,7 +86,11 @@ public class RemoteFileFetcher {
         try {
             IOUtils.read(stream, buffer);
         } finally {
-            try { if (stream != null) stream.close(); } catch(IOException e) { /* ignore */}
+            try {
+                if (stream != null) {
+                    stream.close();
+                }
+            } catch (IOException e) { /* ignore */ }
         }
 
         return new String(buffer);
