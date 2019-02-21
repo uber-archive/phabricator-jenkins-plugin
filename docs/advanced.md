@@ -87,11 +87,23 @@ Pipeline
 Typically the Phabricator Notifier is used as a reporting step in a Jenkins Pipeline. The test result collector step must be run before the Notifier.
 
 ```groovy
-stage ('report') {
-    //...
-    // junit()
-    step([$class: 'PhabricatorNotifier', commentOnSuccess: true, commentWithConsoleLinkOnFailure: true])
-    //...
-}
+
+  stages {
+    stage('create link') {
+      steps {
+        // Create the "Jenkins" link on the harbormaster artifact.
+        step([$class: 'PhabricatorBuildStartNotifier'])
+      }
+    }  
+    stage ('build') {
+        // ...
+    }
+  }
+  post {
+    always {
+      step([$class: 'PhabricatorNotifier', commentOnSuccess: false, commentWithConsoleLinkOnFailure: true])
+    }
+  }
+
 
 ```

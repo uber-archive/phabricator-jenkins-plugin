@@ -1,0 +1,29 @@
+<?jelly escape-by-default='true'?>
+<j:jelly
+        xmlns:j="jelly:core"
+        xmlns:f="/lib/form"
+        xmlns:c="/lib/credentials">
+  <!--
+    This Jelly script is used to produce the global configuration option.
+
+    Jenkins uses a set of tag libraries to provide uniformity in forms.
+    To determine where this tag is defined, first check the namespace URI,
+    and then look under $JENKINS/views/. For example, <f:section> is defined
+    in $JENKINS/views/lib/form/section.jelly.
+
+    It's also often useful to just check other similar scripts to see what
+    tags they use. Views are always organized according to its owner class,
+    so it should be straightforward to find them.
+  -->
+  <f:section title="Phabricator Build Start Notification" name="phabstart">
+    <f:optionalBlock>
+      <f:entry title="Default Phabricator Credentials" field="credentialsID" description="Conduit URI and Token">
+        <c:select />
+      </f:entry>
+      <f:entry title="Blue Ocean URI's" field="isBlueOceanEnabled"
+               description="Make use of Blue Ocean URI's in notifications posted to Phabricator">
+        <f:checkbox default="false" />
+      </f:entry>
+    </f:optionalBlock>
+  </f:section>
+</j:jelly>
