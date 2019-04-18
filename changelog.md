@@ -1,6 +1,11 @@
 # Changelog
 
-### 2.1.2 (Unreleased)
+### 2.1.3 (Unreleased)
+
+### 2.1.2
+
+* Explicitly close InputStream in RemoteFileFetcher
+* Fix NullPointerExceptions with Pipeline
 
 ### 2.1.1
 
