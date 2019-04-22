@@ -123,6 +123,8 @@ With the build plans created it's time to create a Herald Rule to trigger the pl
 
 ![Herald rule](/docs/herald-rule.png)
 
+**Ensure your bot user has access to view the repository**
+
 Test Your Configuration
 -----------------------
 
