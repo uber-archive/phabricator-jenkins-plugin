@@ -78,10 +78,22 @@ public class DifferentialClient {
         try {
             response = query.getJSONObject("result");
         } catch (JSONException e) {
-            throw new ConduitAPIException(
-                    String.format("No 'result' object found in conduit call: (%s) %s",
-                            e.getMessage(),
-                            query.toString(2)));
+            // Check if the "result" key contains an array value. This may happen if:
+            // 1. Arcanist is not configured correctly.
+            // 2. The bot user does not have access to view the repository.
+            // 3. There is no diff with the ID given.
+            try {
+                query.getJSONArray("result");
+                throw new ConduitAPIException(
+                        String.format("'result' object was an array: %s\n\nThe conduit call may return an empty array arcanist is not configured correctly, the bot user does not have access to view the repository, or there is no diff with that ID.",
+                                query.toString(2)));
+
+            } catch (JSONException ex) {
+                throw new ConduitAPIException(
+                        String.format("No 'result' object found in conduit call: (%s) %s",
+                                e.getMessage(),
+                                query.toString(2)));
+            }
         }
         try {
             return response.getJSONObject(diffID);
