@@ -116,14 +116,12 @@ With the build plans created it's time to create a Herald Rule to trigger the pl
 4. Select the **Global** checkbox and click **Continue**.
 5. Enter a name for the Herald Rule in the **Rule Name** field.
 6. In the **Conditions** section, click the dropdown menu that says "Author" and select "Repository".
-7. Enter your repository name in to the blank field in the **Conditions** section.
+7. Enter your repository name in to the blank field in the **Conditions** section (ensure your bot user has access to view the repository).
 8. In the **Actions** section, click the dropdown menu that says "Add blocking reviewers" and select "Run build plans".
 9. Enter the build plans that were created in the previous section in to the blank field in the **Action** section.
 10. Click **Save Rule**.
 
 ![Herald rule](/docs/herald-rule.png)
-
-**Ensure your bot user has access to view the repository**
 
 Test Your Configuration
 -----------------------
