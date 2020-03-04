@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.1.3 (Unreleased)
+### 2.1.4 (Unreleased)
+
+### 2.1.3
+
+* support diff id as param - fix revision id parsing when null revision
 
 ### 2.1.2
 
