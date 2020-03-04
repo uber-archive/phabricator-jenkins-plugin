@@ -46,11 +46,11 @@ public class DifferentialClient {
      * Posts a comment to a differential
      *
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
-     * @param message the content of the comment
-     * @param silent whether or not to trigger an email
-     * @param action phabricator comment action, e.g. 'resign', 'reject', 'none'
+     * @param message    the content of the comment
+     * @param silent     whether or not to trigger an email
+     * @param action     phabricator comment action, e.g. 'resign', 'reject', 'none'
      * @return the Conduit API response
-     * @throws IOException if there is a network error talking to Conduit
+     * @throws IOException         if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject postComment(String revisionID, String message, boolean silent, String action) throws IOException,
@@ -68,11 +68,11 @@ public class DifferentialClient {
      * Fetch a differential from Conduit
      *
      * @return the Conduit API response
-     * @throws IOException if there is a network error talking to Conduit
+     * @throws IOException         if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject fetchDiff() throws IOException, ConduitAPIException {
-        JSONObject params = new JSONObject().element("ids", new String[] {diffID});
+        JSONObject params = new JSONObject().element("ids", new String[]{diffID});
         JSONObject query = this.callConduit("differential.querydiffs", params);
         JSONObject response;
         try {
@@ -98,12 +98,12 @@ public class DifferentialClient {
     /**
      * Sets a sendHarbormasterMessage build status
      *
-     * @param phid Phabricator object ID
-     * @param pass whether or not the build passed
+     * @param phid        Phabricator object ID
+     * @param pass        whether or not the build passed
      * @param unitResults the results from the unit tests
-     * @param coverage the results from the coverage provider
+     * @param coverage    the results from the coverage provider
      * @return the Conduit API response
-     * @throws IOException if there is a network error talking to Conduit
+     * @throws IOException         if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(
@@ -116,10 +116,10 @@ public class DifferentialClient {
     /**
      * Uploads a uri as an 'artifact' for Harbormaster to display
      *
-     * @param phid Phabricator object ID
+     * @param phid     Phabricator object ID
      * @param buildUri Uri to display, presumably the jenkins builds
      * @return the Conduit API response
-     * @throws IOException if there is a network error talking to Conduit
+     * @throws IOException         if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterUri(String phid, String buildUri) throws ConduitAPIException, IOException {
@@ -130,9 +130,9 @@ public class DifferentialClient {
      * Post a comment on the differential
      *
      * @param revisionID the revision ID (e.g. "D1234" without the "D")
-     * @param message the string message to post
+     * @param message    the string message to post
      * @return the Conduit API response
-     * @throws IOException if there is a network error talking to Conduit
+     * @throws IOException         if there is a network error talking to Conduit
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject postComment(String revisionID, String message) throws ConduitAPIException, IOException {
@@ -148,6 +148,10 @@ public class DifferentialClient {
      * @throws IOException
      */
     public String getCommitMessage(String revisionID) throws ConduitAPIException, IOException {
+        //if no revision ID return null
+        if (revisionID == null) {
+            return "";
+        }
         JSONObject params = new JSONObject().element("revision_id", revisionID);
         JSONObject query = callConduit("differential.getcommitmessage", params);
 
