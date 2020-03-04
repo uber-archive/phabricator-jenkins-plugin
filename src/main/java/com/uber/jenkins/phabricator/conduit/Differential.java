@@ -55,7 +55,8 @@ public class Differential {
     }
 
     public String getRevisionID(boolean formatted) {
-        String rawRevisionId = (String) rawJSON.get("revisionID");
+        Object rawRevisionIdObj = rawJSON.get("revisionID");
+        String rawRevisionId = rawRevisionIdObj != null && !(rawRevisionIdObj instanceof net.sf.json.JSONNull) ? (String) rawRevisionIdObj : null;
         if (rawRevisionId == null || rawRevisionId.equals("")) {
             return null;
         }

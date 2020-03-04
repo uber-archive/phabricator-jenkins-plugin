@@ -148,6 +148,10 @@ public class DifferentialClient {
      * @throws IOException
      */
     public String getCommitMessage(String revisionID) throws ConduitAPIException, IOException {
+        // if no revision ID return null
+        if (revisionID == null) {
+            return "";
+        }
         JSONObject params = new JSONObject().element("revision_id", revisionID);
         JSONObject query = callConduit("differential.getcommitmessage", params);
 
