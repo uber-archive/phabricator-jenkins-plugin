@@ -24,6 +24,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -40,6 +41,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +81,7 @@ public class ConduitAPIClient {
         InputStream responseBody = response.getEntity().getContent();
 
         if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new ConduitAPIException(responseBody.toString(), response.getStatusLine().getStatusCode());
+            throw new ConduitAPIException(IOUtils.toString(responseBody, Charset.defaultCharset()), response.getStatusLine().getStatusCode());
         }
 
         JsonSlurper jsonParser = new JsonSlurper();
