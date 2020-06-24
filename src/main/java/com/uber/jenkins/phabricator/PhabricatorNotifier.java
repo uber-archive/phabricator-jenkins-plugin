@@ -119,7 +119,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     }
 
     @Override
-    public final void perform(
+    public void perform(
             final Run<?, ?> build, FilePath workspace, final Launcher launcher,
             final TaskListener listener) throws InterruptedException, IOException {
         EnvVars environment = build.getEnvironment(listener);
