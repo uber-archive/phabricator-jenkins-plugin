@@ -25,6 +25,7 @@ import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.credentials.ConduitCredentials;
 import com.uber.jenkins.phabricator.tasks.ApplyPatchTask;
 import com.uber.jenkins.phabricator.tasks.SendHarbormasterResultTask;
@@ -212,7 +213,7 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
             if (result != Task.Result.SUCCESS) {
                 logger.warn("arcanist", "Error applying arc patch; got non-zero exit code " + result);
-                Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, false, null, null,
+                Task.Result failureResult = new SendHarbormasterResultTask(logger, diffClient, phid, MessageType.fail, null, null,
                         null).run();
                 if (failureResult != Task.Result.SUCCESS) {
                     // such failure, very broke

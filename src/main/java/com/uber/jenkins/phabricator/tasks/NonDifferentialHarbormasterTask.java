@@ -23,6 +23,7 @@ package com.uber.jenkins.phabricator.tasks;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIClient;
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.HarbormasterClient;
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.utils.Logger;
 
 import java.io.IOException;
@@ -35,27 +36,32 @@ public class NonDifferentialHarbormasterTask extends Task {
     private final String buildUrl;
     private final HarbormasterClient harbormaster;
     private final Logger logger;
+    private final boolean sendPartialResults;
 
     /**
      * Task constructor.
      *
      * @param logger The logger where logs go to.
+     * @param phid Phabricator object ID
      * @param conduitClient
      * @param result
      * @param buildUrl
+     * @param sendPartialResults Send a 'work' message type instead of 'pass'/'fail' if true.
      */
     public NonDifferentialHarbormasterTask(
             Logger logger,
             String phid,
             ConduitAPIClient conduitClient,
             hudson.model.Result result,
-            String buildUrl) {
+            String buildUrl,
+            boolean sendPartialResults) {
         super(logger);
         this.logger = logger;
         this.phid = phid;
         this.conduit = conduitClient;
         this.buildResult = result;
         this.buildUrl = buildUrl;
+        this.sendPartialResults = sendPartialResults;
 
         this.harbormaster = new HarbormasterClient(conduit);
     }
@@ -81,13 +87,21 @@ public class NonDifferentialHarbormasterTask extends Task {
      */
     @Override
     protected void execute() {
-        final boolean pass = buildResult.isBetterOrEqualTo(hudson.model.Result.SUCCESS);
-        info(String.format("Sending diffusion result as: %s", buildResult.toString()));
+        MessageType messageType;
+        if (this.sendPartialResults) {
+            messageType = MessageType.work;
+        } else if (buildResult.isBetterOrEqualTo(hudson.model.Result.SUCCESS)) {
+            messageType = MessageType.pass;
+        } else {
+            messageType = MessageType.fail;
+        }
+
+        info(String.format("Sending diffusion result as: %s, message type: %s", buildResult.toString(), messageType.name()));
 
         try {
             harbormaster.sendHarbormasterUri(phid, buildUrl);
             // Only send pass/fail, since coverage and unit aren't viewable outside of differentials
-            harbormaster.sendHarbormasterMessage(phid, pass, null, null, null);
+            harbormaster.sendHarbormasterMessage(phid, messageType, null, null, null);
             result = Result.SUCCESS;
             return;
         } catch (ConduitAPIException e) {

@@ -183,7 +183,7 @@ public class BuildResultProcessorTest {
                 new CoverageCheckSettings(true, 0.0, 100.0)
         );
         processor.processLintResults(fileName, "1000");
-        processor.processHarbormaster();
+        processor.processHarbormaster(false);
         return processor;
     }
 

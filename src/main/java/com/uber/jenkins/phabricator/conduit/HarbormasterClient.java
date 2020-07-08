@@ -12,6 +12,15 @@ import java.util.Map;
 
 public class HarbormasterClient {
 
+    /**
+     * See https://secure.phabricator.com/conduit/method/harbormaster.sendmessage/
+     */
+    public enum MessageType {
+        pass,
+        fail,
+        work,
+    }
+
     private final ConduitAPIClient conduit;
 
     public HarbormasterClient(ConduitAPIClient conduit) {
@@ -22,7 +31,7 @@ public class HarbormasterClient {
      * Sets a sendHarbormasterMessage build status
      *
      * @param phid Phabricator object ID
-     * @param pass whether or not the build passed
+     * @param messageType type of message to send; either 'pass', 'fail' or 'work'
      * @param unitResults the results from the unit tests
      * @param coverage the results from the coverage provider
      * @param lintResults
@@ -32,7 +41,7 @@ public class HarbormasterClient {
      */
     public JSONObject sendHarbormasterMessage(
             String phid,
-            boolean pass,
+            MessageType messageType,
             UnitResults unitResults,
             Map<String, String> coverage,
             LintResults lintResults) throws ConduitAPIException, IOException {
@@ -58,7 +67,7 @@ public class HarbormasterClient {
         }
 
         JSONObject params = new JSONObject();
-        params.element("type", pass ? "pass" : "fail")
+        params.element("type", messageType.name())
                 .element("buildTargetPHID", phid);
 
         if (!unit.isEmpty()) {

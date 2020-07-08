@@ -67,6 +67,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         assertTrue(notifier.isProcessLint());
         assertEquals(".phabricator-lint", notifier.getLintFile());
         assertEquals("10000", notifier.getLintFileSize());
+        assertFalse(notifier.isSendPartialResults());
     }
 
     @Test
@@ -106,6 +107,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
 
         assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("Sending build result to Harbormaster with PHID PHID-not-real, message type: pass", build);
     }
 
     @Test
@@ -126,6 +128,15 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.SUCCESS, build.getResult());
         assertLogContains("Publishing coverage data to Harbormaster for 3 files", build);
+    }
+
+    @Test
+    public void testSendPartialResults() throws Exception {
+        notifier = getSendPartialResultsNotifier();
+        FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
+
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("Sending build result to Harbormaster with PHID PHID-not-real, message type: work", build);
     }
 
     @Test
@@ -150,7 +161,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
         assertEquals(Result.FAILURE, build.getResult());
-        assertLogContains("Sending build result to Harbormaster with PHID PHID-not-real, success: false", build);
+        assertLogContains("Sending build result to Harbormaster with PHID PHID-not-real, message type: fail", build);
     }
 
     @Test
@@ -300,7 +311,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 true,
                 ".phabricator-lint",
-                "10000"
+                "10000",
+                false
         );
         testPostCoverage();
     }
@@ -311,6 +323,17 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
 
         assertEquals(Result.SUCCESS, build.getResult());
         assertLogContains("Sending diffusion result", build);
+        assertLogContains("message type: pass", build);
+    }
+
+    @Test
+    public void testNonDifferentialPartialResultsWithPHID() throws Exception {
+        notifier = getSendPartialResultsNotifier();
+        FreeStyleBuild build = buildWithCommit(new JSONObject());
+
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertLogContains("Sending diffusion result", build);
+        assertLogContains("message type: work", build);
     }
 
     @Test
@@ -348,7 +371,8 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 true,
                 ".phabricator-lint",
-                "10000"
+                "10000",
+                false
         );
     }
 
@@ -367,7 +391,28 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
                 true,
                 true,
                 ".phabricator-lint",
-                "10000"
+                "10000",
+                false
+        );
+    }
+
+    private PhabricatorNotifier getSendPartialResultsNotifier() {
+        return new PhabricatorNotifier(
+                false,
+                true,
+                false,
+                0.0,
+                0.0,
+                null,
+                true,
+                ".phabricator-comment",
+                "1001",
+                false,
+                true,
+                true,
+                ".phabricator-lint",
+                "10000",
+                true
         );
     }
 }
