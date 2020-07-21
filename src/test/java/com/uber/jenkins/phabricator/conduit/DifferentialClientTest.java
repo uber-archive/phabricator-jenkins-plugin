@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 
 import net.sf.json.JSONObject;
@@ -113,7 +114,7 @@ public class DifferentialClientTest {
     public void testSendHarbormasterSuccess() throws IOException, ConduitAPIException {
         JSONObject empty = new JSONObject();
         mockConduitResponse(differentialClient, empty);
-        differentialClient.sendHarbormasterMessage(TestUtils.TEST_PHID, true, null, null, null);
+        differentialClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.pass, null, null, null);
     }
 
     private void mockConduitResponse(DifferentialClient client, JSONObject response) throws IOException,

@@ -2,6 +2,7 @@ package com.uber.jenkins.phabricator.tasks;
 
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 import com.uber.jenkins.phabricator.utils.Logger;
@@ -16,20 +17,20 @@ public class SendHarbormasterResultTask extends Task {
 
     private final DifferentialClient diffClient;
     private final String phid;
-    private final boolean harbormasterSuccess;
+    private final MessageType messageType;
     private final Map<String, String> coverage;
     private final LintResults lintResults;
     private UnitResults unitResults;
 
     public SendHarbormasterResultTask(
             Logger logger, DifferentialClient diffClient, String phid,
-            boolean harbormasterSuccess, UnitResults unitResults,
+            MessageType messageType, UnitResults unitResults,
             Map<String, String> harbormasterCoverage,
             LintResults lintResults) {
         super(logger);
         this.diffClient = diffClient;
         this.phid = phid;
-        this.harbormasterSuccess = harbormasterSuccess;
+        this.messageType = messageType;
         this.unitResults = unitResults;
         this.coverage = harbormasterCoverage;
         this.lintResults = lintResults;
@@ -87,7 +88,7 @@ public class SendHarbormasterResultTask extends Task {
      */
     private boolean sendMessage(UnitResults unitResults, Map<String, String> coverage, LintResults lintResults) throws
             IOException, ConduitAPIException {
-        JSONObject result = diffClient.sendHarbormasterMessage(phid, harbormasterSuccess, unitResults, coverage,
+        JSONObject result = diffClient.sendHarbormasterMessage(phid, messageType, unitResults, coverage,
                 lintResults);
 
         if (result.containsKey("error_info") && !(result.get("error_info") instanceof JSONNull)) {

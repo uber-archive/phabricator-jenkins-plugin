@@ -2,6 +2,7 @@ package com.uber.jenkins.phabricator.tasks;
 
 import com.uber.jenkins.phabricator.conduit.ConduitAPIException;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.utils.TestUtils;
 
 import net.sf.json.JSONObject;
@@ -29,7 +30,7 @@ public class SendHarbormasterResultTaskTest {
 
     @Test
     public void testSuccessfulHarbormaster() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null, null, null)).thenReturn(
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.fail, null, null, null)).thenReturn(
                 validResponse);
 
         assertEquals(Task.Result.SUCCESS, getResult());
@@ -37,7 +38,7 @@ public class SendHarbormasterResultTaskTest {
 
     @Test
     public void testErrorInfoResponse() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null, null, null)).thenReturn(
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.fail, null, null, null)).thenReturn(
                 getErrorResponse());
 
         assertEquals(Task.Result.FAILURE, getResult());
@@ -47,9 +48,9 @@ public class SendHarbormasterResultTaskTest {
     public void testRetryOnUnitError() throws Exception {
         Map<String, String> coverage = new HashMap<String, String>();
         coverage.put("filename", "NNNUC");
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null, coverage, null)).thenReturn(
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.fail, null, coverage, null)).thenReturn(
                 getErrorResponse());
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null, null, null)).thenReturn(
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.fail, null, null, null)).thenReturn(
                 validResponse);
 
         assertEquals(Task.Result.SUCCESS, getResult(coverage));
@@ -57,7 +58,7 @@ public class SendHarbormasterResultTaskTest {
 
     @Test
     public void testConduitAPIFailure() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null, null, null)).thenThrow(
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.fail, null, null, null)).thenThrow(
                 ConduitAPIException.class);
 
         assertEquals(Task.Result.FAILURE, getResult());
@@ -65,7 +66,7 @@ public class SendHarbormasterResultTaskTest {
 
     @Test
     public void testIOExceptionFailure() throws IOException, ConduitAPIException {
-        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, false, null, null, null)).thenThrow(
+        when(diffClient.sendHarbormasterMessage(TestUtils.TEST_PHID, MessageType.fail, null, null, null)).thenThrow(
                 IOException.class);
 
         assertEquals(Task.Result.FAILURE, getResult());
@@ -76,7 +77,7 @@ public class SendHarbormasterResultTaskTest {
                 TestUtils.getDefaultLogger(),
                 diffClient,
                 TestUtils.TEST_PHID,
-                false,
+                MessageType.fail,
                 null,
                 coverage,
                 null

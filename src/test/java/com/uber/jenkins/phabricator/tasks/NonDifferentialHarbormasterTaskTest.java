@@ -73,7 +73,8 @@ public class NonDifferentialHarbormasterTaskTest {
                 TestUtils.TEST_PHID,
                 conduitClient,
                 Result.SUCCESS,
-                TestUtils.TEST_BASE_URL
+                TestUtils.TEST_BASE_URL,
+                false
         ).run();
     }
 }

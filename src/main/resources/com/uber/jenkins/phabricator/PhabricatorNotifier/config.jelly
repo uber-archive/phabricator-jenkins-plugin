@@ -61,4 +61,9 @@
       <f:textbox default="100000" />
     </f:entry>
   </f:optionalBlock>
+
+  <f:entry title="Send partial results" field="sendPartialResults"
+           description="Report to Harbormaster that work is ongoing instead of reporting pass/fail. Pass/fail must be reported outside of this job. For example, if this is a child job, the parent job should report the final pass/fail status to Harbormaster once all child jobs complete. If you have multiple Jenkins jobs triggered by the same harbormaster buildable, use this to avoid posting multiple (possibly conflicting) pass/fail statuses.">
+    <f:checkbox default="false" />
+  </f:entry>
 </j:jelly>

@@ -20,6 +20,7 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.lint.LintResults;
 import com.uber.jenkins.phabricator.unit.UnitResults;
 
@@ -99,7 +100,7 @@ public class DifferentialClient {
      * Sets a sendHarbormasterMessage build status
      *
      * @param phid Phabricator object ID
-     * @param pass whether or not the build passed
+     * @param messageType type of message to send; either 'pass', 'fail' or 'work'
      * @param unitResults the results from the unit tests
      * @param coverage the results from the coverage provider
      * @return the Conduit API response
@@ -107,10 +108,10 @@ public class DifferentialClient {
      * @throws ConduitAPIException if any error is experienced talking to Conduit
      */
     public JSONObject sendHarbormasterMessage(
-            String phid, boolean pass, UnitResults unitResults,
+            String phid, MessageType messageType, UnitResults unitResults,
             Map<String, String> coverage,
             LintResults lintResults) throws ConduitAPIException, IOException {
-        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, pass, unitResults, coverage, lintResults);
+        return new HarbormasterClient(conduit).sendHarbormasterMessage(phid, messageType, unitResults, coverage, lintResults);
     }
 
     /**

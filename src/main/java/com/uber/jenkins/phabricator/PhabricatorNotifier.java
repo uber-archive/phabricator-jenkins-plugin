@@ -90,6 +90,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     private final String lintFile;
     private final String lintFileSize;
     private final String coverageReportPattern;
+    private final boolean sendPartialResults;
     private transient UberallsClient uberallsClient;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
@@ -99,7 +100,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
             double coverageThreshold, double minCoverageThreshold, String coverageReportPattern,
             boolean preserveFormatting, String commentFile, String commentSize,
             boolean commentWithConsoleLinkOnFailure, boolean customComment, boolean processLint,
-            String lintFile, String lintFileSize) {
+            String lintFile, String lintFileSize, boolean sendPartialResults) {
         this.commentOnSuccess = commentOnSuccess;
         this.uberallsEnabled = uberallsEnabled;
         this.coverageCheckSettings = new CoverageCheckSettings(coverageCheck, coverageThreshold, minCoverageThreshold);
@@ -112,6 +113,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         this.customComment = customComment;
         this.processLint = processLint;
         this.coverageReportPattern = coverageReportPattern;
+        this.sendPartialResults = sendPartialResults;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -216,7 +218,8 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
                     phid,
                     conduitClient,
                     buildResult,
-                    buildUrl
+                    buildUrl,
+                    this.sendPartialResults
             ).run();
             if (result == Task.Result.SUCCESS) {
                 return;
@@ -283,7 +286,7 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
         }
 
         // Fail the build if we can't report to Harbormaster
-        if (!resultProcessor.processHarbormaster()) {
+        if (!resultProcessor.processHarbormaster(this.sendPartialResults)) {
             throw new AbortException();
         }
 
@@ -497,6 +500,11 @@ public class PhabricatorNotifier extends Notifier implements SimpleBuildStep {
     @SuppressWarnings("UnusedDeclaration")
     public String getLintFileSize() {
         return lintFileSize;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean isSendPartialResults() {
+        return sendPartialResults;
     }
 
     private ConduitCredentials getConduitCredentials(Job owner) {

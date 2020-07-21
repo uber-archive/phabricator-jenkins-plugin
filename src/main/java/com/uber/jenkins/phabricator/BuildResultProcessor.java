@@ -22,6 +22,7 @@ package com.uber.jenkins.phabricator;
 
 import com.uber.jenkins.phabricator.conduit.Differential;
 import com.uber.jenkins.phabricator.conduit.DifferentialClient;
+import com.uber.jenkins.phabricator.conduit.HarbormasterClient.MessageType;
 import com.uber.jenkins.phabricator.coverage.CodeCoverageMetrics;
 import com.uber.jenkins.phabricator.coverage.CoverageConverter;
 import com.uber.jenkins.phabricator.coverage.CoverageProvider;
@@ -203,8 +204,15 @@ public class BuildResultProcessor {
      *
      * @return whether we were able to successfully send the result
      */
-    public boolean processHarbormaster() {
-        final boolean harbormasterSuccess = getBuildResult().isBetterOrEqualTo(Result.SUCCESS);
+    public boolean processHarbormaster(boolean sendPartialResults) {
+        MessageType messageType;
+        if (sendPartialResults) {
+            messageType = MessageType.work;
+        } else if (getBuildResult().isBetterOrEqualTo(Result.SUCCESS)) {
+            messageType = MessageType.pass;
+        } else {
+            messageType = MessageType.fail;
+        }
 
         if (runHarbormaster) {
             logger.info("harbormaster", "Sending Harbormaster BUILD_URL via PHID: " + phid);
@@ -239,9 +247,9 @@ public class BuildResultProcessor {
 
             logger.info(
                     LOGGING_TAG,
-                    String.format("Sending build result to Harbormaster with PHID %s, success: %s",
+                    String.format("Sending build result to Harbormaster with PHID %s, message type: %s",
                             phid,
-                            harbormasterSuccess
+                            messageType.name()
                     )
             );
 
@@ -249,7 +257,7 @@ public class BuildResultProcessor {
                     logger,
                     diffClient,
                     phid,
-                    harbormasterSuccess,
+                    messageType,
                     unitResults,
                     harbormasterCoverage,
                     lintResults
