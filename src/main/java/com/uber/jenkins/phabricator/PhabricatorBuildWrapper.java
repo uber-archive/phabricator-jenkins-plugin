@@ -168,6 +168,8 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
             if (sendUriResult != Task.Result.SUCCESS) {
                 logger.info("harbormaster", "Unable to send BUILD_URL to Harbormaster");
+            } else {
+                logger.info("harbormaster", "Harbormaster BUILD_URL sent");
             }
         }
 
