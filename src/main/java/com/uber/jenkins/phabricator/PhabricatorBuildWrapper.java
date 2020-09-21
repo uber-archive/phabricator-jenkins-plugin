@@ -173,12 +173,14 @@ public class PhabricatorBuildWrapper extends BuildWrapper {
 
         Differential diff;
         try {
-            diff = new Differential(diffClient.fetchDiff());
-            String revisionID = diff.getRevisionID(false);
-            diff.setCommitMessage(diffClient.getCommitMessage(revisionID));
-            diff.decorate(build, this.getPhabricatorURL(build.getParent()));
-
             logger.info(CONDUIT_TAG, "Fetching differential from Conduit API");
+            diff = new Differential(diffClient.fetchDiff());
+            logger.info(CONDUIT_TAG, "Differential fetched from Conduit API");
+            String revisionID = diff.getRevisionID(false);
+            logger.info(CONDUIT_TAG, "Fetching commit from Conduit API");
+            diff.setCommitMessage(diffClient.getCommitMessage(revisionID));
+            logger.info(CONDUIT_TAG, "Fetched commit from Conduit API");
+            diff.decorate(build, this.getPhabricatorURL(build.getParent()));
 
             envAdditions.put(DIFFERENTIAL_AUTHOR, diff.getAuthorEmail());
             envAdditions.put(DIFFERENTIAL_BASE_COMMIT, diff.getBaseCommit());
