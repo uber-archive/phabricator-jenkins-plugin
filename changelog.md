@@ -1,6 +1,11 @@
 # Changelog
 
-### 2.1.4 (Unreleased)
+### 2.1.5 (Unreleased)
+
+### 2.1.4
+
+* Add sendPartialResults option to report work is ongoing to Harbormaster instead of pass/fail
+* Add better logging to improve phabricator issue finding
 
 ### 2.1.3
 
