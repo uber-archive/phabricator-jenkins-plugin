@@ -1,6 +1,10 @@
 # Changelog
 
-### 2.1.5 (Unreleased)
+### 2.1.6 (Unreleased)
+
+### 2.1.5
+
+* Bump version
 
 ### 2.1.4
 
