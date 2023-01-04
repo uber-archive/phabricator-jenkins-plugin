@@ -20,6 +20,8 @@
 
 package com.uber.jenkins.phabricator.conduit;
 
+import java.lang.Integer;
+
 public class ConduitAPIException extends Exception {
 
     public final int code;
@@ -30,7 +32,7 @@ public class ConduitAPIException extends Exception {
     }
 
     public ConduitAPIException(String message, int code) {
-        super(message);
+        super(Integer.toString(code) + " " + message);
         this.code = code;
     }
 }

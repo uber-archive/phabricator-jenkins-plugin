@@ -23,9 +23,9 @@ package com.uber.jenkins.phabricator.conduit;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -79,9 +79,9 @@ public class ConduitAPIClient {
         }
 
         InputStream responseBody = response.getEntity().getContent();
-
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new ConduitAPIException(IOUtils.toString(responseBody, Charset.defaultCharset()), response.getStatusLine().getStatusCode());
+        Integer responseCode = response.getStatusLine().getStatusCode();
+        if (responseCode != HttpStatus.SC_OK) {
+            throw new ConduitAPIException(IOUtils.toString(responseBody, Charset.defaultCharset()), responseCode);
         }
 
         JsonSlurper jsonParser = new JsonSlurper();

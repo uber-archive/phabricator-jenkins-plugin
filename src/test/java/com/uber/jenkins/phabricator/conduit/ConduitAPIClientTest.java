@@ -24,8 +24,8 @@ import com.uber.jenkins.phabricator.utils.TestUtils;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.http.localserver.LocalTestServer;
+import org.apache.http.HttpStatus;
+import org.apache.http.localserver.LocalServerTestBase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,21 +34,19 @@ import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.assertEquals;
 
-public class ConduitAPIClientTest {
+public class ConduitAPIClientTest extends LocalServerTestBase {
 
     private final JSONObject emptyParams = new JSONObject();
-    private LocalTestServer server;
     private ConduitAPIClient client;
 
     @Before
     public void setUp() throws Exception {
-        server = new LocalTestServer(null, null);
-        server.start();
+        super.setUp();
     }
 
     @After
     public void tearDown() throws Exception {
-        server.stop();
+        this.shutDown();
     }
 
     @Test(expected = ConduitAPIException.class)
@@ -59,7 +57,8 @@ public class ConduitAPIClientTest {
 
     @Test
     public void testSuccessfullFetch() throws Exception {
-        server.register("/api/valid", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{\"hello\": \"world\"}"));
+        this.serverBootstrap.registerHandler("/api/valid", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{\"hello\": \"world\"}"));
+        this.start();
 
         client = new ConduitAPIClient(getTestServerAddress(), TestUtils.TEST_CONDUIT_TOKEN);
         JSONObject response = client.perform("valid", emptyParams);
@@ -68,7 +67,8 @@ public class ConduitAPIClientTest {
 
     @Test(expected = ConduitAPIException.class)
     public void testBadRequestErrorCode() throws Exception {
-        server.register("/api/foo", TestUtils.makeHttpHandler(HttpStatus.SC_BAD_REQUEST, "nothing"));
+        this.serverBootstrap.registerHandler("/api/foo", TestUtils.makeHttpHandler(HttpStatus.SC_BAD_REQUEST, "nothing"));
+        this.start();
 
         client = new ConduitAPIClient(getTestServerAddress(), TestUtils.TEST_CONDUIT_TOKEN);
         client.perform("foo", emptyParams);
@@ -84,7 +84,8 @@ public class ConduitAPIClientTest {
 
     @Test
     public void testWithUTF8() throws Exception {
-        server.register("/api/utf8", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+        this.serverBootstrap.registerHandler("/api/utf8", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+        this.start();
 
         client = new ConduitAPIClient(getTestServerAddress(), TestUtils.TEST_CONDUIT_TOKEN);
         JSONObject utf8Params = new JSONObject().element("message", "こんにちは世界");
@@ -92,6 +93,6 @@ public class ConduitAPIClientTest {
     }
 
     private String getTestServerAddress() {
-        return TestUtils.getTestServerAddress(server);
+        return TestUtils.getTestServerAddress(this.server);
     }
 }
