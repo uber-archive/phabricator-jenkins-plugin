@@ -1,3 +1,7 @@
+> **_NOTE:_**  This project is now **archived**.  The original maintainers from Uber have moved on to new opportunities.  
+>
+> If you or your organization is interested in becoming the project owner, please contact us at ospo@uber.com
+
 # Phabricator-Jenkins Plugin [![Build Status](https://travis-ci.org/uber/phabricator-jenkins-plugin.svg?branch=master)](https://travis-ci.org/uber/phabricator-jenkins-plugin) [![Coverage Status](https://coveralls.io/repos/uber/phabricator-jenkins-plugin/badge.svg?branch=master&service=github)](https://coveralls.io/github/uber/phabricator-jenkins-plugin?branch=master)
 
 This plugin provides [Phabricator][] integration with [Jenkins][]. It allows Jenkins to
