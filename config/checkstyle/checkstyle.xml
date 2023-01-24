@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE module PUBLIC
-        "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
-        "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
   <property name="charset" value="UTF-8"/>
@@ -70,6 +70,6 @@
     <module name="SimplifyBooleanReturn"/>
   </module>
   <module name="SuppressionFilter">
-    <property name="file" value="config/checkstyle/checkstyle-suppressions.xml"/>
+    <property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
   </module>
 </module>

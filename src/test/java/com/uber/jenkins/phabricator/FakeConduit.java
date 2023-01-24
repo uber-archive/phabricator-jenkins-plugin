@@ -24,34 +24,34 @@ import com.uber.jenkins.phabricator.utils.TestUtils;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.http.localserver.LocalTestServer;
+import org.apache.http.HttpStatus;
+import org.apache.http.impl.bootstrap.HttpServer;
+import org.apache.http.localserver.LocalServerTestBase;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FakeConduit {
+public class FakeConduit extends LocalServerTestBase {
 
-    private LocalTestServer server;
     private List<String> requestBodies;
 
     public FakeConduit(Map<String, JSONObject> responses) throws Exception {
-        server = new LocalTestServer(null, null);
         this.requestBodies = new ArrayList<String>();
+        this.setUp();
         for (Map.Entry<String, JSONObject> entry : responses.entrySet()) {
-            register(entry.getKey(), entry.getValue());
+            this.register(entry.getKey(), entry.getValue());
         }
-        server.start();
+        this.start();
     }
 
     public void stop() throws Exception {
-        server.stop();
+        this.shutDown();
     }
 
-    public LocalTestServer getServer() {
-        return server;
+    public HttpServer getServer() {
+        return this.server;
     }
 
     public List<String> getRequestBodies() throws UnsupportedEncodingException {
@@ -59,11 +59,11 @@ public class FakeConduit {
     }
 
     public String uri() {
-        return TestUtils.getTestServerAddress(server);
+        return TestUtils.getTestServerAddress(this.server);
     }
 
     public void register(String method, JSONObject response) {
-        server.register(
+        this.serverBootstrap.registerHandler(
                 "/api/" + method,
                 TestUtils.makeHttpHandler(HttpStatus.SC_OK, response.toString(2), requestBodies)
         );

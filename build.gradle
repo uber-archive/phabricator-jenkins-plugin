@@ -1,9 +1,9 @@
 plugins {
   id 'java'
   id 'checkstyle'
-  id 'org.jenkins-ci.jpi' version '0.27.0'
-  id 'net.saliman.cobertura' version '2.5.4'
-  id 'com.github.kt3k.coveralls' version '2.8.2'
+  id 'org.jenkins-ci.jpi' version '0.38.0'
+  id 'net.saliman.cobertura' version '2.6.1'
+  id 'com.github.kt3k.coveralls' version '2.12.0'
 }
 
 group = 'org.jenkins-ci.plugins'
@@ -11,15 +11,15 @@ archivesBaseName = 'phabricator-plugin'
 version = '2.1.5'
 description = 'Integrate Jenkins with Phabricator Differentials and Uberalls'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
 
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
 }
 
 jenkinsPlugin {
-  coreVersion = '2.6'
+  coreVersion = '2.385'
   displayName = 'Phabricator Differential Plugin'
   url = 'https://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Differential+Plugin'
   gitHubUrl = 'https://github.com/uber/phabricator-jenkins-plugin'
@@ -43,34 +43,38 @@ jenkinsPlugin {
 }
 
 dependencies {
-  compile 'org.apache.httpcomponents:httpclient:4.5.3'
-  jenkinsPlugins 'org.jenkins-ci.plugins:credentials:1.22@jar'
+  compile 'org.apache.httpcomponents:httpclient:4.5.13'
 
-  optionalJenkinsPlugins 'org.jenkins-ci.plugins:junit:1.6@jar'
-  optionalJenkinsPlugins 'org.jenkins-ci.plugins:cobertura:1.11@jar'
-  optionalJenkinsPlugins 'org.jenkins-ci.plugins:jacoco:2.2.1@jar'
-  providedCompile 'org.jacoco:org.jacoco.report:0.7.8'
+  jenkinsPlugins 'io.jenkins.plugins:checks-api:1.8.1@jar'
+  jenkinsPlugins 'io.jenkins.plugins:plugin-util-api:2.20.0@jar'
+  jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.6.2@jar'
+  jenkinsPlugins 'org.jenkins-ci.plugins:display-url-api:2.3.7@jar'
 
-  testCompile 'junit:junit:4.12'
-  testCompile 'org.apache.httpcomponents:httpclient:4.3:tests'
+  optionalJenkinsPlugins 'org.jenkins-ci.plugins:junit:1.63@jar'
+  optionalJenkinsPlugins 'org.jenkins-ci.plugins:cobertura:1.17@jar'
+  optionalJenkinsPlugins 'org.jenkins-ci.plugins:jacoco:3.3.2@jar'
+  providedCompile 'org.jacoco:org.jacoco.report:0.8.8'
+
+  testCompile 'junit:junit:4.13.2'
+  testCompile 'org.apache.httpcomponents:httpclient:4.5.13:tests'
   testCompile 'net.sf.trove4j:trove4j:3.0.3'
   testCompile('org.mockito:mockito-core:1.10.19') {
     exclude module: 'hamcrest-core'
   }
-  testCompile 'org.powermock:powermock-api-mockito:1.6.2'
-  testCompile 'org.powermock:powermock-module-junit4:1.6.2'
-  testCompile 'org.powermock:powermock-classloading-xstream:1.6.2'
-  testCompile 'org.jenkins-ci.plugins:jacoco:2.2.1'
+  testCompile 'org.powermock:powermock-api-mockito2:2.0.9'
+  testCompile 'org.powermock:powermock-module-junit4:2.0.9'
+  testCompile 'org.powermock:powermock-classloading-xstream:2.0.9'
+  testCompile 'org.jenkins-ci.plugins:jacoco:3.3.2'
 
-  jenkinsTest 'org.jenkins-ci.main:jenkins-war:2.6@war'
-  jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
-  jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:2.6@jar'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-war:2.385@war'
+  jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.20@jar'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:1912.v0cdf15450b_fb@jar'
 }
 
 configurations.all {
   if (it.name.toLowerCase().contains("test")) {
     resolutionStrategy {
-      force 'org.apache.httpcomponents:httpclient:4.3:tests'
+      force 'org.apache.httpcomponents:httpclient:4.5.13:tests'
       force 'xml-apis:xml-apis:1.4.01'
     }
   }

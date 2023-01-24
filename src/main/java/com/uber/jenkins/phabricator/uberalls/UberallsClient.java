@@ -29,16 +29,18 @@ import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -117,18 +119,19 @@ public class UberallsClient {
             params.put(LINES_TESTED_KEY, codeCoverageMetrics.getLinesTested());
 
             try {
-                HttpClient client = getClient();
-                PostMethod request = new PostMethod(getBuilder().build().toString());
-                request.addRequestHeader("Content-Type", "application/json");
-                StringRequestEntity requestEntity = new StringRequestEntity(
+                CloseableHttpClient client = getClient();
+                HttpPost request = new HttpPost(getBuilder().build().toString());
+                request.addHeader("Content-Type", "application/json");
+                StringEntity requestEntity = new StringEntity(
                         params.toString(),
                         ContentType.APPLICATION_JSON.toString(),
                         "UTF-8");
-                request.setRequestEntity(requestEntity);
-                int statusCode = client.executeMethod(request);
+                request.setEntity(requestEntity);
+                CloseableHttpResponse response = client.execute(request);
+                int statusCode = response.getStatusLine().getStatusCode();
 
                 if (statusCode != HttpStatus.SC_OK) {
-                    logger.info(TAG, "Call failed: " + request.getStatusLine());
+                    logger.info(TAG, "Call failed: " + response.getStatusLine());
                     return false;
                 }
                 return true;
@@ -154,15 +157,16 @@ public class UberallsClient {
                     .setParameter("sha", sha)
                     .setParameter("repository", repository);
 
-            HttpClient client = getClient();
-            HttpMethod request = new GetMethod(builder.build().toString());
-            int statusCode = client.executeMethod(request);
+            CloseableHttpClient client = getClient();
+            HttpGet request = new HttpGet(builder.build().toString());
+            CloseableHttpResponse response = client.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
 
             if (statusCode != HttpStatus.SC_OK) {
-                logger.info(TAG, "Call failed: " + request.getStatusLine());
+                logger.info(TAG, "Call failed: " + response.getStatusLine().toString());
                 return null;
             }
-            return request.getResponseBodyAsString();
+            return EntityUtils.toString(response.getEntity());
         } catch (HttpResponseException e) {
             if (e.getStatusCode() != 404) {
                 e.printStackTrace(logger.getStream());
@@ -177,8 +181,8 @@ public class UberallsClient {
         return new URIBuilder(baseURL);
     }
 
-    public HttpClient getClient() {
-        return new HttpClient();
+    public CloseableHttpClient getClient() {
+        return HttpClients.createDefault();
     }
 
     public boolean isConfigured() {

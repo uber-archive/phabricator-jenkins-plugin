@@ -43,12 +43,17 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.localserver.LocalTestServer;
+import org.apache.http.impl.bootstrap.HttpServer;
+import org.apache.http.localserver.LocalServerTestBase;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.util.EntityUtils;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -255,11 +260,11 @@ public class TestUtils {
         addCredentials(TestUtils.getConduitCredentials(conduit.uri()));
     }
 
-    public static String getTestServerAddress(LocalTestServer server) {
+    public static String getTestServerAddress(HttpServer server) {
         return String.format(
                 "http://%s:%s",
-                server.getServiceAddress().getHostName(),
-                server.getServiceAddress().getPort()
+                server.getInetAddress().getHostName(),
+                server.getLocalPort()
         );
     }
 
@@ -306,5 +311,12 @@ public class TestUtils {
                 return true;
             }
         });
+    }
+
+    @Test
+    public void testNothing() {
+        // This is here to stop JUnit complaining that this class doesn't have
+        // any tests. Ideally it should be renamed or moved but this works :)
+        assertTrue(true);
     }
 }

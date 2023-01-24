@@ -274,7 +274,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         p.getPublishersList().add(TestUtils.getDefaultXUnitPublisher());
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
-        assertEquals(Result.SUCCESS, build.getResult());
+        assertBuildStatus(Result.SUCCESS, build);
         assertLogContains("Publishing unit results to Harbormaster for 35 tests", build);
     }
 
@@ -284,7 +284,7 @@ public class PhabricatorNotifierTest extends BuildIntegrationTest {
         p.getPublishersList().add(TestUtils.getDefaultXUnitPublisher());
 
         FreeStyleBuild build = buildWithConduit(getFetchDiffResponse(), null, new JSONObject());
-        assertEquals(Result.UNSTABLE, build.getResult());
+        assertBuildStatus(Result.UNSTABLE, build);
         assertLogContains("Publishing unit results to Harbormaster for 8 tests", build);
 
         FakeConduit conduitTestClient = getConduitClient();

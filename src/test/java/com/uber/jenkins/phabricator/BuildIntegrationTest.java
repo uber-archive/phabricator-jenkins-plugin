@@ -34,6 +34,7 @@ import org.junit.Rule;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
+import java.lang.StringBuilder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,5 +161,17 @@ public abstract class BuildIntegrationTest {
     protected void assertFailureWithMessage(String message, AbstractBuild build) throws IOException {
         assertEquals(Result.FAILURE, build.getResult());
         assertLogContains(message, build);
+    }
+
+    protected void assertBuildStatus(Result expectedResult, FreeStyleBuild build) throws IOException {
+        Result actualResult = build.getResult();
+        String rejectionMessage = String.format(
+                "Build result %s did not match expected result %s\nBuild output:\n%s",
+                actualResult.toString(),
+                expectedResult.toString(),
+                String.join("\n", build.getLog(1000))
+        );
+
+        assertEquals(rejectionMessage, expectedResult, actualResult);
     }
 }

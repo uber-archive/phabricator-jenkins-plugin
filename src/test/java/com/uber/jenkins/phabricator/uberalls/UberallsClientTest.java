@@ -5,12 +5,12 @@ import com.uber.jenkins.phabricator.utils.TestUtils;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.localserver.LocalTestServer;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.localserver.LocalServerTestBase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,91 +28,105 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-public class UberallsClientTest {
+public class UberallsClientTest extends LocalServerTestBase {
 
-    private LocalTestServer server;
     private UberallsClient client;
 
     @Before
     public void setUp() throws Exception {
-        server = new LocalTestServer(null, null);
-        server.start();
-        client = getDefaultClient();
+        super.setUp();
     }
 
     @After
     public void tearDown() throws Exception {
-        server.stop();
+        this.shutDown();
     }
 
     @Test
-    public void testGetCoverageNotFound() {
+    public void testGetCoverageNotFound() throws Exception {
+        this.start();
+        this.client = getDefaultClient();
         assertNull(client.getCoverage(TestUtils.TEST_SHA));
     }
 
     @Test
-    public void testGetCoverageFound() {
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+    public void testGetCoverageFound() throws Exception {
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+        this.start();
+        this.client = getDefaultClient();
         String coverage = client.getCoverage(TestUtils.TEST_SHA);
         assertEquals("{}", coverage);
     }
 
     @Test
-    public void testGetCoverageInternalError() {
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_INTERNAL_SERVER_ERROR, ""));
+    public void testGetCoverageInternalError() throws Exception {
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_INTERNAL_SERVER_ERROR, ""));
+        this.start();
+        this.client = getDefaultClient();
         assertNull(client.getCoverage(TestUtils.TEST_SHA));
     }
 
     @Test
-    public void testGetParentCoverageNoBackend() {
+    public void testGetParentCoverageNoBackend() throws Exception {
+        this.start();
+        this.client = getDefaultClient();
         assertNull(client.getParentCoverage(TestUtils.TEST_SHA));
     }
 
     @Test
-    public void testGetParentCoverageNullSHA() {
+    public void testGetParentCoverageNullSHA() throws Exception {
+        this.start();
+        this.client = getDefaultClient();
         assertNull(client.getParentCoverage(null));
     }
 
     @Test
-    public void testGetParentCoverageNull() {
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "null"));
+    public void testGetParentCoverageNull() throws Exception {
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "null"));
+        this.start();
+        this.client = getDefaultClient();
         assertNull(client.getParentCoverage(TestUtils.TEST_SHA));
     }
 
     @Test
-    public void testGetCoverageMissingKey() {
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+    public void testGetCoverageMissingKey() throws Exception {
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+        this.start();
+        this.client = getDefaultClient();
         assertNull(client.getParentCoverage(TestUtils.TEST_SHA));
     }
 
     @Test
-    public void testGetCoverageWorkingBackend() throws IOException {
+    public void testGetCoverageWorkingBackend() throws Exception {
         JSONObject validJSON = TestUtils.getJSONFromFile(getClass(), "validCoverage");
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, validJSON.toString()));
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, validJSON.toString()));
+        this.start();
+        this.client = getDefaultClient();
         CodeCoverageMetrics metrics = client.getParentCoverage(TestUtils.TEST_SHA);
         assertEquals(42.0f, metrics.getLineCoveragePercent(), 0.01f);
     }
 
     @Test
-    public void testRecordCoverageNullMetrics() {
+    public void testRecordCoverageNullMetrics() throws Exception {
+        this.start();
+        this.client = getDefaultClient();
         assertFalse(client.recordCoverage(TestUtils.TEST_SHA, null));
     }
 
     @Test
-    public void testRecordCoverageInternalError() {
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_INTERNAL_SERVER_ERROR, ""));
+    public void testRecordCoverageInternalError() throws Exception {
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_INTERNAL_SERVER_ERROR, ""));
+        this.start();
+        this.client = getDefaultClient();
         assertFalse(client.recordCoverage(TestUtils.TEST_SHA, TestUtils.getDefaultCodeCoverageMetrics()));
     }
 
     @Test
-    public void testRecordCoverageSuccessful() {
-        server.register("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+    public void testRecordCoverageSuccessful() throws Exception {
+        this.serverBootstrap.registerHandler("/*", TestUtils.makeHttpHandler(HttpStatus.SC_OK, "{}"));
+        this.start();
+        this.client = getDefaultClient();
         assertTrue(client.recordCoverage(TestUtils.TEST_SHA, TestUtils.getDefaultCodeCoverageMetrics()));
-    }
-
-    @Test
-    public void testRecordCoverageURISyntaxException() throws Exception {
-        assertRecordCoverageException(URISyntaxException.class);
     }
 
     @Test
@@ -141,16 +155,16 @@ public class UberallsClientTest {
     }
 
     private void assertRecordCoverageException(Class<? extends Exception> exceptionClass) throws Exception {
-        HttpClient mockClient = mockClient();
+        CloseableHttpClient mockClient = mockClient();
 
-        doThrow(exceptionClass).when(mockClient).executeMethod(any(HttpMethod.class));
+        doThrow(exceptionClass).when(mockClient).execute(any(HttpRequestBase.class));
         assertFalse(client.recordCoverage(TestUtils.TEST_SHA, TestUtils.getDefaultCodeCoverageMetrics()));
     }
 
-    private void assertGetCoverageException(Class<? extends Exception> exceptionClass) throws IOException {
-        HttpClient mockClient = mockClient();
+    private void assertGetCoverageException(Class<? extends Exception> exceptionClass) throws Exception {
+        CloseableHttpClient mockClient = mockClient();
 
-        doThrow(exceptionClass).when(mockClient).executeMethod(any(HttpMethod.class));
+        doThrow(exceptionClass).when(mockClient).execute(any(HttpRequestBase.class));
         assertNull(client.getCoverage(TestUtils.TEST_SHA));
     }
 
@@ -163,22 +177,20 @@ public class UberallsClientTest {
         ));
     }
 
-    private HttpClient getMockHttpClient() {
-        return mock(HttpClient.class);
+    private CloseableHttpClient getMockHttpClient() {
+        return mock(CloseableHttpClient.class);
     }
 
-    private HttpClient mockClient() {
-        HttpClient mockClient = getMockHttpClient();
+    private CloseableHttpClient mockClient() throws Exception {
+        this.start();
+        this.client = getDefaultClient();
+        CloseableHttpClient mockClient = getMockHttpClient();
         doReturn(mockClient).when(client).getClient();
 
         return mockClient;
     }
 
     private String getTestServerAddress() {
-        return String.format(
-                "http://%s:%s",
-                server.getServiceAddress().getHostName(),
-                server.getServiceAddress().getPort()
-        );
+        return TestUtils.getTestServerAddress(this.server);
     }
 }
