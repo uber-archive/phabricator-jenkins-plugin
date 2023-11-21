@@ -8,7 +8,7 @@ plugins {
 
 group = 'org.jenkins-ci.plugins'
 archivesBaseName = 'phabricator-plugin'
-version = '2.1.5'
+version = '2.1.6'
 description = 'Integrate Jenkins with Phabricator Differentials and Uberalls'
 
 sourceCompatibility = 1.11
@@ -19,7 +19,7 @@ tasks.withType(JavaCompile) {
 }
 
 jenkinsPlugin {
-  coreVersion = '2.385'
+  coreVersion = '2.414.3'
   displayName = 'Phabricator Differential Plugin'
   url = 'https://wiki.jenkins-ci.org/display/JENKINS/Phabricator+Differential+Plugin'
   gitHubUrl = 'https://github.com/uber/phabricator-jenkins-plugin'
@@ -66,7 +66,7 @@ dependencies {
   testCompile 'org.powermock:powermock-classloading-xstream:2.0.9'
   testCompile 'org.jenkins-ci.plugins:jacoco:3.3.2'
 
-  jenkinsTest 'org.jenkins-ci.main:jenkins-war:2.385@war'
+  jenkinsTest 'org.jenkins-ci.main:jenkins-war:2.414.3@war'
   jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.20@jar'
   jenkinsTest 'org.jenkins-ci.main:jenkins-test-harness:1912.v0cdf15450b_fb@jar'
 }
