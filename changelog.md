@@ -2,6 +2,8 @@
 
 ### 2.1.6 (Unreleased)
 
+* Updated HTTPClient dependencie to 4.5 to support later Jenkins builds
+
 ### 2.1.5
 
 * Bump version
